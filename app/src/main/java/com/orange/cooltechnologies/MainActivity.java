@@ -51,6 +51,7 @@ public class MainActivity extends Activity implements ActionBar.OnNavigationList
 
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
         // Restore the previously serialized current dropdown position.
         if (savedInstanceState.containsKey(STATE_SELECTED_NAVIGATION_ITEM)) {
             getActionBar().setSelectedNavigationItem(
@@ -63,6 +64,7 @@ public class MainActivity extends Activity implements ActionBar.OnNavigationList
         // Serialize the current dropdown position.
         outState.putInt(STATE_SELECTED_NAVIGATION_ITEM,
                 getActionBar().getSelectedNavigationIndex());
+        super.onSaveInstanceState(outState);
     }
 
 

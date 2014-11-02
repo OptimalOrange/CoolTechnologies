@@ -22,3 +22,38 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 }
+
+// 代码质量检查
+// 摘（窃取:）自 http://blogs.burnsidedigital.com/2014/06/code-quality-and-testing-with-gradle-in-android-projects/?utm_source=tuicool
+apply plugin: 'checkstyle'
+
+check.dependsOn 'checkstyle'
+task checkstyle(type: Checkstyle){
+//    ignoreFailures = true    // 如果想暂时忽略code style问题，让本行代码生效
+    configFile new File(rootDir, "config/checkstyle/checkstyle.xml")
+
+    source 'src'
+    include '**/*.java'
+    include '**/*.xml'
+//    exclude '**/packageName/**', '**/utils/MyFile.java'
+    classpath = files()
+}
+
+apply plugin: 'pmd' 
+
+check.dependsOn 'pmd'
+task pmd(type: Pmd) {
+//    ignoreFailures = true
+
+    ruleSets = ["java-basic", "java-braces", "java-android"]
+
+    source 'src'
+    include '**/*.java'
+    exclude '**/gen/**'
+
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+}
+
