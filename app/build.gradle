@@ -23,7 +23,7 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 }
 
-// 代码质量检查
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 代码质量检查 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // 摘（窃取:）自 http://blogs.burnsidedigital.com/2014/06/code-quality-and-testing-with-gradle-in-android-projects/?utm_source=tuicool
 apply plugin: 'checkstyle'
 
