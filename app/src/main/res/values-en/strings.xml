@@ -5,6 +5,11 @@
     <string name="title_popular">Popular</string>
     <string name="title_categories">Categories</string>
     <string name="hello_world">Hello world!</string>
+
+    <string name="cool_videos">Cool Videos</string>
+    <string name="favorites">Favorites</string>
+    <string name="watched">Watched</string>
+    <string name="promotion">Promotion</string>
     <string name="action_settings">Settings</string>
 
 </resources>

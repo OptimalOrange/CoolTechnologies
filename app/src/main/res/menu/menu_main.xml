@@ -1,8 +1,32 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:tools="http://schemas.android.com/tools"
-      tools:context=".MainActivity">
-    <item android:id="@+id/action_settings"
-          android:title="@string/action_settings"
-          android:orderInCategory="100"
-          android:showAsAction="never"/>
+      tools:context=".ui.MainActivity">
+
+    <item
+            android:id="@+id/action_cool_videos"
+            android:title="@string/cool_videos"
+            android:showAsAction="ifRoom"
+            />
+    <item
+            android:id="@+id/action_favorites"
+            android:title="@string/favorites"
+            android:showAsAction="ifRoom"
+            />
+    <item
+            android:id="@+id/action_watched"
+            android:title="@string/watched"
+            android:showAsAction="ifRoom"
+            />
+    <item
+            android:id="@+id/action_promotion"
+            android:title="@string/promotion"
+            android:showAsAction="ifRoom"
+            />
+    <item
+            android:id="@+id/action_settings"
+            android:title="@string/action_settings"
+            android:orderInCategory="100"
+            android:showAsAction="never"
+            />
+
 </menu>
