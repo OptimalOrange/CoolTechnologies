@@ -55,11 +55,7 @@ public class MainActivity extends Activity implements ActionBar.OnNavigationList
                         actionBar.getThemedContext(),
                         android.R.layout.simple_list_item_1,
                         android.R.id.text1,
-                        new String[]{
-                                getString(R.string.title_section1),
-                                getString(R.string.title_section2),
-                                getString(R.string.title_section3),
-                        }),
+                        getResources().getStringArray(R.array.titles_in_cool_videos)),
                 this);
     }
 
@@ -110,19 +106,19 @@ public class MainActivity extends Activity implements ActionBar.OnNavigationList
         return true;
     }
 
-    public static class MyPagerAdapter extends FragmentPagerAdapter {
+    private class MyPagerAdapter extends FragmentPagerAdapter {
         public MyPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 
         @Override
         public int getCount() {
-            return 3;
+            return getResources().getStringArray(R.array.titles_in_cool_videos).length;
         }
 
         @Override
         public Fragment getItem(int position) {
-            return PlaceholderFragment.newInstance(position + 1);
+            return PlaceholderFragment.newInstance(position);
         }
     }
 
@@ -132,19 +128,18 @@ public class MainActivity extends Activity implements ActionBar.OnNavigationList
     public static class PlaceholderFragment extends Fragment {
 
         /**
-         * The fragment argument representing the section number for this
-         * fragment.
+         * The fragment argument representing the position for this fragment.
          */
-        private static final String ARG_SECTION_NUMBER = "section_number";
+        private static final String ARG_POSITION = "position";
 
         /**
          * Returns a new instance of this fragment for the given section
          * number.
          */
-        public static PlaceholderFragment newInstance(int sectionNumber) {
+        public static PlaceholderFragment newInstance(int position) {
             PlaceholderFragment fragment = new PlaceholderFragment();
             Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
+            args.putInt(ARG_POSITION, position);
             fragment.setArguments(args);
             return fragment;
         }
@@ -157,7 +152,8 @@ public class MainActivity extends Activity implements ActionBar.OnNavigationList
                 Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
             TextView content = (TextView) rootView.findViewById(R.id.contentTextView);
-            content.setText("Section " + getArguments().getInt(ARG_SECTION_NUMBER));
+            String[] titles = getResources().getStringArray(R.array.titles_in_cool_videos);
+            content.setText(titles[getArguments().getInt(ARG_POSITION)]);
             return rootView;
         }
     }
