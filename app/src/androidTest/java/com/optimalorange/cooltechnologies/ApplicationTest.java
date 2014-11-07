@@ -1,4 +1,4 @@
-package com.orange.cooltechnologies;
+package com.optimalorange.cooltechnologies;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

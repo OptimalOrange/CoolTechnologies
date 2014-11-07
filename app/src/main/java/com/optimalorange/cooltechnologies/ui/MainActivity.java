@@ -1,6 +1,6 @@
-package com.orange.cooltechnologies.ui;
+package com.optimalorange.cooltechnologies.ui;
 
-import com.orange.cooltechnologies.R;
+import com.optimalorange.cooltechnologies.R;
 
 import android.app.Activity;
 import android.app.Fragment;
