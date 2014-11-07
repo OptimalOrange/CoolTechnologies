@@ -2,7 +2,6 @@ package com.orange.cooltechnologies.ui;
 
 import com.orange.cooltechnologies.R;
 
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -14,11 +13,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 
-public class MainActivity extends Activity implements ActionBar.OnNavigationListener {
+public class MainActivity extends Activity {
 
     /**
      * The serialization (saved instance state) Bundle key representing the
@@ -39,24 +37,9 @@ public class MainActivity extends Activity implements ActionBar.OnNavigationList
             @Override
             public void onPageSelected(int position) {
                 // When swiping between pages, select the corresponding tab.
-                getActionBar().setSelectedNavigationItem(position);
             }
         });
 
-        // Set up the action bar to show a dropdown list.
-        final ActionBar actionBar = getActionBar();
-        actionBar.setDisplayShowTitleEnabled(false);
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-
-        // Set up the dropdown list navigation in the action bar.
-        actionBar.setListNavigationCallbacks(
-                // Specify a SpinnerAdapter to populate the dropdown list.
-                new ArrayAdapter<String>(
-                        actionBar.getThemedContext(),
-                        android.R.layout.simple_list_item_1,
-                        android.R.id.text1,
-                        getResources().getStringArray(R.array.titles_in_cool_videos)),
-                this);
     }
 
     @Override
@@ -64,16 +47,14 @@ public class MainActivity extends Activity implements ActionBar.OnNavigationList
         super.onRestoreInstanceState(savedInstanceState);
         // Restore the previously serialized current dropdown position.
         if (savedInstanceState.containsKey(STATE_SELECTED_NAVIGATION_ITEM)) {
-            getActionBar().setSelectedNavigationItem(
-                    savedInstanceState.getInt(STATE_SELECTED_NAVIGATION_ITEM));
+            mPager.setCurrentItem(savedInstanceState.getInt(STATE_SELECTED_NAVIGATION_ITEM));
         }
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         // Serialize the current dropdown position.
-        outState.putInt(STATE_SELECTED_NAVIGATION_ITEM,
-                getActionBar().getSelectedNavigationIndex());
+        outState.putInt(STATE_SELECTED_NAVIGATION_ITEM, mPager.getCurrentItem());
         super.onSaveInstanceState(outState);
     }
 
@@ -100,12 +81,6 @@ public class MainActivity extends Activity implements ActionBar.OnNavigationList
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public boolean onNavigationItemSelected(int position, long id) {
-        mPager.setCurrentItem(position);
-        return true;
-    }
-
     private class MyPagerAdapter extends FragmentPagerAdapter {
         public MyPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -114,6 +89,11 @@ public class MainActivity extends Activity implements ActionBar.OnNavigationList
         @Override
         public int getCount() {
             return getResources().getStringArray(R.array.titles_in_cool_videos).length;
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            return getResources().getStringArray(R.array.titles_in_cool_videos)[position];
         }
 
         @Override

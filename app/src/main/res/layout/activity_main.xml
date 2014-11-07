@@ -7,4 +7,17 @@
         android:layout_height="match_parent"
         tools:context=".ui.MainActivity"
         tools:ignore="MergeRootFrame"
-        />
+        >
+
+    <android.support.v4.view.PagerTitleStrip
+            android:id="@+id/pager_title_strip"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:background="#fff3832d"
+            android:textColor="#fff"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            />
+
+</android.support.v4.view.ViewPager>
