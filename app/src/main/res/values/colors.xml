@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <color name="primary_light">#FFE0B2</color>
-    <color name="primary">#FF9800</color>
-    <color name="primary_dark">#F57C00</color>
+    <!-- 参考自 https://www.google.com/design/spec/style/color.html -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Color Palette ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <color name="primary_light">#FFCCBC</color>
+    <color name="primary">#FF5722</color>
+    <color name="primary_dark">#E64A19</color>
     <color name="accent">#40C4FF</color>
 
-    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ font color ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Font Color ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
     <!-- ~~~~~~~~ white font ~~~~~~~~ -->
     <!-- alpha: 100% -->
     <color name="text_white">#FFFFFFFF</color>
