@@ -1,8 +1,31 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="android:Theme.Holo.Light.DarkActionBar">
+    <style name="BaseAppTheme" parent="android:Theme.Holo.Light">
+        <item name="android:actionBarStyle">@style/CustomActionBar</item>
+    </style>
+    <!-- Application theme. -->
+    <style name="AppTheme" parent="BaseAppTheme">
         <!-- Customize your theme here. -->
+        <item name="vpiTitlePageIndicatorStyle">@style/CustomTitlePageIndicator</item>
+    </style>
+
+    <!-- ActionBar styles -->
+    <style name="CustomActionBar" parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
+        <item name="android:background">@color/primary</item>
+    </style>
+    <!-- Indicators styles -->
+    <style name="CustomTitlePageIndicator">
+        <item name="android:background">@color/primary</item>
+        <item name="topPadding">4dp</item>
+        <item name="footerPadding">4dp</item>
+        <item name="footerColor">@color/primary_dark</item>
+        <item name="footerLineHeight">1dp</item>
+        <item name="footerIndicatorHeight">3dp</item>
+        <item name="footerIndicatorStyle">underline</item>
+        <item name="android:textColor">@color/text_secondary_white</item>
+        <item name="selectedColor">@color/text_white</item>
+        <item name="selectedBold">true</item>
     </style>
 
 </resources>

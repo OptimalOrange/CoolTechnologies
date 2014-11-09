@@ -1,6 +1,7 @@
 package com.optimalorange.cooltechnologies.ui;
 
 import com.optimalorange.cooltechnologies.R;
+import com.viewpagerindicator.TitlePageIndicator;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -33,12 +34,9 @@ public class MainActivity extends Activity {
 
         mPager = (ViewPager)findViewById(R.id.pager);
         mPager.setAdapter(new MyPagerAdapter(getFragmentManager()));
-        mPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-            @Override
-            public void onPageSelected(int position) {
-                // When swiping between pages, select the corresponding tab.
-            }
-        });
+        // Bind the indicators to the ViewPager
+        TitlePageIndicator mIndicator  = (TitlePageIndicator) findViewById(R.id.indicator);
+        mIndicator.setViewPager(mPager);
 
     }
 
