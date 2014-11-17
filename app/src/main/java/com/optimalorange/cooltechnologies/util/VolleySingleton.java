@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+//stolen from http://developer.android.com/training/volley/requestqueue.html#singleton
 package com.optimalorange.cooltechnologies.util;
 
 import com.android.volley.Request;
@@ -21,10 +22,7 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.Volley;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.util.LruCache;
 
-//stolen from http://developer.android.com/training/volley/requestqueue.html#singleton
 public class VolleySingleton {
 
     private static VolleySingleton mInstance;
@@ -40,21 +38,7 @@ public class VolleySingleton {
 
         mRequestQueue = Volley.newRequestQueue(context);
 
-        mImageLoader = new ImageLoader(mRequestQueue,
-                new ImageLoader.ImageCache() {
-                    private final LruCache<String, Bitmap>
-                            cache = new LruCache<String, Bitmap>(20);
-
-                    @Override
-                    public Bitmap getBitmap(String url) {
-                        return cache.get(url);
-                    }
-
-                    @Override
-                    public void putBitmap(String url, Bitmap bitmap) {
-                        cache.put(url, bitmap);
-                    }
-                });
+        mImageLoader = new ImageLoader(mRequestQueue, new LruBitmapCache(context));
     }
 
     public static synchronized VolleySingleton getInstance(Context context) {
