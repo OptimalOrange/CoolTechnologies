@@ -32,10 +32,13 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mPager = (ViewPager)findViewById(R.id.pager);
-        mPager.setAdapter(new MyPagerAdapter(getFragmentManager()));
+        mPager = (ViewPager) findViewById(R.id.pager);
+        mPager.setAdapter(new MyPagerAdapter(
+                getFragmentManager(),
+                getResources().getStringArray(R.array.titles_in_cool_videos)
+        ));
         // Bind the indicators to the ViewPager
-        TitlePageIndicator mIndicator  = (TitlePageIndicator) findViewById(R.id.indicator);
+        TitlePageIndicator mIndicator = (TitlePageIndicator) findViewById(R.id.indicator);
         mIndicator.setViewPager(mPager);
 
     }
@@ -79,24 +82,28 @@ public class MainActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    private class MyPagerAdapter extends FragmentPagerAdapter {
-        public MyPagerAdapter(FragmentManager fm) {
+    private static class MyPagerAdapter extends FragmentPagerAdapter {
+
+        private final String[] mPageTitles;
+
+        public MyPagerAdapter(FragmentManager fm, String[] pageTitles) {
             super(fm);
+            mPageTitles = pageTitles;
         }
 
         @Override
         public int getCount() {
-            return getResources().getStringArray(R.array.titles_in_cool_videos).length;
+            return mPageTitles.length;
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
-            return getResources().getStringArray(R.array.titles_in_cool_videos)[position];
+            return mPageTitles[position];
         }
 
         @Override
         public Fragment getItem(int position) {
-            return PlaceholderFragment.newInstance(position);
+            return PlaceholderFragment.newInstance(getPageTitle(position).toString());
         }
     }
 
@@ -106,18 +113,17 @@ public class MainActivity extends Activity {
     public static class PlaceholderFragment extends Fragment {
 
         /**
-         * The fragment argument representing the position for this fragment.
+         * The fragment argument representing the content for this fragment.
          */
-        private static final String ARG_POSITION = "position";
+        private static final String ARG_CONTENT = "content";
 
         /**
-         * Returns a new instance of this fragment for the given section
-         * number.
+         * Returns a new instance of this fragment with the given content.
          */
-        public static PlaceholderFragment newInstance(int position) {
+        public static PlaceholderFragment newInstance(String content) {
             PlaceholderFragment fragment = new PlaceholderFragment();
             Bundle args = new Bundle();
-            args.putInt(ARG_POSITION, position);
+            args.putString(ARG_CONTENT, content);
             fragment.setArguments(args);
             return fragment;
         }
@@ -130,8 +136,7 @@ public class MainActivity extends Activity {
                 Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
             TextView content = (TextView) rootView.findViewById(R.id.contentTextView);
-            String[] titles = getResources().getStringArray(R.array.titles_in_cool_videos);
-            content.setText(titles[getArguments().getInt(ARG_POSITION)]);
+            content.setText(getArguments().getString(ARG_CONTENT));
             return rootView;
         }
     }
