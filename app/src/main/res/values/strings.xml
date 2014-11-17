@@ -11,4 +11,8 @@
 
     <string name="action_settings">设置</string>
 
+    <!-- NetworkChecker -->
+    <string name="no_connection_title">打开网络设置</string>
+    <string name="no_connection_message">网络连接不可用，现在打开网络开关？</string>
+
 </resources>
