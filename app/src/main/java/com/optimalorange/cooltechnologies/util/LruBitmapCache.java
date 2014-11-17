@@ -26,12 +26,22 @@ import android.util.LruCache;
 public class LruBitmapCache extends LruCache<String, Bitmap>
         implements ImageLoader.ImageCache {
 
+    /**
+     * @param maxSize the maximum sum of the sizes of the entries in this cache.
+     */
     public LruBitmapCache(int maxSize) {
         super(maxSize);
     }
 
-    public LruBitmapCache(Context ctx) {
-        this(getCacheSize(ctx));
+    /**
+     * construct a {@link com.optimalorange.cooltechnologies.util.LruBitmapCache} with the maxSize
+     * equal to approximately three screens worth of images.
+     *
+     * @see #LruBitmapCache(int maxSize)
+     * @see #getCacheSize(android.content.Context context)
+     */
+    public LruBitmapCache(Context context) {
+        this(getCacheSize(context));
     }
 
     @Override
@@ -49,10 +59,11 @@ public class LruBitmapCache extends LruCache<String, Bitmap>
         put(url, bitmap);
     }
 
-    // Returns a cache size equal to approximately three screens worth of images.
-    public static int getCacheSize(Context ctx) {
-        final DisplayMetrics displayMetrics = ctx.getResources().
-                getDisplayMetrics();
+    /**
+     * @return a cache size equal to approximately three screens worth of images.
+     */
+    public static int getCacheSize(Context context) {
+        final DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
         final int screenWidth = displayMetrics.widthPixels;
         final int screenHeight = displayMetrics.heightPixels;
         // 4 bytes per pixel
