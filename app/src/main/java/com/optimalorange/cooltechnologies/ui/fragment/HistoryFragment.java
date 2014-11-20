@@ -1,12 +1,12 @@
 package com.optimalorange.cooltechnologies.ui.fragment;
 
+import com.optimalorange.cooltechnologies.R;
+
 import android.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
-import com.optimalorange.cooltechnologies.R;
 
 /**
  * Created by WANGZHENGZE on 2014/11/20.

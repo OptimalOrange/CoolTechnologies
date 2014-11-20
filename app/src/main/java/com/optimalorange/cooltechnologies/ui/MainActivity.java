@@ -14,12 +14,8 @@ import android.app.FragmentManager;
 import android.os.Bundle;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
 
 
 public class MainActivity extends Activity {
@@ -116,7 +112,7 @@ public class MainActivity extends Activity {
 
         @Override
         public Fragment getItem(int position) {
-            return FragmentConfig.getInstance().getFragment((int)getItemId(position));
+            return FragmentConfig.getInstance().getFragment((int) getItemId(position));
         }
 
         @Override
@@ -126,13 +122,18 @@ public class MainActivity extends Activity {
     }
 
     private static class FragmentConfig {
-        public static FragmentConfig instance;
 
         public static final int FRAGMENT_ID_POPULAR = 0;
+
         public static final int FRAGMENT_ID_CATEGORIES = 1;
+
         public static final int FRAGMENT_ID_FAVORITE = 2;
+
         public static final int FRAGMENT_ID_HISTORY = 3;
+
         public static final int FRAGMENT_ID_PROMOTION = 4;
+
+        public static FragmentConfig instance;
 
         public static FragmentConfig getInstance() {
             if (instance == null) {
