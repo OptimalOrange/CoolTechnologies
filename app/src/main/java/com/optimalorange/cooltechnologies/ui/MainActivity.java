@@ -1,7 +1,11 @@
 package com.optimalorange.cooltechnologies.ui;
 
 import com.optimalorange.cooltechnologies.R;
-import com.optimalorange.cooltechnologies.util.FragmentConfig;
+import com.optimalorange.cooltechnologies.ui.fragment.ClassifyFragment;
+import com.optimalorange.cooltechnologies.ui.fragment.FavoriteFragment;
+import com.optimalorange.cooltechnologies.ui.fragment.HistoryFragment;
+import com.optimalorange.cooltechnologies.ui.fragment.HotFragment;
+import com.optimalorange.cooltechnologies.ui.fragment.PushFragment;
 import com.viewpagerindicator.TitlePageIndicator;
 
 import android.app.Activity;
@@ -26,7 +30,9 @@ public class MainActivity extends Activity {
      */
     private static final String STATE_SELECTED_NAVIGATION_ITEM = "selected_navigation_item";
 
-    ViewPager mPager;
+    private ViewPager mPager;
+    private static final int[] FRAGMENT_ID = {FragmentConfig.FRAGMENT_ID_HOT, FragmentConfig.FRAGMENT_ID_CLASSIFY,
+            FragmentConfig.FRAGMENT_ID_FAVORITE, FragmentConfig.FRAGMENT_ID_HISTORY, FragmentConfig.FRAGMENT_ID_PUSH};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,41 +110,51 @@ public class MainActivity extends Activity {
 
         @Override
         public Fragment getItem(int position) {
-            return FragmentConfig.getInstance().getFragment(position);
-        }
-    }
-
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
-
-        /**
-         * The fragment argument representing the content for this fragment.
-         */
-        private static final String ARG_CONTENT = "content";
-
-        /**
-         * Returns a new instance of this fragment with the given content.
-         */
-        public static PlaceholderFragment newInstance(String content) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
-            Bundle args = new Bundle();
-            args.putString(ARG_CONTENT, content);
-            fragment.setArguments(args);
-            return fragment;
-        }
-
-        public PlaceholderFragment() {
+            return FragmentConfig.getInstance().getFragment((int)getItemId(position));
         }
 
         @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-            TextView content = (TextView) rootView.findViewById(R.id.contentTextView);
-            content.setText(getArguments().getString(ARG_CONTENT));
-            return rootView;
+        public long getItemId(int position) {
+            return FRAGMENT_ID[position];
+        }
+    }
+
+    private static class FragmentConfig {
+        public static FragmentConfig instance;
+
+        public static final int FRAGMENT_ID_HOT = 0;
+        public static final int FRAGMENT_ID_CLASSIFY = 1;
+        public static final int FRAGMENT_ID_FAVORITE = 2;
+        public static final int FRAGMENT_ID_HISTORY = 3;
+        public static final int FRAGMENT_ID_PUSH = 4;
+
+        public static FragmentConfig getInstance() {
+            if (instance == null) {
+                instance = new FragmentConfig();
+            }
+            return instance;
+        }
+
+        public Fragment getFragment(int id) {
+            Fragment newFragment = null;
+            switch (id) {
+                case FRAGMENT_ID_HOT:
+                    newFragment = new HotFragment();
+                    break;
+                case FRAGMENT_ID_CLASSIFY:
+                    newFragment = new ClassifyFragment();
+                    break;
+                case FRAGMENT_ID_FAVORITE:
+                    newFragment = new FavoriteFragment();
+                    break;
+                case FRAGMENT_ID_HISTORY:
+                    newFragment = new HistoryFragment();
+                    break;
+                case FRAGMENT_ID_PUSH:
+                    newFragment = new PushFragment();
+                    break;
+            }
+            return newFragment;
         }
     }
 
