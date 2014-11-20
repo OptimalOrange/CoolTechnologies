@@ -1,6 +1,7 @@
 package com.optimalorange.cooltechnologies.ui;
 
 import com.optimalorange.cooltechnologies.R;
+import com.optimalorange.cooltechnologies.util.FragmentConfig;
 import com.viewpagerindicator.TitlePageIndicator;
 
 import android.app.Activity;
@@ -103,7 +104,7 @@ public class MainActivity extends Activity {
 
         @Override
         public Fragment getItem(int position) {
-            return PlaceholderFragment.newInstance(getPageTitle(position).toString());
+            return FragmentConfig.getInstance().getFragment(position);
         }
     }
 
