@@ -2,8 +2,8 @@
 <resources>
 
     <string-array name="titles_in_cool_videos">
-        <item>@string/title_popular</item>
-        <item>@string/title_categories</item>
+        <item>@string/popular</item>
+        <item>@string/categories</item>
         <item>@string/favorites</item>
         <item>@string/watched</item>
         <item>@string/promotion</item>
