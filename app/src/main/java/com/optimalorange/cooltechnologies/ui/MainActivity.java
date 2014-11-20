@@ -1,11 +1,11 @@
 package com.optimalorange.cooltechnologies.ui;
 
 import com.optimalorange.cooltechnologies.R;
-import com.optimalorange.cooltechnologies.ui.fragment.ClassifyFragment;
 import com.optimalorange.cooltechnologies.ui.fragment.FavoriteFragment;
 import com.optimalorange.cooltechnologies.ui.fragment.HistoryFragment;
-import com.optimalorange.cooltechnologies.ui.fragment.HotFragment;
-import com.optimalorange.cooltechnologies.ui.fragment.PushFragment;
+import com.optimalorange.cooltechnologies.ui.fragment.ListCategoriesFragment;
+import com.optimalorange.cooltechnologies.ui.fragment.ListVideosFragment;
+import com.optimalorange.cooltechnologies.ui.fragment.PromotionFragment;
 import com.viewpagerindicator.TitlePageIndicator;
 
 import android.app.Activity;
@@ -30,9 +30,15 @@ public class MainActivity extends Activity {
      */
     private static final String STATE_SELECTED_NAVIGATION_ITEM = "selected_navigation_item";
 
+    private static final int[] FRAGMENT_IDS_ORDER_BY_POSITION = {
+            FragmentConfig.FRAGMENT_ID_POPULAR,
+            FragmentConfig.FRAGMENT_ID_CATEGORIES,
+            FragmentConfig.FRAGMENT_ID_FAVORITE,
+            FragmentConfig.FRAGMENT_ID_HISTORY,
+            FragmentConfig.FRAGMENT_ID_PROMOTION
+    };
+
     private ViewPager mPager;
-    private static final int[] FRAGMENT_ID = {FragmentConfig.FRAGMENT_ID_HOT, FragmentConfig.FRAGMENT_ID_CLASSIFY,
-            FragmentConfig.FRAGMENT_ID_FAVORITE, FragmentConfig.FRAGMENT_ID_HISTORY, FragmentConfig.FRAGMENT_ID_PUSH};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,18 +121,18 @@ public class MainActivity extends Activity {
 
         @Override
         public long getItemId(int position) {
-            return FRAGMENT_ID[position];
+            return FRAGMENT_IDS_ORDER_BY_POSITION[position];
         }
     }
 
     private static class FragmentConfig {
         public static FragmentConfig instance;
 
-        public static final int FRAGMENT_ID_HOT = 0;
-        public static final int FRAGMENT_ID_CLASSIFY = 1;
+        public static final int FRAGMENT_ID_POPULAR = 0;
+        public static final int FRAGMENT_ID_CATEGORIES = 1;
         public static final int FRAGMENT_ID_FAVORITE = 2;
         public static final int FRAGMENT_ID_HISTORY = 3;
-        public static final int FRAGMENT_ID_PUSH = 4;
+        public static final int FRAGMENT_ID_PROMOTION = 4;
 
         public static FragmentConfig getInstance() {
             if (instance == null) {
@@ -138,11 +144,11 @@ public class MainActivity extends Activity {
         public Fragment getFragment(int id) {
             Fragment newFragment = null;
             switch (id) {
-                case FRAGMENT_ID_HOT:
-                    newFragment = new HotFragment();
+                case FRAGMENT_ID_POPULAR:
+                    newFragment = new ListVideosFragment();
                     break;
-                case FRAGMENT_ID_CLASSIFY:
-                    newFragment = new ClassifyFragment();
+                case FRAGMENT_ID_CATEGORIES:
+                    newFragment = new ListCategoriesFragment();
                     break;
                 case FRAGMENT_ID_FAVORITE:
                     newFragment = new FavoriteFragment();
@@ -150,8 +156,8 @@ public class MainActivity extends Activity {
                 case FRAGMENT_ID_HISTORY:
                     newFragment = new HistoryFragment();
                     break;
-                case FRAGMENT_ID_PUSH:
-                    newFragment = new PushFragment();
+                case FRAGMENT_ID_PROMOTION:
+                    newFragment = new PromotionFragment();
                     break;
             }
             return newFragment;
