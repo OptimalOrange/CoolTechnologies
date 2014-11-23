@@ -1,0 +1,11 @@
+##
+# local.properties file should *NOT* be checked into Version Control Systems,
+# as it contains information specific to your local configuration.
+#
+# Location of the SDK. This is only used by Gradle.
+# For customization when using a Version Control System, please read the
+# header note.
+sdk.dir=Path of Android SDK
+
+# 优酷API使用的client ID
+youku.clientId=Youku client ID

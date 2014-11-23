@@ -17,6 +17,19 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    // set youku.clientId in local.properties to R.string.youku_client_id
+    Properties localProperties = new Properties()
+    localProperties.load(project.rootProject.file('local.properties').newReader('UTF-8'))
+    String client_id = localProperties.getProperty('youku.clientId')
+    if (client_id != null) {
+        applicationVariants.all { variant ->
+            variant.resValue "string", "youku_client_id", client_id
+        }
+    } else {
+        throw new org.gradle.api.resources.ResourceException(
+                'Please set youku.clientId in local.properties file at root project')
+    }
 }
 
 dependencies {
