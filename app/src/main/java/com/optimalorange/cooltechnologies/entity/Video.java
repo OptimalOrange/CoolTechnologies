@@ -35,7 +35,7 @@ public class Video {
 
     /** 视频状态 */
     @NonNull
-    private final String state;
+    private final State state;
 
     /** 总播放数 */
     private final int view_count;
@@ -85,9 +85,10 @@ public class Video {
         link = video.getString("link");
         thumbnail = video.getString("thumbnail");
         category = video.getString("category");
-        state = video.getString("state");
         published = video.getString("published");
         favorite_time = video.getString("favorite_time");
+
+        state = State.fromStringIgnoreCase(video.getString("state"));
 
         user = new User(video.getJSONObject("user"));
 
@@ -165,7 +166,7 @@ public class Video {
      * @return 视频状态
      */
     @NonNull
-    public String getState() {
+    public State getState() {
         return state;
     }
 
