@@ -5,7 +5,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 
 import java.util.LinkedList;
 
@@ -98,11 +97,7 @@ public class Video {
         } else {
             LinkedList<OperationLimit> limits = new LinkedList<>();
             for (int i = 0; i < jsonArray.length(); i++) {
-                OperationLimit limit = OperationLimit.fromStringIgnoreCase(jsonArray.getString(i));
-                if (limit == null) {
-                    throw new JSONException("Unknown operation_limit");
-                }
-                limits.add(limit);
+                limits.add(OperationLimit.fromStringIgnoreCase(jsonArray.getString(i)));
             }
             operation_limit = limits.toArray(new OperationLimit[limits.size()]);
         }
@@ -112,11 +107,7 @@ public class Video {
         } else {
             LinkedList<StreamType> streamTypeses = new LinkedList<>();
             for (int i = 0; i < jsonArray.length(); i++) {
-                StreamType streamType = StreamType.fromStringIgnoreCase(jsonArray.getString(i));
-                if (streamType == null) {
-                    throw new JSONException("Unknown streamtypes");
-                }
-                streamTypeses.add(streamType);
+                streamTypeses.add(StreamType.fromStringIgnoreCase(jsonArray.getString(i)));
             }
             streamtypes = streamTypeses.toArray(new StreamType[streamTypeses.size()]);
         }
@@ -278,7 +269,7 @@ public class Video {
         /** 已屏蔽 */
         BLOCKED;
 
-        @Nullable
+        @NonNull
         public static State fromStringIgnoreCase(String value) {
             return valueOf(value.toUpperCase());
         }
@@ -297,7 +288,7 @@ public class Video {
          */
         DOWNLOAD_DISABLED;
 
-        @Nullable
+        @NonNull
         public static OperationLimit fromStringIgnoreCase(String value) {
             return valueOf(value.toUpperCase());
         }
@@ -314,22 +305,16 @@ public class Video {
         HD,
         HD2;
 
-        @Nullable
+        @NonNull
         public static StreamType fromStringIgnoreCase(String value) {
-            StreamType result;
             value = value.toUpperCase();
-            result = valueOf(value);
-            if (result == null) {
-                switch (value) {
-                    case "3GP":
-                        result = _3GP;
-                        break;
-                    case "3GPHD":
-                        result = _3GPHD;
-                        break;
-                }
+            switch (value) {
+                case "3GP":
+                case "3GPHD":
+                    value = "_" + value;
+                    break;
             }
-            return result;
+            return valueOf(value);
         }
     }
 
