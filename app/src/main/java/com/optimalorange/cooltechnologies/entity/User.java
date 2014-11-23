@@ -54,4 +54,14 @@ public class User {
     public String getLink() {
         return link;
     }
+
+    @Override
+    @NonNull
+    public String toString() {
+        return "User{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", link='" + link + '\'' +
+                '}';
+    }
 }

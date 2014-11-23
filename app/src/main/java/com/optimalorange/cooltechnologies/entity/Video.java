@@ -6,6 +6,7 @@ import org.json.JSONObject;
 
 import android.support.annotation.NonNull;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 
 public class Video {
@@ -274,6 +275,31 @@ public class Video {
         return public_type;
     }
 
+    @Override
+    @NonNull
+    public String toString() {
+        return "Video{" +
+                "id='" + id + '\'' +
+                ", title='" + title + '\'' +
+                ", link='" + link + '\'' +
+                ", thumbnail='" + thumbnail + '\'' +
+                ", thumbnail_v2='" + thumbnail_v2 + '\'' +
+                ", duration=" + duration +
+                ", category='" + category + '\'' +
+                ", state=" + state +
+                ", view_count=" + view_count +
+                ", favorite_count=" + favorite_count +
+                ", comment_count=" + comment_count +
+                ", up_count=" + up_count +
+                ", down_count=" + down_count +
+                ", published='" + published + '\'' +
+                ", user=" + user +
+                ", operation_limit=" + Arrays.toString(operation_limit) +
+                ", streamtypes=" + Arrays.toString(streamtypes) +
+                ", public_type=" + public_type +
+                '}';
+    }
+
     /**
      * 视频状态
      */
@@ -343,6 +369,19 @@ public class Video {
                     break;
             }
             return valueOf(value);
+        }
+
+        @Override
+        @NonNull
+        public String toString() {
+            switch (this) {
+                case _3GP:
+                    return "3GP";
+                case _3GPHD:
+                    return "3GPHD";
+                default:
+                    return super.toString();
+            }
         }
     }
 
