@@ -10,6 +10,8 @@ import java.util.LinkedList;
 
 public class Video {
 
+    public static final String YOUKU_API_VIDEOS = "http://open.youku.com/docs/api_videos.html";
+
     /** 视频唯一ID */
     @NonNull
     private final String id;
@@ -25,6 +27,14 @@ public class Video {
     /** 视频截图 */
     @NonNull
     private final String thumbnail;
+
+    /**
+     * {@link #YOUKU_API_VIDEOS 官方文档}中没有，但目前事实上存在
+     *
+     * @since 2013/11/23 09:41
+     */
+    @NonNull
+    private final String thumbnail_v2;
 
     /** 视频时长，单位：秒 */
     private final int duration;
@@ -68,9 +78,9 @@ public class Video {
     @NonNull
     private final StreamType[] streamtypes;
 
-    /** 收藏时间 */
+    /** 公开类型 */
     @NonNull
-    private final String favorite_time;
+    private final PublicType public_type;
 
     public Video(JSONObject video) throws JSONException {
         duration = video.getInt("duration");
@@ -84,11 +94,12 @@ public class Video {
         title = video.getString("title");
         link = video.getString("link");
         thumbnail = video.getString("thumbnail");
+        thumbnail_v2 = video.getString("thumbnail_v2");
         category = video.getString("category");
         published = video.getString("published");
-        favorite_time = video.getString("favorite_time");
 
         state = State.fromStringIgnoreCase(video.getString("state"));
+        public_type = PublicType.fromStringIgnoreCase(video.getString("public_type"));
 
         user = new User(video.getJSONObject("user"));
 
@@ -145,6 +156,16 @@ public class Video {
     @NonNull
     public String getThumbnail() {
         return thumbnail;
+    }
+
+    /**
+     * {@link #YOUKU_API_VIDEOS 官方文档}中没有，但目前事实上存在
+     *
+     * @since 2013/11/23 09:41
+     */
+    @NonNull
+    public String getThumbnail_v2() {
+        return thumbnail_v2;
     }
 
     /**
@@ -246,11 +267,11 @@ public class Video {
     }
 
     /**
-     * @return 收藏时间
+     * @return 公开类型
      */
     @NonNull
-    public String getFavorite_time() {
-        return favorite_time;
+    public PublicType getPublic_type() {
+        return public_type;
     }
 
     /**
@@ -304,7 +325,13 @@ public class Video {
         _3GPHD,
         _3GP,
         HD,
-        HD2;
+        HD2,
+        /**
+         * {@link #YOUKU_API_VIDEOS 官方文档}中没有，但目前事实上存在
+         *
+         * @since 2013/11/23 09:58
+         */
+        HD3;
 
         @NonNull
         public static StreamType fromStringIgnoreCase(String value) {
@@ -319,4 +346,26 @@ public class Video {
         }
     }
 
+    /**
+     * 公开类型
+     */
+    public static enum PublicType {
+        /**
+         * 公开
+         */
+        ALL,
+        /**
+         * 仅好友观看
+         */
+        FRIEND,
+        /**
+         * 输入密码观看
+         */
+        PASSWORD;
+
+        @NonNull
+        public static PublicType fromStringIgnoreCase(String value) {
+            return valueOf(value.toUpperCase());
+        }
+    }
 }
