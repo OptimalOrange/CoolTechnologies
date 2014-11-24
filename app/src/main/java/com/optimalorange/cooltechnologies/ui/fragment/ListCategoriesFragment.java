@@ -67,6 +67,7 @@ public class ListCategoriesFragment extends Fragment {
     private RecyclerView.LayoutManager mLayoutManager;
 
     private View v;
+    private ItemsCountCalculater.Result mItemsCountAndDimension;
 
     //--------------------------------------------------------------------------
     // Network Request to Youku
@@ -112,6 +113,7 @@ public class ListCategoriesFragment extends Fragment {
                             }
                         }
                         mGenres = new Pair<>(genres, videos);
+                        mAdapter.notifyDataSetChanged();
                     }
                 }
             },
@@ -129,15 +131,20 @@ public class ListCategoriesFragment extends Fragment {
      * @see #mGenres
      */
     private VideosRequest buildQueryVideosRequest(final String genre, final int index) {
+        if (mItemsCountAndDimension == null) {
+            throw new IllegalStateException("calculateItemsCount before query");
+        }
         return new VideosRequest.Builder()
                 .setClient_id(mYoukuClientId)
                 .setCategory(CATEGORY_LABEL_OF_TECH)
                 .setGenre(genre)
                 .setPeriod(VideosRequest.Builder.PERIOD.MONTH)
+                .setCount(mItemsCountAndDimension.getCount())
                 .setResponseListener(new Response.Listener<List<Video>>() {
                     @Override
                     public void onResponse(List<Video> videos) {
                         mGenres.second.set(index, videos);
+                        mAdapter.notifyItemChanged(index);
                     }
                 })
                 .setErrorListener(new Response.ErrorListener() {
@@ -177,32 +184,63 @@ public class ListCategoriesFragment extends Fragment {
         mRecyclerView.setHasFixedSize(false);
         mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);
-        mAdapter = new MyAdapter(new String[]{"title1", "title2", "title3"});
+        mItemsCountAndDimension = calculateItemsCount(mRecyclerView);
+        mAdapter = new MyAdapter();
         mRecyclerView.setAdapter(mAdapter);
+    }
+
+    //--------------------------------------------------------------------------
+    // Private methods
+    //--------------------------------------------------------------------------
+
+    private static ItemsCountCalculater.Result calculateItemsCount(View parent) {
+        Resources resources = parent.getResources();
+        float margin = resources.getDimension(R.dimen.card_margin_half);
+        float cardWidthMin = resources.getDimension(R.dimen.card_width_min);
+        float cardWidthMax = resources.getDimension(R.dimen.card_width_max);
+        return ItemsCountCalculater
+                .calculateItemsCountAndDimension(
+                        cardWidthMin, cardWidthMax, margin * 2,
+                        resources.getDisplayMetrics().widthPixels - margin * 2,
+                        ItemsCountCalculater.Preference.SMALLER_OR_MORE_ITEMS);
     }
 
     //--------------------------------------------------------------------------
     // Adapter
     //--------------------------------------------------------------------------
 
-    public static class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
-
-        private String[] mDataset;
-
-        // Provide a suitable constructor (depends on the kind of dataset)
-        public MyAdapter(String[] myDataset) {
-            mDataset = myDataset;
-        }
+    public class MyAdapter extends RecyclerView.Adapter<ViewHolder> {
 
         // Create new views (invoked by the layout manager)
         @Override
-        public MyAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
-                int viewType) {
+        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             // create a new view
             View v = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.list_item_categories, parent, false);
             //TODO set the view's size, margins, paddings and layout parameters
-            return new ViewHolder(v, parent);
+            ViewHolder viewHolder = new ViewHolder(v);
+            addCardViews(viewHolder);
+            return viewHolder;
+        }
+
+        private void addCardViews(ViewHolder viewHolder) {
+            int margin = viewHolder.mVideosContainer.getResources()
+                    .getDimensionPixelSize(R.dimen.card_margin_half);
+            ArrayList<CardViewNative> cardViews =
+                    new ArrayList<>(mItemsCountAndDimension.getCount());
+            for (int i = mItemsCountAndDimension.getCount(); i >= 1; i--) {
+                CardViewNative newCardView =
+                        new CardViewNative(viewHolder.mVideosContainer.getContext());
+
+                LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                        mItemsCountAndDimension.getDimension(),
+                        LinearLayout.LayoutParams.WRAP_CONTENT);
+                layoutParams.setMargins(margin, margin, margin, margin);
+                viewHolder.mVideosContainer.addView(newCardView, layoutParams);
+
+                cardViews.add(newCardView);
+            }
+            viewHolder.mCardViews = cardViews;
         }
 
         // Replace the contents of a view (invoked by the layout manager)
@@ -210,72 +248,58 @@ public class ListCategoriesFragment extends Fragment {
         public void onBindViewHolder(ViewHolder holder, int position) {
             // - get element from your dataset at this position
             // - replace the contents of the view with that element
-            holder.mTitleTextView.setText(mDataset[position]);
-            int i = 0;
-            for (CardViewNative cardView : holder.mCardViews) {
-                i++;
-                Card card = new Card(holder.mItemView.getContext());
-                CardHeader cardHeader = new CardHeader(holder.mItemView.getContext());
-                cardHeader.setTitle("CardHeader:" + mDataset[position] + "@" + i);
-                card.addCardHeader(cardHeader);
-                card.setTitle("CardTitle:" + mDataset[position] + "@" + i);
-                cardView.setCard(card);
+            final String title = mGenres.first.get(position);
+            holder.mTitleTextView.setText(title);
+            List<Video> videos = mGenres.second.get(position);
+            int cardViewsIndex = 0;
+            if (videos != null) {
+                for (Video video : videos) {
+                    CardViewNative currentCardView = holder.mCardViews.get(cardViewsIndex);
+                    Card card = new Card(holder.mVideosContainer.getContext());
+                    CardHeader cardHeader = new CardHeader(holder.mItemView.getContext());
+                    cardHeader.setTitle("CardHeader:" + video.getTitle());
+                    card.addCardHeader(cardHeader);
+                    card.setTitle("CardTitle:" + video.getTitle());
+                    if (currentCardView.getCard() != null) {
+                        currentCardView.replaceCard(card);
+                    } else {
+                        currentCardView.setCard(card);
+                    }
+                    currentCardView.setVisibility(CardViewNative.VISIBLE);
+                    cardViewsIndex++;
+                }
+            }
+            for (; cardViewsIndex < holder.mCardViews.size(); cardViewsIndex++) {
+                holder.mCardViews.get(cardViewsIndex).setVisibility(CardViewNative.GONE);
             }
         }
 
         // Return the size of your dataset (invoked by the layout manager)
         @Override
         public int getItemCount() {
-            return mDataset.length;
+            return mGenres != null ? mGenres.first.size() : 0;
         }
+    }
 
-        // Provide a reference to the views for each data item
-        // Complex data items may need more than one view per item, and
-        // you provide access to all the views for a data item in a view holder
-        public static class ViewHolder extends RecyclerView.ViewHolder {
+    // Provide a reference to the views for each data item
+    // Complex data items may need more than one view per item, and
+    // you provide access to all the views for a data item in a view holder
+    public static class ViewHolder extends RecyclerView.ViewHolder {
 
-            public View mItemView;
+        public View mItemView;
 
-            public TextView mTitleTextView;
+        public TextView mTitleTextView;
 
-            public LinearLayout mVideosContainer;
+        public LinearLayout mVideosContainer;
 
-            public List<CardViewNative> mCardViews;
+        public ArrayList<CardViewNative> mCardViews;
 
-            public ViewHolder(View itemView, View parent) {
-                super(itemView);
-                mItemView = itemView;
-                mTitleTextView = (TextView) itemView.findViewById(R.id.title_textView);
-                mVideosContainer = (LinearLayout) itemView.findViewById(R.id.videos_container);
-
-                addCardViews(parent);
-            }
-
-            private void addCardViews(View parent) {
-                Resources resources = mVideosContainer.getResources();
-                int margin = resources.getDimensionPixelSize(R.dimen.card_margin_half);
-                float cardWidthMin = resources.getDimension(R.dimen.card_width_min);
-                float cardWidthMax = resources.getDimension(R.dimen.card_width_max);
-                ItemsCountCalculater.Result itemsCountAndDimension = ItemsCountCalculater
-                        .calculateItemsCountAndDimension(
-                                cardWidthMin, cardWidthMax, margin * 2,
-                                parent.getWidth() - margin * 2,
-                                ItemsCountCalculater.Preference.SMALLER_OR_MORE_ITEMS);
-                mCardViews = new ArrayList<>(itemsCountAndDimension.getCount());
-                for (int i = itemsCountAndDimension.getCount(); i >= 1; i--) {
-                    CardViewNative newCardView = new CardViewNative(mVideosContainer.getContext());
-
-                    LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-                            itemsCountAndDimension.getDimension(),
-                            LinearLayout.LayoutParams.WRAP_CONTENT);
-                    layoutParams.setMargins(margin, margin, margin, margin);
-                    mVideosContainer.addView(newCardView, layoutParams);
-                    mCardViews.add(newCardView);
-                }
-            }
+        public ViewHolder(View itemView) {
+            super(itemView);
+            mItemView = itemView;
+            mTitleTextView = (TextView) itemView.findViewById(R.id.title_textView);
+            mVideosContainer = (LinearLayout) itemView.findViewById(R.id.videos_container);
         }
-
-
     }
 
 

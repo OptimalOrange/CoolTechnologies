@@ -37,7 +37,7 @@ public class ItemsCountCalculater {
             throw new IllegalArgumentException("min==0 && preference is SMALLER_OR_MORE_ITEMS");
         }
         if (containerDimen <= 0) {
-            throw new IllegalArgumentException("containerDimen <= 0");
+            throw new IllegalArgumentException("containerDimen(" + containerDimen + "px) <= 0");
         }
         //TODO 改善算法
         int minCount = (int) (containerDimen / (max + marginTotal));
