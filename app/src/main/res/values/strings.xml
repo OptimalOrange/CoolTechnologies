@@ -7,11 +7,14 @@
     <string name="favorites">收藏</string>
     <string name="watched">历史</string>
     <string name="promotion">推荐</string>
-
     <string name="action_settings">设置</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
     <!-- NetworkChecker -->
     <string name="no_connection_title">打开网络设置</string>
     <string name="no_connection_message">网络连接不可用，现在打开网络开关？</string>
+
+    <!-- list_item_videos -->
+    <string name="view_count">播放：%1$s</string>
 
 </resources>
