@@ -17,9 +17,11 @@
   ~  *****************************************************************************
   -->
 
-<ImageView
+<com.android.volley.toolbox.NetworkImageView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/card_thumbnail_image"
-    style="@style/card.native.card_thumbnail_image"/>
-
-
+    style="@style/card.native.card_thumbnail_image"
+    android:layout_width="@dimen/video_card_thumbnail_width"
+    android:layout_height="@dimen/video_card_thumbnail_height"
+    android:scaleType="fitCenter"
+    />

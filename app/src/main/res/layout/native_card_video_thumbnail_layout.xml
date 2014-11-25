@@ -43,27 +43,22 @@
             card:card_header_layout_resourceID="@layout/native_base_header_layout"
             android:layout_height="wrap_content"/>
 
-        <LinearLayout
-            android:id="@+id/card_thumb_and_content_layout"
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
 
             <it.gmariotti.cardslib.library.view.component.CardThumbnailView
                 style="@style/card.native.card_thumbnail_outer_layout"
                 android:id="@+id/card_thumbnail_layout"
                 android:layout_width="wrap_content"
-                card:card_thumbnail_layout_resourceID="@layout/native_base_thumbnail_layout"
+                card:card_thumbnail_layout_resourceID="@layout/native_card_video_thumbnail_view_layout"
                 android:layout_height="match_parent"/>
 
             <!-- Main Content View -->
             <FrameLayout
                 android:id="@+id/card_main_content_layout"
-                style="@style/card.native.content_outer_layout"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:layout_height="wrap_content"
+                />
 
-        </LinearLayout>
+
 
     </it.gmariotti.cardslib.library.view.ForegroundLinearLayout>
 
