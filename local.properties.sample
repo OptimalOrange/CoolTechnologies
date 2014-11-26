@@ -7,5 +7,7 @@
 # header note.
 sdk.dir=Path of Android SDK
 
-# 优酷API使用的client ID
+# 优酷API使用的client ID和client secret
+# see http://open.youku.com/app
 youku.clientId=Youku client ID
+youku.clientSecret=Youku client secret
