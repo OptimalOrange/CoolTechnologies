@@ -6,11 +6,14 @@ import com.optimalorange.cooltechnologies.ui.fragment.HistoryFragment;
 import com.optimalorange.cooltechnologies.ui.fragment.ListCategoriesFragment;
 import com.optimalorange.cooltechnologies.ui.fragment.ListVideosFragment;
 import com.optimalorange.cooltechnologies.ui.fragment.PromotionFragment;
+import com.optimalorange.cooltechnologies.util.Const;
+import com.optimalorange.cooltechnologies.util.Utils;
 import com.viewpagerindicator.TitlePageIndicator;
 
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -35,11 +38,16 @@ public class MainActivity extends Activity {
     };
 
     private ViewPager mPager;
+    private String mUserToken;
+    private boolean mIsLogin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mUserToken = Utils.getString(this, "user_token", "");
+        mIsLogin = !mUserToken.isEmpty();
 
         mPager = (ViewPager) findViewById(R.id.pager);
         mPager.setAdapter(new MyPagerAdapter(
@@ -77,6 +85,16 @@ public class MainActivity extends Activity {
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        if (mIsLogin) {
+            menu.getItem(0).setIcon(R.drawable.logout);
+        } else {
+            menu.getItem(0).setIcon(R.drawable.login);
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -84,8 +102,20 @@ public class MainActivity extends Activity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+
+        switch (id) {
+            case R.id.action_settings:
+                return true;
+            case R.id.action_login:
+                if (mIsLogin) {
+                    Utils.saveString(this, "user_token", "");
+                    mIsLogin = false;
+                    invalidateOptionsMenu();
+                } else {
+                    Intent intent = new Intent(this, LoginActivity.class);
+                    startActivityForResult(intent, Const.REQUEST_CODE_LOGIN_ACTIVITY);
+                }
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -165,4 +195,15 @@ public class MainActivity extends Activity {
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case Const.REQUEST_CODE_LOGIN_ACTIVITY:
+                if (resultCode == Const.RESULT_CODE_SUCCESS_LOGIN_ACTIVITY) {
+                    mIsLogin = true;
+                    invalidateOptionsMenu();
+                }
+        }
+    }
 }
