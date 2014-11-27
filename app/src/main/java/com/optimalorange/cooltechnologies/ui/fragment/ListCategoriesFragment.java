@@ -4,7 +4,6 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.NetworkImageView;
 import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.entity.Video;
 import com.optimalorange.cooltechnologies.util.ItemsCountCalculater;
@@ -31,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import it.gmariotti.cardslib.library.internal.Card;
-import it.gmariotti.cardslib.library.internal.CardThumbnail;
+import it.gmariotti.cardslib.library.internal.CardHeader;
 import it.gmariotti.cardslib.library.view.CardViewNative;
 
 /**
@@ -182,7 +181,7 @@ public class ListCategoriesFragment extends Fragment {
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
-        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setHasFixedSize(false);
         mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);
         mItemsCountAndDimension = calculateItemsCount(mRecyclerView);
@@ -216,24 +215,22 @@ public class ListCategoriesFragment extends Fragment {
         @Override
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             // create a new view
-            LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-            View v = inflater.inflate(R.layout.list_item_categories, parent, false);
+            View v = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.list_item_categories, parent, false);
             //TODO set the view's size, margins, paddings and layout parameters
             ViewHolder viewHolder = new ViewHolder(v);
-            addCardViews(inflater, viewHolder);
+            addCardViews(viewHolder);
             return viewHolder;
         }
 
-        private void addCardViews(LayoutInflater inflater, ViewHolder viewHolder) {
+        private void addCardViews(ViewHolder viewHolder) {
             int margin = viewHolder.mVideosContainer.getResources()
                     .getDimensionPixelSize(R.dimen.card_margin_half);
             ArrayList<CardViewNative> cardViews =
                     new ArrayList<>(mItemsCountAndDimension.getCount());
             for (int i = mItemsCountAndDimension.getCount(); i >= 1; i--) {
-                CardViewNative newCardView = (CardViewNative) inflater.inflate(
-                        R.layout.list_item_categories_native_card_view,
-                        viewHolder.mVideosContainer,
-                        false);
+                CardViewNative newCardView =
+                        new CardViewNative(viewHolder.mVideosContainer.getContext());
 
                 LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
                         mItemsCountAndDimension.getDimension(),
@@ -256,22 +253,13 @@ public class ListCategoriesFragment extends Fragment {
             List<Video> videos = mGenres.second.get(position);
             int cardViewsIndex = 0;
             if (videos != null) {
-                for (final Video video : videos) {
+                for (Video video : videos) {
                     CardViewNative currentCardView = holder.mCardViews.get(cardViewsIndex);
                     Card card = new Card(holder.mVideosContainer.getContext());
-//                    card.setTitle(video.getTitle());
-                    //Add Thumbnail
-                    CardThumbnail cardThumbnail = new CardThumbnail(currentCardView.getContext()) {
-                        @Override
-                        public void setupInnerViewElements(ViewGroup parent, View imageView) {
-                            NetworkImageView networkImageView = (NetworkImageView) imageView;
-                            networkImageView.setImageUrl(
-                                    video.getThumbnail_v2(), mVolleySingleton.getImageLoader());
-                        }
-                    };
-                    //You need to set true to use an external library
-                    cardThumbnail.setExternalUsage(true);
-                    card.addCardThumbnail(cardThumbnail);
+                    CardHeader cardHeader = new CardHeader(holder.mItemView.getContext());
+                    cardHeader.setTitle("CardHeader:" + video.getTitle());
+                    card.addCardHeader(cardHeader);
+                    card.setTitle("CardTitle:" + video.getTitle());
                     if (currentCardView.getCard() != null) {
                         currentCardView.replaceCard(card);
                     } else {
