@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.Locale;
 
 public class Video {
 
@@ -319,7 +320,7 @@ public class Video {
 
         @NonNull
         public static State fromStringIgnoreCase(String value) {
-            return valueOf(value.toUpperCase());
+            return valueOf(value.toUpperCase(Locale.US));
         }
     }
 
@@ -338,7 +339,7 @@ public class Video {
 
         @NonNull
         public static OperationLimit fromStringIgnoreCase(String value) {
-            return valueOf(value.toUpperCase());
+            return valueOf(value.toUpperCase(Locale.US));
         }
     }
 
@@ -361,7 +362,7 @@ public class Video {
 
         @NonNull
         public static StreamType fromStringIgnoreCase(String value) {
-            value = value.toUpperCase();
+            value = value.toUpperCase(Locale.US);
             switch (value) {
                 case "3GP":
                 case "3GPHD":
@@ -404,7 +405,7 @@ public class Video {
 
         @NonNull
         public static PublicType fromStringIgnoreCase(String value) {
-            return valueOf(value.toUpperCase());
+            return valueOf(value.toUpperCase(Locale.US));
         }
     }
 }

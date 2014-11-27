@@ -18,6 +18,7 @@ import android.support.annotation.Nullable;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * @see {@literal http://open.youku.com/docs/api_videos.html#videos-by-category}
@@ -253,7 +254,7 @@ public class VideosRequest extends JsonRequest<List<Video>> {
             HISTORY;
 
             public String toString() {
-                return name().toLowerCase();
+                return name().toLowerCase(Locale.US);
             }
         }
 
@@ -273,7 +274,7 @@ public class VideosRequest extends JsonRequest<List<Video>> {
             FAVORITE_COUNT;
 
             public String toString() {
-                return name().toLowerCase().replace('-', '_');
+                return name().toLowerCase(Locale.US).replace('-', '_');
             }
         }
     }

@@ -141,7 +141,7 @@ public class ListVideosFragment extends Fragment {
             ViewHolder vh;
             if (convertView == null) {
                 convertView = LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.list_item_videos, null);
+                        .inflate(R.layout.list_item_videos, parent, false);
                 vh = new ViewHolder();
                 vh.thumbnail = (DynamicHeightImageView) convertView.findViewById(R.id.thumbnail);
                 vh.duration = (TextView) convertView.findViewById(R.id.duration);
