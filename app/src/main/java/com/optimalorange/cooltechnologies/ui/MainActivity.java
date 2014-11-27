@@ -38,7 +38,9 @@ public class MainActivity extends Activity {
     };
 
     private ViewPager mPager;
+
     private String mUserToken;
+
     private boolean mIsLogin;
 
     @Override

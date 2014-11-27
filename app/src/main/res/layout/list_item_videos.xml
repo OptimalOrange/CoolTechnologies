@@ -1,37 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-			  android:layout_width="match_parent"
-			  android:layout_height="match_parent"
-			  android:orientation="vertical">
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        >
 
-	<com.etsy.android.grid.util.DynamicHeightImageView
-		android:id="@+id/thumbnail"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:contentDescription="@android:string/no"
-		android:scaleType="fitCenter"/>
+    <com.etsy.android.grid.util.DynamicHeightImageView
+            android:id="@+id/thumbnail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:contentDescription="@android:string/no"
+            android:scaleType="fitCenter"
+            />
 
-	<TextView
-		android:id="@+id/duration"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:textSize="12sp"
-		android:textColor="@color/text_black"/>
+    <TextView
+            android:id="@+id/duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textColor="@color/text_black"
+            />
 
-	<TextView
-		android:id="@+id/title"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:singleLine="true"
-		android:ellipsize="end"
-		android:textSize="15sp"
-		android:textColor="@color/text_black"/>
+    <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:textSize="15sp"
+            android:textColor="@color/text_black"
+            />
 
-	<TextView
-		android:id="@+id/view_count"
-		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"
-		android:textSize="12sp"
-		android:textColor="@color/text_black"/>
+    <TextView
+            android:id="@+id/view_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textColor="@color/text_black"
+            />
 
 </LinearLayout>

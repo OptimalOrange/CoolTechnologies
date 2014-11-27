@@ -36,12 +36,20 @@ import java.util.ArrayList;
 public class LoginActivity extends Activity implements Handler.Callback {
 
     private static final String MY_URL = "http://59.67.152.71/wangzhengze/";
+
     private static final String BASE_TOKEN_URL = "https://openapi.youku.com/v2/oauth2/token";
+
     private static final int GET_TOKEN_OK = 0;
+
     private static final int GET_TOKEN_ERROR = 1;
+
     private static final String GRANT_TYPE = "authorization_code";
+
     private static final String RESPONSE_TYPE = "code";
-    private static final String BASE_AUTHORIZE_URL = "https://openapi.youku.com/v2/oauth2/authorize?";
+
+    private static final String BASE_AUTHORIZE_URL
+            = "https://openapi.youku.com/v2/oauth2/authorize?";
+
     private Handler mHandler = new Handler(this);
 
     @Override
@@ -49,7 +57,7 @@ public class LoginActivity extends Activity implements Handler.Callback {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         final WebView loginWebView = (WebView) findViewById(R.id.login_web_view);
-        WebViewClient client = new WebViewClient(){
+        WebViewClient client = new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 Log.e("wzz login", "url=" + url);
@@ -66,7 +74,8 @@ public class LoginActivity extends Activity implements Handler.Callback {
 
         loginWebView.getSettings().setJavaScriptEnabled(true);
         loginWebView.setWebViewClient(client);
-        loginWebView.loadUrl(BASE_AUTHORIZE_URL + "client_id=" + getString(R.string.youku_client_id) + "&response_type=" + RESPONSE_TYPE + "&redirect_uri=" + MY_URL);
+        loginWebView.loadUrl(BASE_AUTHORIZE_URL + "client_id=" + getString(R.string.youku_client_id)
+                + "&response_type=" + RESPONSE_TYPE + "&redirect_uri=" + MY_URL);
 
     }
 
@@ -134,7 +143,8 @@ public class LoginActivity extends Activity implements Handler.Callback {
                 showToastInUIThread(R.string.action_login_success);
                 setResult(Const.RESULT_CODE_SUCCESS_LOGIN_ACTIVITY);
                 Log.e("wzz login", "result=" + msg.obj);
-                Utils.saveString(LoginActivity.this, "user_token", getTokenString(msg.obj.toString()));
+                Utils.saveString(
+                        LoginActivity.this, "user_token", getTokenString(msg.obj.toString()));
                 finish();
                 return true;
             case GET_TOKEN_ERROR:

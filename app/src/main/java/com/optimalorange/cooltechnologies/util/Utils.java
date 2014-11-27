@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-import com.optimalorange.cooltechnologies.R;
-
 /**
  * Created by WANGZHENGZE on 2014/11/20.
  */
@@ -19,10 +17,10 @@ public class Utils {
      * @param value   value
      */
     public static void saveString(Context context, String key, String value) {
-	SharedPreferences.Editor editor =
-		PreferenceManager.getDefaultSharedPreferences(context).edit();
-	editor.putString(key, value);
-	editor.commit();
+        SharedPreferences.Editor editor =
+                PreferenceManager.getDefaultSharedPreferences(context).edit();
+        editor.putString(key, value);
+        editor.commit();
     }
 
     /**
@@ -34,9 +32,9 @@ public class Utils {
      * @return string
      */
     public static String getString(Context context, String key, String defValue) {
-	SharedPreferences sharedPreferences =
-		PreferenceManager.getDefaultSharedPreferences(context);
-	return sharedPreferences.getString(key, defValue);
+        SharedPreferences sharedPreferences =
+                PreferenceManager.getDefaultSharedPreferences(context);
+        return sharedPreferences.getString(key, defValue);
     }
 
     /**
@@ -46,13 +44,13 @@ public class Utils {
      * @return String
      */
     public static String getDurationString(int duration) {
-	int hours = (duration / (60 * 60));
-	int minutes = (duration - hours * (60 * 60)) / 60;
-	int seconds = duration - hours * (60 * 60) - minutes * 60;
-	if (hours == 0) {
-	    return minutes + " : " + seconds;
-	} else {
-	    return hours + " : " + minutes + " : " + seconds;
-	}
+        int hours = duration / (60 * 60);
+        int minutes = (duration - hours * (60 * 60)) / 60;
+        int seconds = duration - hours * (60 * 60) - minutes * 60;
+        if (hours == 0) {
+            return minutes + " : " + seconds;
+        } else {
+            return hours + " : " + minutes + " : " + seconds;
+        }
     }
 }

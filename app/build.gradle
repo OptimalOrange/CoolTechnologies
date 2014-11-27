@@ -58,7 +58,7 @@ dependencies {
 apply plugin: 'checkstyle'
 
 check.dependsOn 'checkstyle'
-task checkstyle(type: Checkstyle){
+task checkstyle(type: Checkstyle) {
 //    ignoreFailures = true    // 如果想暂时忽略code style问题，让本行代码生效
     configFile new File(rootDir, "config/checkstyle/checkstyle.xml")
 
@@ -69,7 +69,7 @@ task checkstyle(type: Checkstyle){
     classpath = files()
 }
 
-apply plugin: 'pmd' 
+apply plugin: 'pmd'
 
 check.dependsOn 'pmd'
 task pmd(type: Pmd) {

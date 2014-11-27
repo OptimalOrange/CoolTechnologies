@@ -65,6 +65,7 @@ public class ListCategoriesFragment extends Fragment {
     private RecyclerView.LayoutManager mLayoutManager;
 
     private View v;
+
     private ItemsCountCalculater.Result mItemsCountAndDimension;
 
     //--------------------------------------------------------------------------
@@ -221,7 +222,7 @@ public class ListCategoriesFragment extends Fragment {
             return viewHolder;
         }
 
-        private void addCardViews(LayoutInflater inflater,ViewHolder viewHolder) {
+        private void addCardViews(LayoutInflater inflater, ViewHolder viewHolder) {
             int margin = viewHolder.mVideosContainer.getResources()
                     .getDimensionPixelSize(R.dimen.card_margin_half);
             ArrayList<ViewHolder.CardViewHolder> cardViews =
@@ -238,7 +239,8 @@ public class ListCategoriesFragment extends Fragment {
                 layoutParams.setMargins(margin, margin, margin, margin);
                 viewHolder.mVideosContainer.addView(newCardView, layoutParams);
 
-                ViewHolder.CardViewHolder cardViewHolder = new ViewHolder.CardViewHolder(newCardView);
+                ViewHolder.CardViewHolder cardViewHolder =
+                        new ViewHolder.CardViewHolder(newCardView);
                 cardViewHolder.mImageView.setDefaultImageResId(R.drawable.ic_launcher);
                 cardViews.add(cardViewHolder);
             }
@@ -256,7 +258,8 @@ public class ListCategoriesFragment extends Fragment {
             int cardViewsIndex = 0;
             if (videos != null) {
                 for (Video video : videos) {
-                    ViewHolder.CardViewHolder currentCardView = holder.mCardViews.get(cardViewsIndex);
+                    ViewHolder.CardViewHolder currentCardView =
+                            holder.mCardViews.get(cardViewsIndex);
                     currentCardView.mImageView.setImageUrl(
                             video.getThumbnail_v2(), mVolleySingleton.getImageLoader());
                     currentCardView.mTextView.setText(video.getTitle());
@@ -297,13 +300,17 @@ public class ListCategoriesFragment extends Fragment {
         }
 
         public static class CardViewHolder {
+
             public CardView mRootCardView;
+
             public NetworkImageView mImageView;
+
             public TextView mTextView;
 
             public CardViewHolder(CardView rootCardView) {
                 mRootCardView = rootCardView;
-                mImageView = (NetworkImageView) rootCardView.findViewById(R.id.card_thumbnail_image);
+                mImageView =
+                        (NetworkImageView) rootCardView.findViewById(R.id.card_thumbnail_image);
                 mTextView = (TextView) rootCardView.findViewById(R.id.card_simple_title);
             }
         }
