@@ -43,9 +43,6 @@ public class ListCategoriesFragment extends Fragment {
     private static final String YOUKU_API_SCHEMAS_VIDEO_CATEGORY
             = "https://openapi.youku.com/v2/schemas/video/category.json";
 
-    private static final String YOUKU_API_VIDEOS_BY_CATEGORY
-            = "https://openapi.youku.com/v2/videos/by_category.json";
-
     private static final String CATEGORY_LABEL_OF_TECH = "科技";
 
     private String mYoukuClientId;
@@ -63,8 +60,6 @@ public class ListCategoriesFragment extends Fragment {
     private RecyclerView.Adapter mAdapter;
 
     private RecyclerView.LayoutManager mLayoutManager;
-
-    private View v;
 
     private ItemsCountCalculater.Result mItemsCountAndDimension;
 
@@ -178,7 +173,7 @@ public class ListCategoriesFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
-        // use this setting to improve performance if you know that changes
+        // use RecyclerView.setHasFixedSize(true) to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
         mRecyclerView.setHasFixedSize(false);
         mLayoutManager = new LinearLayoutManager(getActivity());
