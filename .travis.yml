@@ -27,4 +27,4 @@ android:
 
 before_script:
     # Set up local.properties
-    - cp local.properties.sample local.properties
+    - printf "youku.clientId=Youku_client_ID\nyouku.clientSecret=Youku_client_secret\n" > local.properties
