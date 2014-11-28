@@ -48,9 +48,9 @@ public class Utils {
         int minutes = (duration - hours * (60 * 60)) / 60;
         int seconds = duration - hours * (60 * 60) - minutes * 60;
         if (hours == 0) {
-            return minutes + " : " + seconds;
+            return minutes + ":" + seconds;
         } else {
-            return hours + " : " + minutes + " : " + seconds;
+            return hours + ":" + minutes + ":" + seconds;
         }
     }
 }

@@ -8,6 +8,7 @@ import com.android.volley.toolbox.NetworkImageView;
 import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.entity.Video;
 import com.optimalorange.cooltechnologies.util.ItemsCountCalculater;
+import com.optimalorange.cooltechnologies.util.Utils;
 import com.optimalorange.cooltechnologies.util.VideosRequest;
 import com.optimalorange.cooltechnologies.util.VolleySingleton;
 
@@ -28,6 +29,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -257,6 +259,10 @@ public class ListCategoriesFragment extends Fragment {
                             holder.mCardViews.get(cardViewsIndex);
                     currentCardView.mImageView.setImageUrl(
                             video.getThumbnail_v2(), mVolleySingleton.getImageLoader());
+                    currentCardView.mViewCountView.setText(
+                            NumberFormat.getIntegerInstance().format(video.getView_count()));
+                    currentCardView.mdurationView.setText(
+                            Utils.getDurationString(video.getDuration()));
                     currentCardView.mTextView.setText(video.getTitle());
                     currentCardView.mRootCardView.setVisibility(CardView.VISIBLE);
                     cardViewsIndex++;
@@ -300,12 +306,18 @@ public class ListCategoriesFragment extends Fragment {
 
             public NetworkImageView mImageView;
 
+            public TextView mViewCountView;
+
+            public TextView mdurationView;
+
             public TextView mTextView;
 
             public CardViewHolder(CardView rootCardView) {
                 mRootCardView = rootCardView;
                 mImageView =
                         (NetworkImageView) rootCardView.findViewById(R.id.card_thumbnail_image);
+                mViewCountView = (TextView) rootCardView.findViewById(R.id.view_count);
+                mdurationView = (TextView) rootCardView.findViewById(R.id.duration);
                 mTextView = (TextView) rootCardView.findViewById(R.id.card_simple_title);
             }
         }
