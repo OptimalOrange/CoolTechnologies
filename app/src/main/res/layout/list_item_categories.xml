@@ -9,14 +9,21 @@
     <TextView
             android:id="@+id/title_textView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:layout_height="48dp"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin"
+            android:gravity="center_vertical"
+            android:textSize="@dimen/text_size_medium"
+            android:textColor="@color/text_black"
+            android:drawableRight="@drawable/ic_chevron_right_black_36dp"
             />
 
     <LinearLayout
             android:id="@+id/videos_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/card_margin"
+            android:layout_marginRight="@dimen/card_margin"
             android:orientation="horizontal"
             android:gravity="center"
             />

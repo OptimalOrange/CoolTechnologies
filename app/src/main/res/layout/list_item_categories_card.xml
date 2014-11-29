@@ -4,6 +4,8 @@
         xmlns:card_view="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/card_margin_half"
+        android:layout_marginRight="@dimen/card_margin_half"
         card_view:contentPadding="0dp"
         >
 
@@ -12,12 +14,14 @@
             android:layout_height="wrap_content"
             >
 
+        <!-- 当前mminSdkVersion小于18，android:adjustViewBounds="true"不能放大图片 -->
+        <!-- so 需要在代码中设置高度 -->
         <com.android.volley.toolbox.NetworkImageView
                 android:id="@+id/card_thumbnail_image"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
                 android:scaleType="fitXY"
-                android:adjustViewBounds="true"
+                android:adjustViewBounds="false"
                 />
 
         <RelativeLayout
@@ -35,7 +39,7 @@
                     android:layout_height="match_parent"
                     android:layout_alignParentLeft="true"
                     android:layout_alignParentStart="true"
-                    android:textSize="14sp"
+                    android:textSize="@dimen/text_size_micro"
                     android:textColor="@color/text_white"
                     android:drawableLeft="@drawable/ic_play_circle_outline_white_18dp"
                     android:gravity="center_vertical"
@@ -47,7 +51,7 @@
                     android:layout_height="match_parent"
                     android:layout_alignParentRight="true"
                     android:layout_alignParentEnd="true"
-                    android:textSize="14sp"
+                    android:textSize="@dimen/text_size_micro"
                     android:textColor="@color/text_white"
                     android:drawableLeft="@drawable/ic_av_timer_white_18dp"
                     android:gravity="center_vertical"
@@ -59,12 +63,14 @@
         <TextView
                 android:id="@+id/card_simple_title"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="36dp"
                 android:layout_below="@id/card_thumbnail_image"
                 android:paddingLeft="4dp"
                 android:paddingRight="4dp"
                 android:gravity="center_vertical|start"
                 android:lines="2"
+                android:ellipsize="end"
+                android:textSize="@dimen/text_size_small"
                 android:textColor="@color/text_black"
                 />
 

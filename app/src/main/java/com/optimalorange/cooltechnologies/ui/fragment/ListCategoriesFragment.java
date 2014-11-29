@@ -177,7 +177,7 @@ public class ListCategoriesFragment extends Fragment {
         mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         // use RecyclerView.setHasFixedSize(true) to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
-        mRecyclerView.setHasFixedSize(false);
+        mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(getActivity());
         mRecyclerView.setLayoutManager(mLayoutManager);
         mItemsCountAndDimension = calculateItemsCount(mRecyclerView);
@@ -220,8 +220,6 @@ public class ListCategoriesFragment extends Fragment {
         }
 
         private void addCardViews(LayoutInflater inflater, ViewHolder viewHolder) {
-            int margin = viewHolder.mVideosContainer.getResources()
-                    .getDimensionPixelSize(R.dimen.card_margin_half);
             ArrayList<ViewHolder.CardViewHolder> cardViews =
                     new ArrayList<>(mItemsCountAndDimension.getCount());
             for (int i = mItemsCountAndDimension.getCount(); i >= 1; i--) {
@@ -229,16 +227,16 @@ public class ListCategoriesFragment extends Fragment {
                         R.layout.list_item_categories_card,
                         viewHolder.mVideosContainer,
                         false);
-                ViewGroup.MarginLayoutParams layoutParams =
-                        (ViewGroup.MarginLayoutParams) newCardView.getLayoutParams();
-                layoutParams.width = mItemsCountAndDimension.getDimension();
+                newCardView.getLayoutParams().width = mItemsCountAndDimension.getDimension();
 
-                layoutParams.setMargins(margin, margin, margin, margin);
-                viewHolder.mVideosContainer.addView(newCardView, layoutParams);
+                viewHolder.mVideosContainer.addView(newCardView);
 
                 ViewHolder.CardViewHolder cardViewHolder =
                         new ViewHolder.CardViewHolder(newCardView);
                 cardViewHolder.mImageView.setDefaultImageResId(R.drawable.ic_launcher);
+                cardViewHolder.mImageView.setErrorImageResId(R.drawable.ic_launcher);
+                cardViewHolder.mImageView.getLayoutParams().height =
+                        mItemsCountAndDimension.getDimension() * 9 / 16;
                 cardViews.add(cardViewHolder);
             }
             viewHolder.mCardViews = cardViews;

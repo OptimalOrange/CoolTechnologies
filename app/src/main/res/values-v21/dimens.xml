@@ -1,0 +1,4 @@
+<resources>
+    <dimen name="card_margin">2dp</dimen>
+    <dimen name="card_margin_half">1dp</dimen>
+</resources>
