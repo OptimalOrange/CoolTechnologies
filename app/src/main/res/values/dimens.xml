@@ -6,4 +6,11 @@
     <dimen name="card_margin_half">4dp</dimen>
     <dimen name="card_width_min">120dp</dimen>
     <dimen name="card_width_max">200dp</dimen>
+
+    <dimen name="favorite_item_padding_left_right">15dp</dimen>
+    <dimen name="favorite_item_padding_top_bottom">10dp</dimen>
+    <dimen name="favorite_item_height">100dp</dimen>
+    <dimen name="favorite_item_title_left">10dp</dimen>
+    <dimen name="favorite_item_duration_margin_right">3dp</dimen>
+    <dimen name="favorite_hint_text_size">17sp</dimen>
 </resources>

@@ -7,6 +7,7 @@ import com.optimalorange.cooltechnologies.ui.fragment.ListCategoriesFragment;
 import com.optimalorange.cooltechnologies.ui.fragment.ListVideosFragment;
 import com.optimalorange.cooltechnologies.ui.fragment.PromotionFragment;
 import com.optimalorange.cooltechnologies.util.Const;
+import com.optimalorange.cooltechnologies.util.NetworkChecker;
 import com.optimalorange.cooltechnologies.util.Utils;
 import com.viewpagerindicator.TitlePageIndicator;
 
@@ -19,6 +20,7 @@ import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 
 public class MainActivity extends Activity {
@@ -113,7 +115,12 @@ public class MainActivity extends Activity {
                     Utils.saveString(this, "user_token", "");
                     mIsLogin = false;
                     invalidateOptionsMenu();
+                    Toast.makeText(this, R.string.action_logout_success, Toast.LENGTH_SHORT).show();
                 } else {
+                    if (!NetworkChecker.isConnected(this)) {
+                        Toast.makeText(this, R.string.action_login_no_net, Toast.LENGTH_SHORT).show();
+                        return true;
+                    }
                     Intent intent = new Intent(this, LoginActivity.class);
                     startActivityForResult(intent, Const.REQUEST_CODE_LOGIN_ACTIVITY);
                 }
@@ -205,6 +212,10 @@ public class MainActivity extends Activity {
                 if (resultCode == Const.RESULT_CODE_SUCCESS_LOGIN_ACTIVITY) {
                     mIsLogin = true;
                     invalidateOptionsMenu();
+                    Fragment fragment = getFragmentManager().findFragmentByTag("android:switcher:" + R.id.pager + ":" + mPager.getCurrentItem());
+                    if (fragment instanceof FavoriteFragment) {
+                        ((FavoriteFragment)fragment).getJsonData();
+                    }
                 }
         }
     }

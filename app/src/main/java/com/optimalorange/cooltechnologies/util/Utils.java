@@ -52,7 +52,7 @@ public class Utils {
         if (minutes < 10) {
             minutesStr = "0" + minutes;
         } else {
-            minutesStr = "" + mimutes;
+            minutesStr = "" + minutes;
         }
         if (seconds < 10) {
             secondsStr = "0" + seconds;

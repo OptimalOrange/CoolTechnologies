@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="horizontal"
+              android:weightSum="3"
+              android:background="@color/favorite_item_background"
+              android:paddingTop="@dimen/favorite_item_padding_top_bottom"
+              android:paddingBottom="@dimen/favorite_item_padding_top_bottom"
+              android:paddingLeft="@dimen/favorite_item_padding_left_right"
+              android:paddingRight="@dimen/favorite_item_padding_left_right"
+              android:layout_width="match_parent"
+              android:layout_height="@dimen/favorite_item_height">
+    <RelativeLayout
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            >
+        <ImageView
+                android:id="@+id/thumbnail"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_launcher"
+                android:scaleType="fitXY"
+                />
+        <TextView
+                android:id="@+id/duration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentBottom="true"
+                android:layout_marginRight="@dimen/favorite_item_duration_margin_right"
+                android:textStyle="bold"
+                android:textColor="@color/text_white"
+                android:text="0:00"
+                />
+    </RelativeLayout>
+
+    <LinearLayout
+            android:layout_weight="2"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="@dimen/favorite_item_title_left"
+            android:weightSum="1"
+            android:gravity="center_vertical"
+            android:orientation="vertical"
+            >
+        <TextView
+                android:layout_weight="0.5"
+                android:id="@+id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:text="这是标题"
+                />
+
+    </LinearLayout>
+
+</LinearLayout>

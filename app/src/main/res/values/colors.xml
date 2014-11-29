@@ -34,4 +34,6 @@
     <!-- alpha: 50% -->
     <color name="scrim_white">#80FFFFFF</color>
 
+    <color name="favorite_item_background">#f0f0f0</color>
+
 </resources>
