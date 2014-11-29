@@ -47,10 +47,22 @@ public class Utils {
         int hours = duration / (60 * 60);
         int minutes = (duration - hours * (60 * 60)) / 60;
         int seconds = duration - hours * (60 * 60) - minutes * 60;
-        if (hours == 0) {
-            return minutes + ":" + seconds;
+        String minutesStr = "", secondsStr = "";
+        String hoursStr = "" + hours;
+        if (minutes < 10) {
+            minutesStr = "0" + minutes;
         } else {
-            return hours + ":" + minutes + ":" + seconds;
+            minutesStr = "" + mimutes;
+        }
+        if (seconds < 10) {
+            secondsStr = "0" + seconds;
+        } else {
+            secondsStr = "" + seconds;
+        }
+        if (hours == 0) {
+            return minutesStr + ":" + secondsStr;
+        } else {
+            return hoursStr + ":" + minutesStr + ":" + secondsStr;
         }
     }
 }
