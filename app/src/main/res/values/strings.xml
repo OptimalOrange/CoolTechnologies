@@ -21,7 +21,7 @@
     <string name="no_connection_message">网络连接不可用，现在打开网络开关？</string>
 
     <!-- list_item_videos -->
-    <string name="view_count">播放：%1$s</string>
+    <string name="view_count">播放:%1$s</string>
 
     <string name="favorite_hint_no_login">没有登录不能查看收藏哦~~</string>
     <string name="favorite_hint_no_net">没有网络看不到收藏的啦~~</string>

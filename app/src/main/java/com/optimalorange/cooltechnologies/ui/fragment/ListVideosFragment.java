@@ -150,8 +150,9 @@ public class ListVideosFragment extends Fragment {
             //显示视频标题
             vh.title.setText(mVideos.get(position).getTitle());
             //显示播放次数（这里使用字符串资源格式化）
-            vh.viewCount.setText(Utils.formatViewCount(mVideos.get(position).getView_count(),
-                    parent.getContext()));
+            vh.viewCount.setText(String.format(getString(R.string.view_count),
+                    Utils.formatViewCount(mVideos.get(position).getView_count(),
+                            parent.getContext())));
 
             return convertView;
         }
