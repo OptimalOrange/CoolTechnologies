@@ -36,6 +36,7 @@ import java.util.List;
  * Created by WANGZHENGZE on 2014/11/20.
  * 分类
  */
+//TODO 执行网络操作前，检查网络可用性
 //TODO 刷新
 //TODO reCreat问题（横竖屏转换、接完电话回来时）
 public class ListCategoriesFragment extends Fragment {
