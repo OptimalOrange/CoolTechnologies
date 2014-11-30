@@ -4,9 +4,9 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.NetworkImageView;
 import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.entity.Video;
+import com.optimalorange.cooltechnologies.ui.VideoCardViewBuilder;
 import com.optimalorange.cooltechnologies.util.ItemsCountCalculater;
 import com.optimalorange.cooltechnologies.util.Utils;
 import com.optimalorange.cooltechnologies.util.VideosRequest;
@@ -219,23 +219,20 @@ public class ListCategoriesFragment extends Fragment {
         }
 
         private void addCardViews(LayoutInflater inflater, ViewHolder viewHolder) {
-            ArrayList<ViewHolder.CardViewHolder> cardViews =
+            ArrayList<VideoCardViewBuilder.VideoCardViewHolder> cardViews =
                     new ArrayList<>(mItemsCountAndDimension.getCount());
             for (int i = mItemsCountAndDimension.getCount(); i >= 1; i--) {
-                CardView newCardView = (CardView) inflater.inflate(
-                        R.layout.list_item_categories_card,
-                        viewHolder.mVideosContainer,
-                        false);
-                newCardView.getLayoutParams().width = mItemsCountAndDimension.getDimension();
+                VideoCardViewBuilder.VideoCardViewHolder cardViewHolder =
+                        new VideoCardViewBuilder()
+                                .setInflater(inflater)
+                                .setParent(viewHolder.mVideosContainer)
+                                .setAttachToParent(true)
+                                .setWidth(mItemsCountAndDimension.getDimension())
+                                .build();
 
-                viewHolder.mVideosContainer.addView(newCardView);
-
-                ViewHolder.CardViewHolder cardViewHolder =
-                        new ViewHolder.CardViewHolder(newCardView);
                 cardViewHolder.mImageView.setDefaultImageResId(R.drawable.ic_launcher);
                 cardViewHolder.mImageView.setErrorImageResId(R.drawable.ic_launcher);
-                cardViewHolder.mImageView.getLayoutParams().height =
-                        mItemsCountAndDimension.getDimension() * 9 / 16;
+
                 cardViews.add(cardViewHolder);
             }
             viewHolder.mCardViews = cardViews;
@@ -252,7 +249,7 @@ public class ListCategoriesFragment extends Fragment {
             int cardViewsIndex = 0;
             if (videos != null) {
                 for (Video video : videos) {
-                    ViewHolder.CardViewHolder currentCardView =
+                    VideoCardViewBuilder.VideoCardViewHolder currentCardView =
                             holder.mCardViews.get(cardViewsIndex);
                     currentCardView.mImageView.setImageUrl(
                             video.getThumbnail_v2(), mVolleySingleton.getImageLoader());
@@ -288,35 +285,13 @@ public class ListCategoriesFragment extends Fragment {
 
         public LinearLayout mVideosContainer;
 
-        public ArrayList<CardViewHolder> mCardViews;
+        public ArrayList<VideoCardViewBuilder.VideoCardViewHolder> mCardViews;
 
         public ViewHolder(View itemView) {
             super(itemView);
             mItemView = itemView;
             mTitleTextView = (TextView) itemView.findViewById(R.id.title_textView);
             mVideosContainer = (LinearLayout) itemView.findViewById(R.id.videos_container);
-        }
-
-        public static class CardViewHolder {
-
-            public CardView mRootCardView;
-
-            public NetworkImageView mImageView;
-
-            public TextView mViewCountView;
-
-            public TextView mdurationView;
-
-            public TextView mTextView;
-
-            public CardViewHolder(CardView rootCardView) {
-                mRootCardView = rootCardView;
-                mImageView =
-                        (NetworkImageView) rootCardView.findViewById(R.id.card_thumbnail_image);
-                mViewCountView = (TextView) rootCardView.findViewById(R.id.view_count);
-                mdurationView = (TextView) rootCardView.findViewById(R.id.duration);
-                mTextView = (TextView) rootCardView.findViewById(R.id.card_simple_title);
-            }
         }
     }
 
