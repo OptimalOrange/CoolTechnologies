@@ -18,7 +18,8 @@
         <ImageView
                 android:id="@+id/thumbnail"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/d_item_height"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
                 android:contentDescription="@android:string/no"
                 android:scaleType="fitXY"
                 />
@@ -27,6 +28,7 @@
                 android:id="@+id/title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:padding="@dimen/space_3dp"
                 android:singleLine="true"
                 android:ellipsize="end"
                 android:textSize="@dimen/text_size_small"
@@ -40,6 +42,7 @@
                     android:id="@+id/view_count"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:padding="@dimen/space_3dp"
                     android:textSize="@dimen/text_size_micro"
                     android:textColor="@color/text_black"
                     />
@@ -47,6 +50,7 @@
                     android:id="@+id/duration"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:padding="@dimen/space_3dp"
                     android:layout_alignParentRight="true"
                     android:textSize="@dimen/text_size_micro"
                     android:textColor="@color/text_black"
