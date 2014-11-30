@@ -36,6 +36,8 @@ import java.util.List;
  * Created by WANGZHENGZE on 2014/11/20.
  * 分类
  */
+//TODO 刷新
+//TODO reCreat问题（横竖屏转换、接完电话回来时）
 public class ListCategoriesFragment extends Fragment {
 
     /**
@@ -212,7 +214,6 @@ public class ListCategoriesFragment extends Fragment {
             // create a new view
             LayoutInflater inflater = LayoutInflater.from(parent.getContext());
             View v = inflater.inflate(R.layout.list_item_categories, parent, false);
-            //TODO set the view's size, margins, paddings and layout parameters
             ViewHolder viewHolder = new ViewHolder(v);
             addCardViews(inflater, viewHolder);
             return viewHolder;
