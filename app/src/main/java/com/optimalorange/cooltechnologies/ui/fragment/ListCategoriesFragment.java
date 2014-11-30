@@ -29,7 +29,6 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -257,8 +256,8 @@ public class ListCategoriesFragment extends Fragment {
                             holder.mCardViews.get(cardViewsIndex);
                     currentCardView.mImageView.setImageUrl(
                             video.getThumbnail_v2(), mVolleySingleton.getImageLoader());
-                    currentCardView.mViewCountView.setText(
-                            NumberFormat.getIntegerInstance().format(video.getView_count()));
+                    currentCardView.mViewCountView.setText(Utils.formatViewCount(
+                            video.getView_count(), currentCardView.mViewCountView.getContext()));
                     currentCardView.mdurationView.setText(
                             Utils.getDurationString(video.getDuration()));
                     currentCardView.mTextView.setText(video.getTitle());
