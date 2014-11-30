@@ -15,8 +15,8 @@
             android:id="@+id/grid_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:item_margin="8dp"
-            app:column_count="@integer/column_count"
+            android:numColumns="auto_fit"
+            app:item_margin="@dimen/gridview_margin"
             />
 
 </RelativeLayout>

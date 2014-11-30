@@ -21,4 +21,7 @@
     <dimen name="favorite_item_duration_margin_right">3dp</dimen>
     <dimen name="favorite_hint_text_size">17sp</dimen>
 
+    <dimen name="gridview_margin">6dp</dimen>
+    <dimen name="d_item_height">120dp</dimen>
+
 </resources>
