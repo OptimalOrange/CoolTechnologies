@@ -1,4 +1,4 @@
-package com.optimalorange.cooltechnologies.ui;
+package com.optimalorange.cooltechnologies.ui.view;
 
 import com.android.volley.toolbox.NetworkImageView;
 import com.optimalorange.cooltechnologies.R;
@@ -12,6 +12,9 @@ import java.util.LinkedList;
 
 public class VideoCardViewBuilder {
 
+    /**
+     * 创建的VideoCardView中图片的默认长宽比：16:9
+     */
     public static final double DEFAULT_ASPECT_RATIO = 16.0 / 9.0;
 
     private LayoutInflater mInflater;
