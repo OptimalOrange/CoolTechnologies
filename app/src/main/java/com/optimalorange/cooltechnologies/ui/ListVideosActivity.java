@@ -9,8 +9,7 @@ import android.os.Bundle;
 public class ListVideosActivity extends Activity {
 
     /**
-     * 应当显示的Video的genre（类型，示例：手机）
-     * <p>
+     * 应当显示的Video的genre（类型，示例：手机）<br/>
      * Type: String
      */
     public static final String EXTRA_KEY_GENRE =
@@ -29,7 +28,7 @@ public class ListVideosActivity extends Activity {
             if (extras.containsKey(EXTRA_KEY_GENRE)) {
                 String genre = extras.getString(EXTRA_KEY_GENRE);
                 setTitle(genre);
-                //TODO set videosFragment's arguments
+                arguments.putString(ListVideosFragment.ARGUMENT_KEY_GENRE, genre);
             }
             videosFragment.setArguments(arguments);
         }

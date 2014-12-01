@@ -28,11 +28,23 @@ import java.util.List;
  */
 public class ListVideosFragment extends Fragment {
 
+    // Fragment初始化参数
+    /**
+     * 应当显示的Video的genre（类型，示例：手机）<br/>
+     * Type: String
+     *
+     * @see #newInstance(String genre)
+     */
+    public static final String ARGUMENT_KEY_GENRE =
+            ListVideosFragment.class.getName() + ".argument.KEY_GENRE";
+
     private static final String CATEGORY_LABEL_OF_TECH = "科技";
 
     private String mYoukuClientId;
 
     private VolleySingleton mVolleySingleton;
+
+    private String mGenre;
 
     private StaggeredGridView mGridView;
 
@@ -46,8 +58,7 @@ public class ListVideosFragment extends Fragment {
      * @return VideoRequest
      */
     private VideosRequest buildQueryVideosRequest() {
-
-        return new VideosRequest.Builder()
+        VideosRequest.Builder builder = new VideosRequest.Builder()
                 .setClient_id(mYoukuClientId)
                 .setCategory(CATEGORY_LABEL_OF_TECH)
                 .setPeriod(VideosRequest.Builder.PERIOD.WEEK)
@@ -65,13 +76,35 @@ public class ListVideosFragment extends Fragment {
                     public void onErrorResponse(VolleyError error) {
                         error.printStackTrace();
                     }
-                })
-                .build();
+                });
+        if (mGenre != null) {
+            builder.setGenre(mGenre);
+        }
+        return builder.build();
+    }
+
+    /**
+     * 用于 创建设置有指定参数的新{@link ListVideosFragment}实例的 工厂方法
+     *
+     * @param genre 应当显示的Video的genre（类型，示例：手机）
+     * @return 设置有指定参数的新实例
+     * @see #ARGUMENT_KEY_GENRE
+     */
+    public static ListVideosFragment newInstance(String genre) {
+        ListVideosFragment fragment = new ListVideosFragment();
+        Bundle arguments = new Bundle();
+        arguments.putString(ARGUMENT_KEY_GENRE, genre);
+        fragment.setArguments(arguments);
+        return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // 如果设置过Arguments，应用之
+        if (getArguments() != null) {
+            mGenre = getArguments().getString(ARGUMENT_KEY_GENRE);
+        }
         mYoukuClientId = getString(R.string.youku_client_id);
         mVolleySingleton = VolleySingleton.getInstance(getActivity());
         mVolleySingleton.addToRequestQueue(buildQueryVideosRequest());
