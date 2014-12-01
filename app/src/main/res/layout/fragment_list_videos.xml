@@ -10,13 +10,20 @@
                 tools:context=".ui.fragment.ListVideosFragment"
         >
 
-    <com.etsy.android.grid.StaggeredGridView
-            xmlns:app="http://schemas.android.com/apk/res-auto"
-            android:id="@+id/grid_view"
+    <com.optimalorange.cooltechnologies.ui.view.PullRefreshLayout
+            android:id="@+id/pull_refresh_layout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:numColumns="auto_fit"
-            app:item_margin="@dimen/gridview_margin"
-            />
+            android:layout_height="match_parent">
+
+        <com.etsy.android.grid.StaggeredGridView
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/grid_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:numColumns="auto_fit"
+                app:item_margin="@dimen/gridview_margin"
+                />
+
+    </com.optimalorange.cooltechnologies.ui.view.PullRefreshLayout>
 
 </RelativeLayout>

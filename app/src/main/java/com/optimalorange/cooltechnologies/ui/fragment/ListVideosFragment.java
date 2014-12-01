@@ -6,6 +6,7 @@ import com.android.volley.toolbox.ImageLoader;
 import com.etsy.android.grid.StaggeredGridView;
 import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.entity.Video;
+import com.optimalorange.cooltechnologies.ui.view.PullRefreshLayout;
 import com.optimalorange.cooltechnologies.util.Utils;
 import com.optimalorange.cooltechnologies.util.VideosRequest;
 import com.optimalorange.cooltechnologies.util.VolleySingleton;
@@ -47,6 +48,8 @@ public class ListVideosFragment extends Fragment {
     private String mGenre;
 
     private StaggeredGridView mGridView;
+
+    private PullRefreshLayout mPullRefreshLayout;
 
     private ItemsAdapter mItemsAdapter;
 
@@ -122,8 +125,21 @@ public class ListVideosFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         mGridView = (StaggeredGridView) view.findViewById(R.id.grid_view);
+        mPullRefreshLayout = (PullRefreshLayout) view.findViewById(R.id.pull_refresh_layout);
         mItemsAdapter = new ItemsAdapter(mListVideos, mVolleySingleton.getImageLoader());
         mGridView.setAdapter(mItemsAdapter);
+
+        mPullRefreshLayout.setOnRefreshListener(new PullRefreshLayout.OnRefreshListener(){
+            @Override
+            public void onRefresh() {
+                mPullRefreshLayout.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        mPullRefreshLayout.setRefreshing(false);
+                    }
+                }, 4000);
+            }
+        });
     }
 
     /**
