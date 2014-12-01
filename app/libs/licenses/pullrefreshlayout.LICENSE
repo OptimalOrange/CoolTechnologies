@@ -1,3 +1,14 @@
+Notice for:
+    PullRefreshLayout.java
+    CirclesDrawable.java
+    RefreshDrawable.java
+    R.styleable.PullRefreshLayout_colors
+
+Some of these files are modified in this project. see git log
+------------------------------------------------------------
+
+
+
 The MIT License (MIT)
 
 Copyright (c) 2014 baoyongzhang
