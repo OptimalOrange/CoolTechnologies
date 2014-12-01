@@ -3,7 +3,7 @@ package com.optimalorange.cooltechnologies.ui;
 import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.ui.fragment.FavoriteFragment;
 import com.optimalorange.cooltechnologies.ui.fragment.HistoryFragment;
-import com.optimalorange.cooltechnologies.ui.fragment.ListCategoriesFragment;
+import com.optimalorange.cooltechnologies.ui.fragment.ListGenresFragment;
 import com.optimalorange.cooltechnologies.ui.fragment.ListVideosFragment;
 import com.optimalorange.cooltechnologies.ui.fragment.PromotionFragment;
 import com.optimalorange.cooltechnologies.util.Const;
@@ -188,7 +188,7 @@ public class MainActivity extends Activity {
                     newFragment = new ListVideosFragment();
                     break;
                 case FRAGMENT_ID_CATEGORIES:
-                    newFragment = new ListCategoriesFragment();
+                    newFragment = new ListGenresFragment();
                     break;
                 case FRAGMENT_ID_FAVORITE:
                     newFragment = new FavoriteFragment();

@@ -41,7 +41,7 @@ import java.util.List;
 //TODO 执行网络操作前，检查网络可用性
 //TODO 刷新
 //TODO reCreat问题（横竖屏转换、接完电话回来时）
-public class ListCategoriesFragment extends Fragment {
+public class ListGenresFragment extends Fragment {
 
     /**
      * @see {@literal http://open.youku.com/docs/api_searches.html#schemas-video-category}

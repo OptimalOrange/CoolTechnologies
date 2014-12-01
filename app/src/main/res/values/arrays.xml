@@ -3,7 +3,7 @@
 
     <string-array name="titles_in_cool_videos">
         <item>@string/popular</item>
-        <item>@string/categories</item>
+        <item>@string/genre</item>
         <item>@string/favorites</item>
         <item>@string/watched</item>
         <item>@string/promotion</item>
