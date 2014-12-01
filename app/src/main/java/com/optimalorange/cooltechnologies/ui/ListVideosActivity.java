@@ -1,0 +1,43 @@
+package com.optimalorange.cooltechnologies.ui;
+
+import com.optimalorange.cooltechnologies.R;
+import com.optimalorange.cooltechnologies.ui.fragment.ListVideosFragment;
+
+import android.app.Activity;
+import android.os.Bundle;
+
+public class ListVideosActivity extends Activity {
+
+    /**
+     * 应当显示的Video的genre（类型，示例：手机）
+     * <p>
+     * Type: String
+     */
+    public static final String EXTRA_GENRE = MainActivity.class.getName() + ".extra.GENRE";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_list_videos);
+
+        ListVideosFragment videosFragment = new ListVideosFragment();
+        // 如果Intent有Extras，应用之
+        Bundle extras = getIntent().getExtras();
+        if(extras != null) {
+            Bundle arguments = new Bundle();
+            if (extras.containsKey(EXTRA_GENRE)) {
+                String genre = extras.getString(EXTRA_GENRE);
+                setTitle(genre);
+                //TODO set videosFragment's arguments
+            }
+            videosFragment.setArguments(arguments);
+        }
+        // 添加videosFragment
+        if (savedInstanceState == null) {
+            getFragmentManager().beginTransaction()
+                    .add(R.id.container, videosFragment)
+                    .commit();
+        }
+    }
+
+}
