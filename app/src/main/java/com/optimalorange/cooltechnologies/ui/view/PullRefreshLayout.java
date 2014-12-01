@@ -19,6 +19,9 @@ import android.view.animation.Transformation;
 import android.widget.AbsListView;
 import android.widget.ImageView;
 
+/**
+ * from "https://github.com/baoyongzhang/android-PullRefreshLayout"
+ */
 public class PullRefreshLayout extends ViewGroup {
 
     private static final float DECELERATE_INTERPOLATION_FACTOR = 2f;
@@ -214,10 +217,10 @@ public class PullRefreshLayout extends ViewGroup {
                 float slingshotDist = mSpinnerFinalOffset;
                 float tensionSlingshotPercent = Math.max(0,
                         Math.min(extraOS, slingshotDist * 2) / slingshotDist);
-                float tensionPercent = (float) ((tensionSlingshotPercent / 4) - Math.pow(
-                        (tensionSlingshotPercent / 4), 2)) * 2f;
+                float tensionPercent = (float) (tensionSlingshotPercent / 4 - Math.pow(
+                        tensionSlingshotPercent / 4, 2)) * 2f;
                 float extraMove = (slingshotDist) * tensionPercent * 2;
-                int targetY = (int) ((slingshotDist * dragPercent) + extraMove);
+                int targetY = (int) (slingshotDist * dragPercent + extraMove);
                 if (mRefreshView.getVisibility() != View.VISIBLE) {
                     mRefreshView.setVisibility(View.VISIBLE);
                 }
@@ -290,7 +293,7 @@ public class PullRefreshLayout extends ViewGroup {
         public void applyTransformation(float interpolatedTime, Transformation t) {
             int targetTop = 0;
             int endTarget = (int) mSpinnerFinalOffset;
-            targetTop = (mFrom + (int) ((endTarget - mFrom) * interpolatedTime));
+            targetTop = mFrom + (int) ((endTarget - mFrom) * interpolatedTime);
             int offset = targetTop - mTarget.getTop();
             setTargetOffsetTop(offset, false /* requires update */);
         }
@@ -336,10 +339,8 @@ public class PullRefreshLayout extends ViewGroup {
         public void onAnimationEnd(Animation animation) {
             if (mRefreshing) {
                 mRefreshDrawable.start();
-                if (mNotify) {
-                    if (mListener != null) {
-                        mListener.onRefresh();
-                    }
+                if (mNotify && mListener != null) {
+                    mListener.onRefresh();
                 }
             } else {
                 mRefreshDrawable.stop();
@@ -454,6 +455,7 @@ public class PullRefreshLayout extends ViewGroup {
     }
 
     public static interface OnRefreshListener {
+
         public void onRefresh();
     }
 }

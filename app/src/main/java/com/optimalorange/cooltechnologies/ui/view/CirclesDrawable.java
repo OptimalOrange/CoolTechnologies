@@ -12,6 +12,9 @@ import android.util.TypedValue;
 
 import java.security.InvalidParameterException;
 
+/**
+ * from "https://github.com/baoyongzhang/android-PullRefreshLayout"
+ */
 public class CirclesDrawable extends RefreshDrawable implements Runnable {
 
     private static final float MAX_LEVEL = 10000;
@@ -309,5 +312,4 @@ public class CirclesDrawable extends RefreshDrawable implements Runnable {
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp,
                 getContext().getResources().getDisplayMetrics());
     }
-} 
-
+}

@@ -6,6 +6,9 @@ import android.graphics.PixelFormat;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 
+/**
+ * from "https://github.com/baoyongzhang/android-PullRefreshLayout"
+ */
 public abstract class RefreshDrawable extends Drawable implements Drawable.Callback, Animatable {
 
     private PullRefreshLayout mRefreshLayout;
