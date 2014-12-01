@@ -6,6 +6,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.entity.Video;
+import com.optimalorange.cooltechnologies.ui.ListVideosActivity;
 import com.optimalorange.cooltechnologies.ui.view.VideoCardViewBuilder;
 import com.optimalorange.cooltechnologies.util.ItemsCountCalculater;
 import com.optimalorange.cooltechnologies.util.Utils;
@@ -17,6 +18,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Fragment;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
@@ -247,6 +249,14 @@ public class ListCategoriesFragment extends Fragment {
             // - replace the contents of the view with that element
             final String title = mGenres.first.get(position);
             holder.mTitleTextView.setText(title);
+            holder.mTitleTextView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(v.getContext(), ListVideosActivity.class);
+                    intent.putExtra(ListVideosActivity.EXTRA_KEY_GENRE, title);
+                    startActivity(intent);
+                }
+            });
             List<Video> videos = mGenres.second.get(position);
             int cardViewsIndex = 0;
             if (videos != null) {

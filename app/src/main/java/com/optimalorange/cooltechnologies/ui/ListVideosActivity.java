@@ -13,7 +13,8 @@ public class ListVideosActivity extends Activity {
      * <p>
      * Type: String
      */
-    public static final String EXTRA_GENRE = MainActivity.class.getName() + ".extra.GENRE";
+    public static final String EXTRA_KEY_GENRE =
+            ListVideosActivity.class.getName() + ".extra.KEY_GENRE";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,10 +24,10 @@ public class ListVideosActivity extends Activity {
         ListVideosFragment videosFragment = new ListVideosFragment();
         // 如果Intent有Extras，应用之
         Bundle extras = getIntent().getExtras();
-        if(extras != null) {
+        if (extras != null) {
             Bundle arguments = new Bundle();
-            if (extras.containsKey(EXTRA_GENRE)) {
-                String genre = extras.getString(EXTRA_GENRE);
+            if (extras.containsKey(EXTRA_KEY_GENRE)) {
+                String genre = extras.getString(EXTRA_KEY_GENRE);
                 setTitle(genre);
                 //TODO set videosFragment's arguments
             }
