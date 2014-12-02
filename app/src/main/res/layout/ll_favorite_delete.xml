@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content">
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="@dimen/favorite_delete_padding_top_bottom"
+            android:paddingBottom="@dimen/favorite_delete_padding_top_bottom"
+            android:paddingLeft="@dimen/favorite_delete_padding_left_right"
+            android:paddingRight="@dimen/favorite_delete_padding_left_right"
+            android:text="@string/favorite_delete"
+            android:textColor="@color/text_white"
+            android:textSize="@dimen/favorite_delete_text_size"
+            android:background="@drawable/cycle_delete_background"
+            android:alpha="0.8"
+            />
+    <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/bubble_arrow"
+            android:layout_gravity="center_horizontal"
+            android:alpha="0.8"
+            />
+
+</LinearLayout>

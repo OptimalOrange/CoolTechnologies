@@ -15,12 +15,16 @@
             android:visibility="gone"
             />
 
-    <ListView
-            android:id="@+id/favorite_list"
+    <com.optimalorange.cooltechnologies.ui.view.PullRefreshLayout
+            android:id="@+id/pull_refresh_layout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone"
-            />
-
+            android:layout_height="match_parent">
+        <ListView
+                android:id="@+id/favorite_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"
+                />
+    </com.optimalorange.cooltechnologies.ui.view.PullRefreshLayout>
 
 </LinearLayout>

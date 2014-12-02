@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content">
+    <TextView
+            android:id="@+id/tv_more"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/text_black"
+            android:text="@string/favorite_view_more"
+            android:background="@color/favorite_item_background"
+            android:paddingTop="@dimen/favorite_view_more_padding_top_bottom"
+            android:paddingBottom="@dimen/favorite_view_more_padding_top_bottom"
+            android:gravity="center"
+            />
+
+</LinearLayout>
