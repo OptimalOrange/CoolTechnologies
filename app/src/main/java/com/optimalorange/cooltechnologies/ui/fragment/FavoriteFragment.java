@@ -78,6 +78,7 @@ public class FavoriteFragment extends Fragment {
     private int total = 0;
     private int currentCount = 0;
     private TextView tvViewMore;
+    private View footer;
 
     private Handler mHandler = new Handler() {
         @Override
@@ -91,6 +92,9 @@ public class FavoriteFragment extends Fragment {
                             adapter.notifyDataSetChanged();
                             removeWindowView();
                             Toast.makeText(getActivity(), getString(R.string.favorite_delete_success), Toast.LENGTH_SHORT).show();
+                            if (favoriteBeans.size() == 0) {
+                                setHint(R.string.favorite_no_fav);
+                            }
                         }
                     });
                     break;
@@ -119,10 +123,14 @@ public class FavoriteFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         mVolleySingleton = VolleySingleton.getInstance(getActivity());
         favoriteListView = (ListView) view.findViewById(R.id.favorite_list);
+        favoriteListView.setVisibility(View.GONE);
         mTvHint = (TextView) v.findViewById(R.id.favorite_hint);
         favoriteBeans = new ArrayList<>();
         adapter = new FavoriteAdapter(getActivity(), favoriteBeans, mVolleySingleton.getImageLoader());
-        View footer = LayoutInflater.from(getActivity()).inflate(R.layout.ll_favorite_footer, null);
+        if (footer != null) {
+            favoriteListView.removeFooterView(footer);
+        }
+        footer = LayoutInflater.from(getActivity()).inflate(R.layout.ll_favorite_footer, null);
         tvViewMore = (TextView) footer.findViewById(R.id.tv_more);
         tvViewMore.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -206,10 +214,14 @@ public class FavoriteFragment extends Fragment {
     }
 
     public void getJsonData() {
+        if (favoriteListView.getVisibility() == View.GONE) {
+            setHint(R.string.favorite_new_loading);
+        }
         String token = Utils.getString(getActivity(), "user_token", "");
         if (!token.isEmpty()) {
             if (!NetworkChecker.isConnected(getActivity())) {
                 setHint(R.string.favorite_hint_no_net);
+                return;
             }
             RequestQueue requestQueue = Volley.newRequestQueue(getActivity());
             String url = FAVORITE_BASE_URL + "?client_id=" + getString(R.string.youku_client_id) + "&access_token=" + token + "&page=" + page + "&count=10";
@@ -229,19 +241,22 @@ public class FavoriteFragment extends Fragment {
                             } else {
                                 tvViewMore.setEnabled(true);
                                 tvViewMore.setText(getString(R.string.favorite_view_more));
-                                page ++;
+                                page++;
                             }
                             for (int i = 0; i < videoArray.length(); i++) {
                                 JSONObject itemObject = videoArray.getJSONObject(i);
                                 FavoriteBean bean = new FavoriteBean(itemObject);
                                 favoriteBeans.add(bean);
                             }
+                            adapter.notifyDataSetChanged();
+                            favoriteListView.setVisibility(View.VISIBLE);
+                            if (mTvHint.getVisibility() == View.VISIBLE) {
+                                mTvHint.setVisibility(View.GONE);
+                            }
+                        } else {
+                            setHint(R.string.favorite_no_fav);
                         }
-                        adapter.notifyDataSetChanged();
-                        favoriteListView.setVisibility(View.VISIBLE);
-                        if (mTvHint.getVisibility() == View.VISIBLE) {
-                            mTvHint.setVisibility(View.GONE);
-                        }
+
                         refreshLayout.setRefreshing(false);
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -263,6 +278,12 @@ public class FavoriteFragment extends Fragment {
         mTvHint.setText(getString(res));
         mTvHint.setVisibility(View.VISIBLE);
         favoriteListView.setVisibility(View.GONE);
+        mTvHint.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getNewData();
+            }
+        });
     }
 
 

@@ -61,7 +61,13 @@ public class LoginActivity extends Activity implements Handler.Callback {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 Log.e("wzz login", "url=" + url);
-                if (url.startsWith(MY_URL) && !url.contains("error")) {
+                if (url.startsWith(MY_URL)) {
+                    if (url.contains("error")) {
+                        Message msg = new Message();
+                        msg.what = GET_TOKEN_ERROR;
+                        handleMessage(msg);
+                        return true;
+                    }
                     loginWebView.setVisibility(View.GONE);
                     String params[] = url.split("\\?");
                     String code = params[1].substring(5, 37);
