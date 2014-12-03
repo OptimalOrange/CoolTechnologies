@@ -30,6 +30,7 @@ import java.util.List;
 public class ListVideosFragment extends Fragment {
 
     // Fragment初始化参数
+
     /**
      * 应当显示的Video的genre（类型，示例：手机）<br/>
      * Type: String
@@ -46,6 +47,8 @@ public class ListVideosFragment extends Fragment {
     private VolleySingleton mVolleySingleton;
 
     private String mGenre;
+
+    private int mPage = 1;
 
     private StaggeredGridView mGridView;
 
@@ -64,13 +67,20 @@ public class ListVideosFragment extends Fragment {
         VideosRequest.Builder builder = new VideosRequest.Builder()
                 .setClient_id(mYoukuClientId)
                 .setCategory(CATEGORY_LABEL_OF_TECH)
+                .setPage(mPage)
                 .setPeriod(VideosRequest.Builder.PERIOD.WEEK)
+                .setOrderby(VideosRequest.Builder.ORDER_BY.VIEW_COUNT)
                 .setResponseListener(new Response.Listener<List<Video>>() {
                     @Override
                     public void onResponse(List<Video> videos) {
                         for (Video mVideo : videos) {
                             mListVideos.add(mVideo);
-                            mItemsAdapter.notifyDataSetChanged();
+                            if (mItemsAdapter != null) {
+                                mItemsAdapter.notifyDataSetChanged();
+                            }
+                            if (mPullRefreshLayout != null) {
+                                mPullRefreshLayout.setRefreshing(false);
+                            }
                         }
                     }
                 })
@@ -80,6 +90,11 @@ public class ListVideosFragment extends Fragment {
                         error.printStackTrace();
                     }
                 });
+
+        //为下一次请求获取Video翻页
+        mPage++;
+
+        //如果没设置mGenre就用默认的，如果设置了mGenre就请求相应的类型Video
         if (mGenre != null) {
             builder.setGenre(mGenre);
         }
@@ -129,15 +144,16 @@ public class ListVideosFragment extends Fragment {
         mItemsAdapter = new ItemsAdapter(mListVideos, mVolleySingleton.getImageLoader());
         mGridView.setAdapter(mItemsAdapter);
 
-        mPullRefreshLayout.setOnRefreshListener(new PullRefreshLayout.OnRefreshListener(){
+        mPullRefreshLayout.setOnRefreshListener(new PullRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                mPullRefreshLayout.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        mPullRefreshLayout.setRefreshing(false);
-                    }
-                }, 4000);
+                //每次刷新时去除所有Video
+                mListVideos.clear();
+                //重新请求第一页的内容
+                mPage = 1;
+                mItemsAdapter.notifyDataSetChanged();
+                //开始请求刷新Video
+                mVolleySingleton.addToRequestQueue(buildQueryVideosRequest());
             }
         });
     }
@@ -202,6 +218,11 @@ public class ListVideosFragment extends Fragment {
             vh.viewCount.setText(String.format(getString(R.string.view_count),
                     Utils.formatViewCount(mVideos.get(position).getView_count(),
                             parent.getContext())));
+
+            //当滑到末尾的位置时加载更多Video
+            if (position == mListVideos.size() - 2) {
+                mVolleySingleton.addToRequestQueue(buildQueryVideosRequest());
+            }
 
             return convertView;
         }
