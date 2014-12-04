@@ -31,6 +31,12 @@
             android:name=".ui.ListVideosActivity"
             android:label="@string/popular" />
 
+        <activity
+            android:name=".ui.PlayVideoActivity"
+            android:label="@string/play_video"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:hardwareAccelerated="true" />
+
     </application>
 
 </manifest>
