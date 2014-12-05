@@ -120,8 +120,8 @@ public class PlayVideoActivity extends Activity {
 
     @Override
     protected void onPause() {
-        super.onPause();
         mWebView.onPause();
+        super.onPause();
     }
 
     @Override
