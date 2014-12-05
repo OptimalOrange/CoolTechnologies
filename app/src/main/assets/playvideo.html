@@ -21,11 +21,7 @@
 <div id="youkuplayer"></div>
 <script type="text/javascript" src="http://player.youku.com/jsapi"></script>
 <script type="text/javascript">
-player = new YKU.Player('youkuplayer',{
-styleid: '0',
-client_id: 'client_id',
-vid: 'XODMyNTQ5MTI0'
-});
+player = new YKU.Player('youkuplayer', JSON.parse(webAppInterface.getYoukuPlayerArguments()));
 </script>
 
 </body>

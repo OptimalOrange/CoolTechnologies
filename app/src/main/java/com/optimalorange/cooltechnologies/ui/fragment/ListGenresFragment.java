@@ -7,6 +7,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.entity.Video;
 import com.optimalorange.cooltechnologies.ui.ListVideosActivity;
+import com.optimalorange.cooltechnologies.ui.PlayVideoActivity;
 import com.optimalorange.cooltechnologies.ui.view.VideoCardViewBuilder;
 import com.optimalorange.cooltechnologies.util.ItemsCountCalculater;
 import com.optimalorange.cooltechnologies.util.Utils;
@@ -41,6 +42,7 @@ import java.util.List;
 //TODO 执行网络操作前，检查网络可用性
 //TODO 刷新
 //TODO reCreat问题（横竖屏转换、接完电话回来时）
+//TODO 点击时的视觉表现（动画等）
 public class ListGenresFragment extends Fragment {
 
     /**
@@ -260,7 +262,7 @@ public class ListGenresFragment extends Fragment {
             List<Video> videos = mGenres.second.get(position);
             int cardViewsIndex = 0;
             if (videos != null) {
-                for (Video video : videos) {
+                for (final Video video : videos) {
                     VideoCardViewBuilder.VideoCardViewHolder currentCardView =
                             holder.mCardViews.get(cardViewsIndex);
                     currentCardView.mImageView.setImageUrl(
@@ -270,6 +272,14 @@ public class ListGenresFragment extends Fragment {
                     currentCardView.mdurationView.setText(
                             Utils.getDurationString(video.getDuration()));
                     currentCardView.mTextView.setText(video.getTitle());
+                    currentCardView.mRootCardView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Intent intent = new Intent(v.getContext(), PlayVideoActivity.class);
+                            intent.putExtra(PlayVideoActivity.EXTRA_KEY_VIDEO_ID, video.getId());
+                            startActivity(intent);
+                        }
+                    });
                     currentCardView.mRootCardView.setVisibility(CardView.VISIBLE);
                     cardViewsIndex++;
                 }
