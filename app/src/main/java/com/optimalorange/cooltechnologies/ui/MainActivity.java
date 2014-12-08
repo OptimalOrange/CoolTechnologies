@@ -110,6 +110,9 @@ public class MainActivity extends Activity {
         switch (id) {
             case R.id.action_settings:
                 return true;
+            case R.id.action_search:
+                startActivity(new Intent(this, SearchActivity.class));
+                return true;
             case R.id.action_login:
                 if (mIsLogin) {
                     Utils.saveString(this, "user_token", "");
@@ -118,7 +121,8 @@ public class MainActivity extends Activity {
                     Toast.makeText(this, R.string.action_logout_success, Toast.LENGTH_SHORT).show();
                 } else {
                     if (!NetworkChecker.isConnected(this)) {
-                        Toast.makeText(this, R.string.action_login_no_net, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, R.string.action_login_no_net, Toast.LENGTH_SHORT)
+                                .show();
                         return true;
                     }
                     Intent intent = new Intent(this, LoginActivity.class);
@@ -212,9 +216,10 @@ public class MainActivity extends Activity {
                 if (resultCode == Const.RESULT_CODE_SUCCESS_LOGIN_ACTIVITY) {
                     mIsLogin = true;
                     invalidateOptionsMenu();
-                    Fragment fragment = getFragmentManager().findFragmentByTag("android:switcher:" + R.id.pager + ":" + mPager.getCurrentItem());
+                    Fragment fragment = getFragmentManager().findFragmentByTag(
+                            "android:switcher:" + R.id.pager + ":" + mPager.getCurrentItem());
                     if (fragment instanceof FavoriteFragment) {
-                        ((FavoriteFragment)fragment).getJsonData();
+                        ((FavoriteFragment) fragment).getJsonData();
                     }
                 }
         }

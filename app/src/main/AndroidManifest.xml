@@ -1,41 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.optimalorange.cooltechnologies" >
+          package="com.optimalorange.cooltechnologies">
 
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
-        android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
-        android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+            android:allowBackup="true"
+            android:icon="@drawable/ic_launcher"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme">
 
         <!-- 优酷client_id -->
-        <meta-data android:name="client_id" android:value="@string/youku_client_id" />
+        <meta-data
+                android:name="client_id"
+                android:value="@string/youku_client_id"/>
 
         <activity
-            android:name=".ui.MainActivity"
-            android:label="@string/app_name"
-            >
+                android:name=".ui.MainActivity"
+                android:label="@string/app_name">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN"/>
 
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.LoginActivity" />
+        <activity android:name=".ui.LoginActivity"/>
 
         <activity
-            android:name=".ui.ListVideosActivity"
-            android:label="@string/popular" />
+                android:name=".ui.ListVideosActivity"
+                android:label="@string/popular"/>
 
         <activity
-            android:name=".ui.PlayVideoActivity"
-            android:label="@string/play_video"
-            android:configChanges="keyboardHidden|orientation|screenSize"
-            android:hardwareAccelerated="true" />
+                android:name=".ui.PlayVideoActivity"
+                android:configChanges="keyboardHidden|orientation|screenSize"
+                android:hardwareAccelerated="true"
+                android:label="@string/play_video"/>
+
+        <activity
+                android:name=".ui.SearchActivity"
+                android:label="@string/search"
+                android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH"/>
+            </intent-filter>
+            <meta-data
+                    android:name="android.app.searchable"
+                    android:resource="@xml/searchable"/>
+        </activity>
 
     </application>
 

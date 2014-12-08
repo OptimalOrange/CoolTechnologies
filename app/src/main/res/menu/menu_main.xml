@@ -9,6 +9,11 @@
             android:showAsAction="always|withText"
             />
 
+    <item android:id="@+id/action_search"
+          android:title="@string/action_search"
+          android:icon="@android:drawable/ic_menu_search"
+          android:showAsAction="collapseActionView|ifRoom"/>
+
     <item
             android:id="@+id/action_settings"
             android:title="@string/action_settings"

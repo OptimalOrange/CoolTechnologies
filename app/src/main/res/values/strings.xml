@@ -7,14 +7,16 @@
     <string name="favorites">收藏</string>
     <string name="watched">历史</string>
     <string name="promotion">推荐</string>
-    <string name="action_settings">设置</string>
 
+    <string name="action_settings">设置</string>
     <string name="action_login">登录</string>
     <string name="action_logout">登出</string>
     <string name="action_login_success">登录成功！</string>
     <string name="action_logout_success">登出成功！</string>
     <string name="action_login_fail">登录失败！</string>
     <string name="action_login_no_net">没有网络不能登录的啦~~</string>
+    <string name="action_search">搜索</string>
+    <string name="search_hint">输入关键词搜索</string>
 
     <!-- NetworkChecker -->
     <string name="no_connection_title">打开网络设置</string>
@@ -22,7 +24,6 @@
 
     <!-- list_item_videos -->
     <string name="view_count">播放:%1$s</string>
-
     <string name="favorite_hint_no_login">没有登录不能查看收藏哦~~</string>
     <string name="favorite_delete_no_login">没有登录不能删除收藏哦~~</string>
     <string name="favorite_hint_no_net">没有网络看不到收藏的啦~~点我可以刷新</string>
@@ -39,5 +40,8 @@
     <!-- PlayVideoActivity -->
     <string name="play_video">播放</string>
     <string name="loading_video">加载视频…</string>
+
+    <!-- SearchActivity -->
+    <string name="search">搜索</string>
 
 </resources>
