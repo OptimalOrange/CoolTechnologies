@@ -90,10 +90,11 @@ public class MainActivity extends Activity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem loginItem = menu.findItem(R.id.action_login);
         if (mIsLogin) {
-            menu.getItem(0).setIcon(R.drawable.logout);
+            loginItem.setIcon(R.drawable.logout);
         } else {
-            menu.getItem(0).setIcon(R.drawable.login);
+            loginItem.setIcon(R.drawable.login);
         }
         return super.onPrepareOptionsMenu(menu);
     }
