@@ -2,18 +2,19 @@ package com.optimalorange.cooltechnologies.ui;
 
 import com.optimalorange.cooltechnologies.R;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
-
-import java.util.LinkedList;
+import android.webkit.WebChromeClient;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
 import name.cpr.VideoEnabledWebChromeClient;
 import name.cpr.VideoEnabledWebView;
@@ -34,7 +35,16 @@ public class PlayVideoActivity extends Activity {
     private static final String PATH_PLAY_VIDEO_HTML = "file:///android_asset/playvideo.html";
 
     /** {@link #PATH_PLAY_VIDEO_HTML}中用到的{@link WebAppInterface WebAppInterface}实例名 */
-    private static final String JAVASCRIPT_INTERFACE_NAME = "webAppInterface";
+    private static final String JAVASCRIPT_INTERFACE_GENERIC = "webAppInterface";
+
+    /**
+     * {@link #PATH_PLAY_VIDEO_HTML}中用到的
+     * {@link WebAppFullscreenToggleSwitch WebAppFullscreenToggleSwitch}实例名
+     */
+    private static final String JAVASCRIPT_INTERFACE_FULLSCREEN_TOGGLE_SWITCH =
+            "webAppFullscreenToggleSwitch";
+
+    private LinearLayout mNonVideoLayout;
 
     private VideoEnabledWebView mWebView;
 
@@ -56,24 +66,34 @@ public class PlayVideoActivity extends Activity {
 
         setContentView(R.layout.activity_play_video);
 
-        mWebView = (VideoEnabledWebView) findViewById(R.id.webView);
-        View nonVideoLayout = findViewById(R.id.nonVideoLayout);
+        mWebView = new VideoEnabledWebView(this);
+        mNonVideoLayout = (LinearLayout) findViewById(R.id.nonVideoLayout);
         ViewGroup videoLayout = (ViewGroup) findViewById(R.id.videoLayout);
         View loadingView =
                 getLayoutInflater().inflate(R.layout.view_loading_video, videoLayout, false);
 
-        // 设置WebView的lyaout_height
-        int widthPixels = getResources().getDisplayMetrics().widthPixels;
-        int heightPixels = getResources().getDisplayMetrics().heightPixels;
-        int desirableHeight = (int) Math.ceil(widthPixels * 9.0 / 16);
-        if (desirableHeight <= heightPixels) {
-            mWebView.getLayoutParams().height = desirableHeight;
-        } else {
-            mWebView.getLayoutParams().height = heightPixels;
-        }
+        addWebViewToNonVideoLayout();
 
-        mChromeClient =
-                new VideoEnabledWebChromeClient(nonVideoLayout, videoLayout, loadingView, mWebView);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+            mChromeClient = new VideoEnabledWebChromeClient(
+                    mNonVideoLayout, videoLayout, loadingView, mWebView);
+        } else {
+            final WebAppFullscreenToggleSwitch fullscreenToggleSwitch =
+                    new WebAppFullscreenToggleSwitch();
+            //TODO 分析解决安全问题
+            mWebView.addJavascriptInterface(
+                    fullscreenToggleSwitch, JAVASCRIPT_INTERFACE_FULLSCREEN_TOGGLE_SWITCH);
+            mChromeClient = new VideoEnabledWebChromeClient(
+                    mNonVideoLayout, videoLayout, loadingView, mWebView) {
+                @Override
+                public void onHideCustomView() {
+                    super.onHideCustomView();
+                    if (fullscreenToggleSwitch.mVideoViewContainer != null) {
+                        fullscreenToggleSwitch.callback.onCustomViewHidden();
+                    }
+                }
+            };
+        }
         mChromeClient.setOnToggledFullscreen(
                 new VideoEnabledWebChromeClient.ToggledFullscreenCallback() {
                     @Override
@@ -109,12 +129,11 @@ public class PlayVideoActivity extends Activity {
                 });
         mWebView.setWebChromeClient(mChromeClient);
 
-        WebAppInterface webAppInterface = new WebAppInterface.Builder()
+        WebAppInterface webAppInterface = new WebAppInterface()
                 .setClientId(getString(R.string.youku_client_id))
-                .setVid(vid)
-                .build();
+                .setVid(vid);
         //TODO 分析解决安全问题
-        mWebView.addJavascriptInterface(webAppInterface, JAVASCRIPT_INTERFACE_NAME);
+        mWebView.addJavascriptInterface(webAppInterface, JAVASCRIPT_INTERFACE_GENERIC);
         mWebView.loadUrl(PATH_PLAY_VIDEO_HTML);
     }
 
@@ -144,21 +163,88 @@ public class PlayVideoActivity extends Activity {
         super.onBackPressed();
     }
 
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        // readd webview to update its height
+        if (mNonVideoLayout.indexOfChild(mWebView) >= 0) { // if mWebView is in mNonVideoLayout
+            mNonVideoLayout.removeView(mWebView);
+            addWebViewToNonVideoLayout();
+        }
+    }
+
+    //--------------------------------------------------------------------------
+    // 私有方法
+    //--------------------------------------------------------------------------
+
+    private void addWebViewToNonVideoLayout() {
+        int widthPixels = getResources().getDisplayMetrics().widthPixels;
+        int heightPixels = getResources().getDisplayMetrics().heightPixels;
+        int desirableHeight = (int) Math.ceil(widthPixels * 9.0 / 16);
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                desirableHeight <= heightPixels ? desirableHeight : heightPixels,
+                0 //WebView的layout_weight设为0，评论等其他View的weight非0，让其他View充满剩余空间
+        );
+        mNonVideoLayout.addView(mWebView, 0, layoutParams);
+    }
+
     //--------------------------------------------------------------------------
     // 内部类
     //--------------------------------------------------------------------------
 
     /**
      * {@link android.webkit.WebView WebView}中网页可以访问的本地API，用于设置参数，如
-     * {@link WebAppInterface#getYoukuPlayerArguments() YoukuPlayerArguments}
-     *
-     * @see WebAppInterface.Builder WebAppInterface.Builder
+     * {@link WebAppInterface#getVid() vid}
      */
     private static class WebAppInterface {
 
-        private String mTitle;
+        /** 控制条底色：明；主色板颜色：橘色 */
+        private static final String DEFAULT_STYLE_ID = "8";
 
-        private JSONObject mYoukuPlayerArguments;
+        private String mTitle = "";
+
+        private String mStyleId = DEFAULT_STYLE_ID;
+
+        private String mClientId;
+
+        /** Video ID */
+        private String mVid;
+
+        private boolean mAutoplay = true;
+
+        private boolean mShowRelated = false;
+
+
+        public WebAppInterface setTitle(String title) {
+            mTitle = title;
+            return this;
+        }
+
+        public WebAppInterface setStyleId(String styleId) {
+            mStyleId = styleId;
+            return this;
+        }
+
+        public WebAppInterface setClientId(String clientId) {
+            mClientId = clientId;
+            return this;
+        }
+
+        public WebAppInterface setVid(String vid) {
+            mVid = vid;
+            return this;
+        }
+
+        public WebAppInterface setAutoplay(boolean autoplay) {
+            mAutoplay = autoplay;
+            return this;
+        }
+
+        public WebAppInterface setShowRelated(boolean showRelated) {
+            mShowRelated = showRelated;
+            return this;
+        }
 
         @JavascriptInterface
         public String getTitle() {
@@ -166,88 +252,77 @@ public class PlayVideoActivity extends Activity {
         }
 
         @JavascriptInterface
-        public String getYoukuPlayerArguments() {
-            return mYoukuPlayerArguments.toString();
+        public String getStyleId() {
+            return mStyleId;
         }
 
+        @JavascriptInterface
+        public String getClientId() {
+            return mClientId;
+        }
+
+        @JavascriptInterface
+        public String getVid() {
+            return mVid;
+        }
+
+        @JavascriptInterface
+        public boolean isAutoplay() {
+            return mAutoplay;
+        }
+
+        @JavascriptInterface
+        public boolean isShowRelated() {
+            return mShowRelated;
+        }
+    }
+
+    /**
+     * 在{@link Build.VERSION_CODES#KITKAT}以上版本，点击{@link #PATH_PLAY_VIDEO_HTML}中视屏全屏按钮时，
+     * 触发本类的实例的{@link PlayVideoActivity.WebAppFullscreenToggleSwitch#toggleFullscreen()}方法。
+     */
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    private class WebAppFullscreenToggleSwitch {
+
+        private FrameLayout mVideoViewContainer;
+
+        private final WebChromeClient.CustomViewCallback callback =
+                new WebChromeClient.CustomViewCallback() {
+                    @Override
+                    public void onCustomViewHidden() {
+                        if (mVideoViewContainer != null) {
+                            mVideoViewContainer.removeView(mWebView);
+                            addWebViewToNonVideoLayout();
+                            // release memory
+                            mVideoViewContainer = null;
+                        }
+                    }
+                };
+
         /**
-         * 用于构建{@link WebAppInterface WebAppInterface}的Builder
+         * 触发全屏与非全屏状态间的切换。
          */
-        public static class Builder {
-
-            private static final String DEFAULT_TITLE = "";
-
-            /** 控制条底色：明；主色板颜色：橘色 */
-            private static final String DEFAULT_STYLE_ID = "8";
-
-            private String mTitle = DEFAULT_TITLE;
-
-            private String mStyleId = DEFAULT_STYLE_ID;
-
-            private String mClientId;
-
-            /** Video ID */
-            private String mVid;
-
-            private Boolean mAutoplay;
-
-            private Boolean mShowRelated;
-
-            public Builder setTitle(String title) {
-                mTitle = title;
-                return this;
-            }
-
-            public Builder setStyleId(String styleId) {
-                mStyleId = styleId;
-                return this;
-            }
-
-            public Builder setClientId(String clientId) {
-                mClientId = clientId;
-                return this;
-            }
-
-            public Builder setVid(String vid) {
-                mVid = vid;
-                return this;
-            }
-
-            public WebAppInterface build() {
-                assertState("build()");
-                WebAppInterface result = new WebAppInterface();
-                result.mTitle = this.mTitle;
-                JSONObject youkuPlayerArguments = new JSONObject();
-                try {
-                    youkuPlayerArguments
-                            .put("styleid", mStyleId)
-                            .put("client_id", mClientId)
-                            .put("vid", mVid);
-                    if (mAutoplay != null) {
-                        youkuPlayerArguments.put("autoplay", mAutoplay.booleanValue());
+        @JavascriptInterface
+        public void toggleFullscreen() {
+            PlayVideoActivity.this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (!mChromeClient.isVideoFullscreen()) {
+                        assert mVideoViewContainer == null;
+                        mNonVideoLayout.removeView(mWebView);
+                        mVideoViewContainer = new FrameLayout(PlayVideoActivity.this);
+                        mVideoViewContainer.addView(
+                                mWebView,
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.MATCH_PARENT
+                        );
+                        mChromeClient.onShowCustomView(mVideoViewContainer, callback);
+                    } else {
+                        mChromeClient.onHideCustomView();
+                        // see also WebAppFullscreenToggleSwitch.callback
                     }
-                    if (mShowRelated != null) {
-                        youkuPlayerArguments.put("show_related", mShowRelated.booleanValue());
-                    }
-                } catch (JSONException e) {
-                    throw new Error("json format error", e);
                 }
-                result.mYoukuPlayerArguments = youkuPlayerArguments;
-                return result;
-            }
-
-            private void assertState(String where) {
-                LinkedList<String> nulls = new LinkedList<>();
-                if (mClientId == null) {
-                    nulls.add("clientId");
-                }
-                if (mVid == null) {
-                    nulls.add("Vid");
-                }
-                if (nulls.size() > 0) {
-                    throw new IllegalStateException("Please set " + nulls + " before " + where);
-                }
-            }
+            });
         }
     }
 

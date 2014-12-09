@@ -15,13 +15,32 @@
         height: 100%;
         }
     </style>
+    <script type="text/javascript">
+    var onPlayStart = function() {
+        if (typeof webAppFullscreenToggleSwitch === 'object' &&
+        typeof webAppFullscreenToggleSwitch.toggleFullscreen === 'function') {
+            document.getElementsByClassName("x-fullscreen")[0].addEventListener("click", function(){
+                webAppFullscreenToggleSwitch.toggleFullscreen();
+            });
+        }
+    };
+    </script>
 </head>
 
 <body>
 <div id="youkuplayer"></div>
 <script type="text/javascript" src="http://player.youku.com/jsapi"></script>
 <script type="text/javascript">
-player = new YKU.Player('youkuplayer', JSON.parse(webAppInterface.getYoukuPlayerArguments()));
+player = new YKU.Player('youkuplayer', {
+    styleid: webAppInterface.getStyleId(),
+    client_id: webAppInterface.getClientId(),
+    vid: webAppInterface.getVid(),
+    autoplay: webAppInterface.isAutoplay(),
+    show_related: webAppInterface.isShowRelated(),
+    events: {
+        onPlayStart: onPlayStart
+    }
+});
 </script>
 
 </body>
