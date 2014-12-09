@@ -6,16 +6,19 @@ import com.android.volley.toolbox.ImageLoader;
 import com.etsy.android.grid.StaggeredGridView;
 import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.entity.Video;
+import com.optimalorange.cooltechnologies.ui.PlayVideoActivity;
 import com.optimalorange.cooltechnologies.ui.view.PullRefreshLayout;
 import com.optimalorange.cooltechnologies.util.Utils;
 import com.optimalorange.cooltechnologies.util.VideosRequest;
 import com.optimalorange.cooltechnologies.util.VolleySingleton;
 
 import android.app.Fragment;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -154,6 +157,16 @@ public class ListVideosFragment extends Fragment {
                 mItemsAdapter.notifyDataSetChanged();
                 //开始请求刷新Video
                 mVolleySingleton.addToRequestQueue(buildQueryVideosRequest());
+            }
+        });
+
+        //item点击监听，点击进行播放视频
+        mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Intent mIntent = new Intent(getActivity(), PlayVideoActivity.class);
+                mIntent.putExtra(PlayVideoActivity.EXTRA_KEY_VIDEO_ID, mListVideos.get(i).getId());
+                startActivity(mIntent);
             }
         });
     }
