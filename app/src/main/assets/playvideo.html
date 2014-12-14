@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- used by PlayVideoActivity -->
 <html lang="zh">
 
 <head>
@@ -16,7 +17,8 @@
         }
     </style>
     <script type="text/javascript">
-    var onPlayStart = function() {
+    var onPlayerReady = function() {
+        // 点击全屏按钮时，触发全屏切换事件。目前在KITKAT(4.4)以上才添加webAppFullscreenToggleSwitch接口。
         if (typeof webAppFullscreenToggleSwitch === 'object' &&
         typeof webAppFullscreenToggleSwitch.toggleFullscreen === 'function') {
             document.getElementsByClassName("x-fullscreen")[0].addEventListener("click", function(){
@@ -24,6 +26,14 @@
             });
         }
     };
+    var onPlayStart = function() {
+        //TODO bug:因为YKU.Player的onPlayStart事件实际上在按下（加载player后第一次播放前屏幕中央的）播放按钮时发生，而不是真的在开始第一次播放前发生，所以总是在PlayVideoActivity把pauseRequested设为true之前（按下播放按钮时）就运行到这了，所以目前pauseRequested状态变量 **无效**
+        //BUG重现方法：初始化播放器后第一次播放前，点击播放按钮再（在正式播放前）按HOME按钮，回到主屏，YKU.Player仍会在后台播放
+        if (webAppInterface.isPauseRequested()) {
+            player.pauseVideo();
+            //webAppInterface.onAcceptPauseRequest();
+        }
+    }
     </script>
 </head>
 
@@ -38,6 +48,7 @@ player = new YKU.Player('youkuplayer', {
     autoplay: webAppInterface.isAutoplay(),
     show_related: webAppInterface.isShowRelated(),
     events: {
+        onPlayerReady: onPlayerReady,
         onPlayStart: onPlayStart
     }
 });
