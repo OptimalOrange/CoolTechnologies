@@ -49,8 +49,6 @@ public class PlayVideoActivity extends Activity {
 
     private VideoEnabledWebView mWebView;
 
-    private WebAppInterface mWebAppInterface;
-
     private VideoEnabledWebChromeClient mChromeClient;
 
 
@@ -134,27 +132,25 @@ public class PlayVideoActivity extends Activity {
                 });
         mWebView.setWebChromeClient(mChromeClient);
 
-        mWebAppInterface = new WebAppInterface()
+        WebAppInterface webAppInterface = new WebAppInterface()
                 .setClientId(getString(R.string.youku_client_id))
                 .setVid(vid);
         //TODO 分析解决安全问题
-        mWebView.addJavascriptInterface(mWebAppInterface, JAVASCRIPT_INTERFACE_GENERIC);
+        mWebView.addJavascriptInterface(webAppInterface, JAVASCRIPT_INTERFACE_GENERIC);
         mWebView.loadUrl(PATH_PLAY_VIDEO_HTML);
     }
 
     @Override
     protected void onPause() {
-        mWebAppInterface.setPauseRequested(true);
-        mWebView.onPause(); // important! ↑setPauseRequested must happens-before ←mWebView.onPause()
+        mWebView.onPause();
+        mWebView.pauseTimers();
         super.onPause();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        // 实际上，因为目前只会检测一次PauseRequested，↓此行代码没有实际意义。
-        // 当前仅仅是让PauseRequested状态值与实际相符而已。
-        mWebAppInterface.setPauseRequested(false);
+        mWebView.resumeTimers();
         mWebView.onResume();
     }
 
@@ -224,10 +220,7 @@ public class PlayVideoActivity extends Activity {
         /** 控制条底色：明；主色板颜色：橘色 */
         private static final String DEFAULT_STYLE_ID = "8";
 
-        /** 请求Web页面中的JS player暂停播放（状态变量） */
         // important! must be **volatile**
-        private volatile boolean mPauseRequested = false;
-
         private volatile String mTitle = "";
 
         private volatile String mStyleId = DEFAULT_STYLE_ID;
@@ -240,11 +233,6 @@ public class PlayVideoActivity extends Activity {
         private volatile boolean mAutoplay = true;
 
         private volatile boolean mShowRelated = false;
-
-        public WebAppInterface setPauseRequested(boolean pauseRequested) {
-            mPauseRequested = pauseRequested;
-            return this;
-        }
 
         public WebAppInterface setTitle(String title) {
             mTitle = title;
@@ -277,11 +265,6 @@ public class PlayVideoActivity extends Activity {
         }
 
         @JavascriptInterface
-        public boolean isPauseRequested() {
-            return mPauseRequested;
-        }
-
-        @JavascriptInterface
         public String getTitle() {
             return mTitle;
         }
@@ -310,17 +293,6 @@ public class PlayVideoActivity extends Activity {
         public boolean isShowRelated() {
             return mShowRelated;
         }
-
-//        @JavascriptInterface
-//        public void onAcceptPauseRequest() {
-//            PlayVideoActivity.this.runOnUiThread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    mWebView.onPause();
-//                }
-//            });
-//        }
-
     }
 
     /**
