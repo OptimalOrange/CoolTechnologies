@@ -111,9 +111,6 @@ public class MainActivity extends Activity {
         switch (id) {
             case R.id.action_settings:
                 return true;
-            case R.id.action_search:
-                startActivity(new Intent(this, SearchActivity.class));
-                return true;
             case R.id.action_login:
                 if (mIsLogin) {
                     Utils.saveString(this, "user_token", "");

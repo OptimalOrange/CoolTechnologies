@@ -7,6 +7,7 @@ import com.etsy.android.grid.StaggeredGridView;
 import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.entity.Video;
 import com.optimalorange.cooltechnologies.ui.PlayVideoActivity;
+import com.optimalorange.cooltechnologies.ui.SearchActivity;
 import com.optimalorange.cooltechnologies.ui.view.PullRefreshLayout;
 import com.optimalorange.cooltechnologies.util.Utils;
 import com.optimalorange.cooltechnologies.util.VideosRequest;
@@ -16,6 +17,9 @@ import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -129,6 +133,8 @@ public class ListVideosFragment extends Fragment {
         mYoukuClientId = getString(R.string.youku_client_id);
         mVolleySingleton = VolleySingleton.getInstance(getActivity());
         mVolleySingleton.addToRequestQueue(buildQueryVideosRequest());
+
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -171,12 +177,32 @@ public class ListVideosFragment extends Fragment {
         });
     }
 
+    @Override
+    public void setHasOptionsMenu(boolean hasMenu){
+        super.setHasOptionsMenu(hasMenu);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater){
+        inflater.inflate(R.menu.menu_fragment_list_videos, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        switch (item.getItemId()){
+            case R.id.action_search:
+                startActivity(new Intent(getActivity(), SearchActivity.class));
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
     /**
      * 热门视频的图片墙的适配器
      *
      * @author Zhou Peican
      */
-    public class ItemsAdapter extends BaseAdapter {
+    private class ItemsAdapter extends BaseAdapter {
 
         private LinkedList<Video> mVideos;
 
