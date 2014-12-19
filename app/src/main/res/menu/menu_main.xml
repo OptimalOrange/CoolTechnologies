@@ -2,18 +2,22 @@
       xmlns:tools="http://schemas.android.com/tools"
       tools:context=".ui.MainActivity">
 
-    <item
-            android:id="@+id/action_login"
-            android:title="@string/action_login"
-            android:icon="@drawable/login"
-            android:showAsAction="always|withText"
-            />
+    <group
+            android:menuCategory="container">
 
-    <item
-            android:id="@+id/action_settings"
-            android:title="@string/action_settings"
-            android:orderInCategory="100"
-            android:showAsAction="never"
-            />
+        <item
+                android:id="@+id/action_login"
+                android:title="@string/action_login"
+                android:icon="@drawable/login"
+                android:showAsAction="ifRoom|withText"
+                />
+        <item
+                android:id="@+id/action_settings"
+                android:title="@string/action_settings"
+                android:orderInCategory="100"
+                android:showAsAction="never"
+                />
+
+    </group>
 
 </menu>
