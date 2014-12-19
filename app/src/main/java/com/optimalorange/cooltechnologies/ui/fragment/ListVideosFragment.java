@@ -7,24 +7,25 @@ import com.etsy.android.grid.StaggeredGridView;
 import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.entity.Video;
 import com.optimalorange.cooltechnologies.ui.PlayVideoActivity;
-import com.optimalorange.cooltechnologies.ui.SearchActivity;
 import com.optimalorange.cooltechnologies.ui.view.PullRefreshLayout;
 import com.optimalorange.cooltechnologies.util.Utils;
 import com.optimalorange.cooltechnologies.util.VideosRequest;
 import com.optimalorange.cooltechnologies.util.VolleySingleton;
 
 import android.app.Fragment;
+import android.app.SearchManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.SearchView;
 import android.widget.TextView;
 
 import java.util.LinkedList;
@@ -179,17 +180,16 @@ public class ListVideosFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater){
-        inflater.inflate(R.menu.menu_fragment_list_videos, menu);
-    }
+        inflater.inflate(R.menu.menu_search, menu);
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item){
-        switch (item.getItemId()){
-            case R.id.action_search:
-                startActivity(new Intent(getActivity(), SearchActivity.class));
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
+        // Associate searchable configuration with the SearchView
+        SearchManager searchManager =
+                (SearchManager) getActivity().getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView =
+                (SearchView) menu.findItem(R.id.action_search).getActionView();
+        searchView.setSearchableInfo(
+                searchManager.getSearchableInfo(getActivity().getComponentName()));
+
     }
 
     /**
