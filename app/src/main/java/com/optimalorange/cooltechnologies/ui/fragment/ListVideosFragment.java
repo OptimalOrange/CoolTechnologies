@@ -178,11 +178,6 @@ public class ListVideosFragment extends Fragment {
     }
 
     @Override
-    public void setHasOptionsMenu(boolean hasMenu){
-        super.setHasOptionsMenu(hasMenu);
-    }
-
-    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater){
         inflater.inflate(R.menu.menu_fragment_list_videos, menu);
     }
