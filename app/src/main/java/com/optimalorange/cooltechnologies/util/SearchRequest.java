@@ -344,13 +344,13 @@ public class SearchRequest extends JsonRequest<List<Video>> {
             COMMENT_COUNT,
             /** 总引用 */
             REFERENCE_COUNT,
-            /** 收藏时间 */
-            FAVORITE_TIME,
             /** 总收藏数 */
-            FAVORITE_COUNT;
+            FAVORITE_COUNT,
+            /** 相关度 */
+            RELEVANCE;
 
             public String toString() {
-                return name().toLowerCase(Locale.US).replace('-', '_');
+                return name().toLowerCase(Locale.US).replace('_', '-');
             }
         }
 

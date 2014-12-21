@@ -274,7 +274,7 @@ public class VideosRequest extends JsonRequest<List<Video>> {
             FAVORITE_COUNT;
 
             public String toString() {
-                return name().toLowerCase(Locale.US).replace('-', '_');
+                return name().toLowerCase(Locale.US).replace('_', '-');
             }
         }
     }
