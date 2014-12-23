@@ -9,6 +9,8 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.entity.FavoriteBean;
+import com.optimalorange.cooltechnologies.ui.ListVideosActivity;
+import com.optimalorange.cooltechnologies.ui.PlayVideoActivity;
 import com.optimalorange.cooltechnologies.ui.view.PullRefreshLayout;
 import com.optimalorange.cooltechnologies.util.NetworkChecker;
 import com.optimalorange.cooltechnologies.util.Utils;
@@ -29,6 +31,7 @@ import org.json.JSONObject;
 
 import android.app.Fragment;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.os.Handler;
@@ -124,6 +127,14 @@ public class FavoriteFragment extends Fragment {
         mVolleySingleton = VolleySingleton.getInstance(getActivity());
         favoriteListView = (ListView) view.findViewById(R.id.favorite_list);
         favoriteListView.setVisibility(View.GONE);
+        favoriteListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(getActivity(), PlayVideoActivity.class);
+                intent.putExtra(PlayVideoActivity.EXTRA_KEY_VIDEO_ID, favoriteBeans.get(position).videoId);
+                startActivity(intent);
+            }
+        });
         mTvHint = (TextView) v.findViewById(R.id.favorite_hint);
         favoriteBeans = new ArrayList<>();
         adapter = new FavoriteAdapter(getActivity(), favoriteBeans, mVolleySingleton.getImageLoader());
