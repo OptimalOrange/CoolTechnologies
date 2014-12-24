@@ -5,6 +5,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.etsy.android.grid.StaggeredGridView;
 import com.optimalorange.cooltechnologies.R;
+import com.optimalorange.cooltechnologies.entity.FavoriteBean;
 import com.optimalorange.cooltechnologies.entity.Video;
 import com.optimalorange.cooltechnologies.util.SearchRequest;
 import com.optimalorange.cooltechnologies.util.Utils;
@@ -100,7 +101,8 @@ public class SearchActivity extends Activity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Intent mIntent = new Intent(SearchActivity.this, PlayVideoActivity.class);
-                mIntent.putExtra(PlayVideoActivity.EXTRA_KEY_VIDEO_ID, mListVideos.get(i).getId());
+                FavoriteBean favoriteBean = new FavoriteBean(mListVideos.get(i));
+                mIntent.putExtra(PlayVideoActivity.EXTRA_KEY_VIDEO_ID, favoriteBean);
                 startActivity(mIntent);
             }
         });

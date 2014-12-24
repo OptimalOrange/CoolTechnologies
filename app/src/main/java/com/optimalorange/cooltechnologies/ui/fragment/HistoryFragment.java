@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -43,11 +44,12 @@ public class HistoryFragment extends Fragment {
     private View deleteView = null;
 
     private boolean mIsDelButtonCreate;
+    private boolean mIsCreated;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (v == null) {
-            v = inflater.inflate(R.layout.fragment_favorite, container, false);
+            v = inflater.inflate(R.layout.fragment_history, container, false);
         }
         favoriteBeans = DBManager.getInstance(getActivity()).getAllHistory();
         return v;
@@ -134,14 +136,17 @@ public class HistoryFragment extends Fragment {
         adapter = new FavoriteAdapter(getActivity(), favoriteBeans, mVolleySingleton.getImageLoader());
         favoriteListView.setAdapter(adapter);
         favoriteListView.setVisibility(View.VISIBLE);
+        mIsCreated = true;
         isNoHistory();
     }
 
     public void refreshData() {
         if (favoriteBeans != null) {
-            favoriteBeans = DBManager.getInstance(getActivity()).getAllHistory();
+            favoriteBeans.clear();
+            favoriteBeans.addAll(DBManager.getInstance(getActivity()).getAllHistory());
             if (adapter != null) {
                 adapter.notifyDataSetChanged();
+                isNoHistory();
             }
         }
     }
@@ -158,6 +163,7 @@ public class HistoryFragment extends Fragment {
             setHint(R.string.history_no_history);
         } else {
             mTvHint.setVisibility(View.GONE);
+            favoriteListView.setVelocityScale(View.VISIBLE);
         }
     }
 
@@ -165,5 +171,18 @@ public class HistoryFragment extends Fragment {
         mTvHint.setText(getString(res));
         mTvHint.setVisibility(View.VISIBLE);
         favoriteListView.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        //显示的时候判断有没有走onCreated，没有判断是否有列表，没有则刷新列表。
+        if (isVisibleToUser) {
+            if (mIsCreated) {
+                mIsCreated = false;
+            } else {
+                refreshData();
+            }
+        }
     }
 }
