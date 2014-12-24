@@ -1,6 +1,7 @@
 package com.optimalorange.cooltechnologies.ui;
 
 import com.optimalorange.cooltechnologies.R;
+import com.optimalorange.cooltechnologies.ui.fragment.ListCommentsFragment;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -60,11 +61,6 @@ public class PlayVideoActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        final String vid = getIntent().getStringExtra(EXTRA_KEY_VIDEO_ID);
-        if (vid == null) {
-            throw new IllegalStateException("Please do intent.putExtra(EXTRA_KEY_VIDEO_ID, vid)");
-        }
-
         setContentView(R.layout.activity_play_video);
 
         mWebView = new VideoEnabledWebView(this);
@@ -74,6 +70,7 @@ public class PlayVideoActivity extends Activity {
                 getLayoutInflater().inflate(R.layout.view_loading_video, videoLayout, false);
 
         addWebViewToNonVideoLayout();
+        addOthersToNonVideoLayout(savedInstanceState);
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
             mChromeClient = new VideoEnabledWebChromeClient(
@@ -134,7 +131,7 @@ public class PlayVideoActivity extends Activity {
 
         WebAppInterface webAppInterface = new WebAppInterface()
                 .setClientId(getString(R.string.youku_client_id))
-                .setVid(vid);
+                .setVid(getVideoId());
         //TODO 分析解决安全问题
         mWebView.addJavascriptInterface(webAppInterface, JAVASCRIPT_INTERFACE_GENERIC);
         mWebView.loadUrl(PATH_PLAY_VIDEO_HTML);
@@ -194,6 +191,14 @@ public class PlayVideoActivity extends Activity {
     // 私有方法
     //--------------------------------------------------------------------------
 
+    private String getVideoId() {
+        final String vid = getIntent().getStringExtra(EXTRA_KEY_VIDEO_ID);
+        if (vid == null) {
+            throw new IllegalStateException("Please do intent.putExtra(EXTRA_KEY_VIDEO_ID, vid)");
+        }
+        return vid;
+    }
+
     private void addWebViewToNonVideoLayout() {
         int widthPixels = getResources().getDisplayMetrics().widthPixels;
         int heightPixels = getResources().getDisplayMetrics().heightPixels;
@@ -204,6 +209,14 @@ public class PlayVideoActivity extends Activity {
                 0 //WebView的layout_weight设为0，评论等其他View的weight非0，让其他View充满剩余空间
         );
         mNonVideoLayout.addView(mWebView, 0, layoutParams);
+    }
+
+    private void addOthersToNonVideoLayout(Bundle savedInstanceState) {
+        if (savedInstanceState == null) {
+            getFragmentManager().beginTransaction()
+                    .add(R.id.others_container, ListCommentsFragment.newInstance(getVideoId()))
+                    .commit();
+        }
     }
 
     //--------------------------------------------------------------------------

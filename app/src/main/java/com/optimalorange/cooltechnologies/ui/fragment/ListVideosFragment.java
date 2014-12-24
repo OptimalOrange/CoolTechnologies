@@ -17,6 +17,7 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -54,6 +55,12 @@ public class ListVideosFragment extends Fragment {
 
     private VolleySingleton mVolleySingleton;
 
+    /**
+     * 应当显示的Video的genre（类型，示例：手机）。null表示显示所有类别的Video。
+     *
+     * @see #ARGUMENT_KEY_GENRE
+     */
+    @Nullable
     private String mGenre;
 
     private int mPage = 1;
@@ -179,7 +186,7 @@ public class ListVideosFragment extends Fragment {
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater){
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_search, menu);
 
         // Associate searchable configuration with the SearchView
