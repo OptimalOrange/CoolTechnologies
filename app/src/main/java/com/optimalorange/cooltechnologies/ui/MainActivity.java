@@ -214,12 +214,25 @@ public class MainActivity extends Activity {
                 if (resultCode == Const.RESULT_CODE_SUCCESS_LOGIN_ACTIVITY) {
                     mIsLogin = true;
                     invalidateOptionsMenu();
-                    Fragment fragment = getFragmentManager().findFragmentByTag(
-                            "android:switcher:" + R.id.pager + ":" + mPager.getCurrentItem());
+                    Fragment fragment = getCurrentFragment();
                     if (fragment instanceof FavoriteFragment) {
                         ((FavoriteFragment) fragment).getJsonData();
                     }
                 }
         }
+    }
+
+    @Override
+    protected void onResume() {
+        Fragment fragment = getCurrentFragment();
+        if (fragment instanceof HistoryFragment) {
+            ((HistoryFragment) fragment).refreshData();
+        }
+        super.onResume();
+    }
+
+    private Fragment getCurrentFragment() {
+        return getFragmentManager().findFragmentByTag(
+                "android:switcher:" + R.id.pager + ":" + mPager.getCurrentItem());
     }
 }

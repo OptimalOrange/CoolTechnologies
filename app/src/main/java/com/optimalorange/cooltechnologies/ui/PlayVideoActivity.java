@@ -2,6 +2,8 @@ package com.optimalorange.cooltechnologies.ui;
 
 import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.ui.fragment.ListCommentsFragment;
+import com.optimalorange.cooltechnologies.entity.FavoriteBean;
+import com.optimalorange.cooltechnologies.sqlite.DBManager;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -192,7 +194,9 @@ public class PlayVideoActivity extends Activity {
     //--------------------------------------------------------------------------
 
     private String getVideoId() {
-        final String vid = getIntent().getStringExtra(EXTRA_KEY_VIDEO_ID);
+        final FavoriteBean favoriteBean = (FavoriteBean) getIntent().getSerializableExtra(EXTRA_KEY_VIDEO_ID);
+        final String vid = favoriteBean.videoId;
+        DBManager.getInstance(this).saveHistory(favoriteBean);
         if (vid == null) {
             throw new IllegalStateException("Please do intent.putExtra(EXTRA_KEY_VIDEO_ID, vid)");
         }

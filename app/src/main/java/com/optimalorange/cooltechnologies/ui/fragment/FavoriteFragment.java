@@ -8,6 +8,7 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.optimalorange.cooltechnologies.R;
+import com.optimalorange.cooltechnologies.adapter.FavoriteAdapter;
 import com.optimalorange.cooltechnologies.entity.FavoriteBean;
 import com.optimalorange.cooltechnologies.ui.ListVideosActivity;
 import com.optimalorange.cooltechnologies.ui.PlayVideoActivity;
@@ -113,6 +114,8 @@ public class FavoriteFragment extends Fragment {
         }
     };
 
+    private boolean mIsDelButtonCreate;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (v == null) {
@@ -131,7 +134,7 @@ public class FavoriteFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(getActivity(), PlayVideoActivity.class);
-                intent.putExtra(PlayVideoActivity.EXTRA_KEY_VIDEO_ID, favoriteBeans.get(position).videoId);
+                intent.putExtra(PlayVideoActivity.EXTRA_KEY_VIDEO_ID, favoriteBeans.get(position));
                 startActivity(intent);
             }
         });
@@ -201,8 +204,20 @@ public class FavoriteFragment extends Fragment {
         favoriteListView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+
+
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    if (deleteView == null) {
+                        mIsDelButtonCreate = true;
+                    } else {
+                        mIsDelButtonCreate = false;
+                        return true;
+                    }
+                }
+
+                if (event.getAction() == MotionEvent.ACTION_UP && deleteView != null && !mIsDelButtonCreate) {
                     removeWindowView();
+                    return true;
                 }
                 return false;
             }
@@ -298,58 +313,6 @@ public class FavoriteFragment extends Fragment {
     }
 
 
-    private class FavoriteAdapter extends BaseAdapter {
-
-        private class ViewHolder {
-            public TextView tvTitle;
-            public TextView tvDuration;
-            public ImageView ivImage;
-        }
-
-        private Context mContext;
-        private ArrayList<FavoriteBean> mFavoriteBeans;
-        private ImageLoader mImageLoader;
-
-        private FavoriteAdapter(Context context, ArrayList<FavoriteBean> favoriteBeans, ImageLoader imageLoader) {
-            mContext = context;
-            mFavoriteBeans = favoriteBeans;
-            mImageLoader = imageLoader;
-        }
-
-        @Override
-        public int getCount() {
-            return mFavoriteBeans.size();
-        }
-
-        @Override
-        public Object getItem(int position) {
-            return mFavoriteBeans.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            ViewHolder viewHolder;
-            if (convertView == null) {
-                convertView = LayoutInflater.from(mContext).inflate(R.layout.list_item_favorite, parent, false);
-                viewHolder = new ViewHolder();
-                viewHolder.ivImage = (ImageView) convertView.findViewById(R.id.thumbnail);
-                viewHolder.tvDuration = (TextView) convertView.findViewById(R.id.duration);
-                viewHolder.tvTitle = (TextView) convertView.findViewById(R.id.title);
-                convertView.setTag(viewHolder);
-            } else {
-                viewHolder = (ViewHolder) convertView.getTag();
-            }
-            mImageLoader.get(mFavoriteBeans.get(position).imageUrl, ImageLoader.getImageListener(viewHolder.ivImage, R.drawable.ic_launcher, R.drawable.ic_launcher));
-            viewHolder.tvTitle.setText(mFavoriteBeans.get(position).title);
-            viewHolder.tvDuration.setText(Utils.getDurationString((int)Float.parseFloat(mFavoriteBeans.get(position).duration)));
-            return convertView;
-        }
-    }
 
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {

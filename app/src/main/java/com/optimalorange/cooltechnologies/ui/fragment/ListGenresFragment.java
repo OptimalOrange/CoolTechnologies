@@ -5,6 +5,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.optimalorange.cooltechnologies.R;
+import com.optimalorange.cooltechnologies.entity.FavoriteBean;
 import com.optimalorange.cooltechnologies.entity.Video;
 import com.optimalorange.cooltechnologies.ui.ListVideosActivity;
 import com.optimalorange.cooltechnologies.ui.PlayVideoActivity;
@@ -276,7 +277,8 @@ public class ListGenresFragment extends Fragment {
                         @Override
                         public void onClick(View v) {
                             Intent intent = new Intent(v.getContext(), PlayVideoActivity.class);
-                            intent.putExtra(PlayVideoActivity.EXTRA_KEY_VIDEO_ID, video.getId());
+                            FavoriteBean favoriteBean = new FavoriteBean(video);
+                            intent.putExtra(PlayVideoActivity.EXTRA_KEY_VIDEO_ID, favoriteBean);
                             startActivity(intent);
                         }
                     });

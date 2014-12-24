@@ -30,12 +30,14 @@
     <string name="favorite_delete_no_net">没有网络不能删除收藏的啦~~</string>
     <string name="favorite_delete">删除</string>
     <string name="favorite_delete_success">删除收藏成功</string>
+    <string name="history_delete_success">删除历史记录成功</string>
     <string name="favorite_delete_fail">删除收藏失败</string>
     <string name="favorite_view_more">点击查看更多</string>
     <string name="favorite_view_more_last">已经是最后一个了</string>
     <string name="favorite_view_more_loading">正在加载中…</string>
     <string name="favorite_no_fav">还没有收藏哦~~点我可以刷新</string>
     <string name="favorite_new_loading">正在加载中，请稍后……</string>
+    <string name="history_no_history">还没有历史记录哦~~</string>
 
     <!-- PlayVideoActivity -->
     <string name="play_video">播放</string>
