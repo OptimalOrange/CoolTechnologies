@@ -9,6 +9,7 @@ import com.optimalorange.cooltechnologies.ui.fragment.PromotionFragment;
 import com.optimalorange.cooltechnologies.util.Const;
 import com.optimalorange.cooltechnologies.util.NetworkChecker;
 import com.optimalorange.cooltechnologies.util.Utils;
+import com.umeng.update.UmengUpdateAgent;
 import com.viewpagerindicator.TitlePageIndicator;
 
 import android.app.Activity;
@@ -48,6 +49,9 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //友盟自动更新
+        UmengUpdateAgent.update(this);
+
         setContentView(R.layout.activity_main);
 
         mUserToken = Utils.getString(this, "user_token", "");

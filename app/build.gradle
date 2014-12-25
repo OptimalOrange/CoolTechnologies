@@ -19,11 +19,12 @@ android {
         }
     }
 
-    // set youku.clientId in local.properties to R.string.youku_client_id
+    // read local.properties
     Properties localProperties = new Properties()
     localProperties.load(project.rootProject.file('local.properties').newReader('UTF-8'))
-    String client_id = localProperties.getProperty('youku.clientId')
-    String client_secret = localProperties.getProperty('youku.clientSecret')
+
+    // set R.string.youku_client_id according to youku.clientId in local.properties
+    final String client_id = localProperties.getProperty('youku.clientId')
     if (client_id != null) {
         applicationVariants.all { variant ->
             variant.resValue "string", "youku_client_id", client_id
@@ -32,7 +33,8 @@ android {
         throw new org.gradle.api.resources.ResourceException(
                 'Please set youku.clientId in local.properties file at root project')
     }
-
+    // set R.string.youku_client_secret according to youku.clientSecret in local.properties
+    final String client_secret = localProperties.getProperty('youku.clientSecret')
     if (client_secret != null) {
         applicationVariants.all { variant ->
             variant.resValue "string", "youku_client_secret", client_secret
@@ -40,6 +42,17 @@ android {
     } else {
         throw new org.gradle.api.resources.ResourceException(
                 'Please set youku.clientSecret in local.properties file at root project')
+    }
+
+    // set R.string.umeng_app_key according to umeng.appKey in local.properties
+    final String umengAppKey = localProperties.getProperty('umeng.appKey')
+    if (umengAppKey != null) {
+        applicationVariants.all { variant ->
+            variant.resValue "string", "umeng_app_key", umengAppKey
+        }
+    } else {
+        throw new org.gradle.api.resources.ResourceException(
+                'Please set umeng.appKey in local.properties file at root project')
     }
 }
 
@@ -53,6 +66,7 @@ dependencies {
     compile 'com.mcxiaoke.volley:library:1.0.9@aar'
     compile 'com.etsy.android.grid:library:1.0.5'
     compile 'cpr.name.videoenabledwebview:library:1.0'
+    compile 'com.umeng.update:library:2.4.2'
 }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 代码质量检查 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
