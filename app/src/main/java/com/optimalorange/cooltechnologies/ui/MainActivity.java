@@ -224,11 +224,11 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onResume() {
+        super.onResume();
         Fragment fragment = getCurrentFragment();
         if (fragment instanceof HistoryFragment) {
             ((HistoryFragment) fragment).refreshData();
         }
-        super.onResume();
     }
 
     private Fragment getCurrentFragment() {

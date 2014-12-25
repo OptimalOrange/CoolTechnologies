@@ -68,8 +68,9 @@ public class DBManager {
 
     public void quit() {
         try {
-            if (isOpen() && dbHelper != null)
+            if (isOpen() && dbHelper != null) {
                 dbHelper.close();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
