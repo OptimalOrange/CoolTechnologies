@@ -163,7 +163,7 @@ public class HistoryFragment extends Fragment {
             setHint(R.string.history_no_history);
         } else {
             mTvHint.setVisibility(View.GONE);
-            favoriteListView.setVelocityScale(View.VISIBLE);
+            favoriteListView.setVisibility(View.VISIBLE);
         }
     }
 
