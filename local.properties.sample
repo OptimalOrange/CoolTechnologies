@@ -1,11 +1,18 @@
 ##
 # local.properties file should *NOT* be checked into Version Control Systems,
 # as it contains information specific to your local configuration.
-#
+##
+
 # Location of the SDK. This is only used by Gradle.
 # For customization when using a Version Control System, please read the
 # header note.
 sdk.dir=Path of Android SDK
+
+
+
+#########################################
+# 必设配置
+#########################################
 
 # 优酷API使用的client ID和client secret
 # see http://open.youku.com/app
@@ -14,3 +21,22 @@ youku.clientSecret=Youku client secret
 
 # 友盟自动更新使用的APPKEY，用来定位该应用的唯一性。
 umeng.appKey=Your UMENG app key
+
+
+
+#########################################
+# 可选配置
+#########################################
+
+# 用于sign release apk的signingConfig。
+# KEY_STORE_FILE是必设项，其它是可选项，会在构建时提示输入没有设置的项目。
+# 这些signingConfig属性除了可以在local.properties设置外，还可以在gradle.properties和环境变量设置。
+# 优先级：local.properties > gradle.properties > 环境变量。
+# 关于gradle.properties，因为项目目录里的gradle.properties很可能在Version Control System控制中，
+# 其中的内容可能会被公开，所以不建议在项目目录里的gradle.properties设置这些属性；
+# 但是您可以在${user.home}\.gradle\gradle.properties（全局配置）中设置。
+# see app/build.gradle中的trySetReleaseSigningConfig()方法
+KEY_STORE_FILE=/path/to/your.keystore
+KEY_STORE_PASSWORD=your keystore password
+KEY_ALIAS=project key alias
+KEY_PASSWORD=key alias password

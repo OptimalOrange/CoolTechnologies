@@ -31,6 +31,10 @@ android {
         String message = "Please set $re.propertyName in local.properties file at root project"
         throw new ResourceException(re.propertyName, message, re)
     }
+    if (!trySetReleaseSigningConfig(localProperties)) {
+        System.out.println("WARNING: didn't set signingConfig so that " +
+                "you should sign release apk by yourself.")
+    }
 }
 
 dependencies {
@@ -85,6 +89,7 @@ task pmd(type: Pmd) {
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 工具类和方法 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 /**
  * 把properties里设置的propertyName属性的值，添加为Android项目的string resource：R.string.${name}
+ *
  * @param name Android项目string resource的name
  */
 void addStringResSetInProperties(String name, Properties properties, String propertyName) {
@@ -97,7 +102,64 @@ void addStringResSetInProperties(String name, Properties properties, String prop
     }
 }
 
+/**
+ * <p>尝试设置用于sign release apk的signingConfig。应用配置文件中的KEY_STORE_FILE、KEY_STORE_PASSWORD、
+ * KEY_ALIAS、KEY_PASSWORD属性，KEY_STORE_FILE是必设项，其它是可选项，会在构建时提示输入没有设置的项目。</p>
+ * <p>可以在{@link Properties properties}（如local.properties）、gradle.properties、
+ * 环境变量中设置这些属性。配置位置的优先级为properties > gradle.properties > 环境变量。
+ * 另外，关于gradle.properties，因为项目目录里的gradle.properties很可能在Version Control System控制中，
+ * 其中的内容可能会被公开，所以不建议在项目目录里的gradle.properties设置这些属性；
+ * 但是您可以在${user.home}\.gradle\gradle.properties（全局配置）中设置。</p>
+ * <p>最多只会应用一个地方的配置，不会合并不同地方的配置（例如即使local.properties没有配置KEY_ALIAS、
+ * KEY_PASSWORD，也不会合并local.properties里的KEY_ALIAS、KEY_PASSWORD）。</p>
+ *
+ * @param properties {@link Properties}属性资源，如local.properties
+ * @return 若设置了signingConfig（至少在properties、gradle.properties、环境变量其中一个位置设置了
+ * KEY_STORE_FILE），返回true；否则返回false
+ */
+boolean trySetReleaseSigningConfig(Properties properties) {
+    String keyStoreFile, keyStorePassword, keyAlias, keyPassword
+    if (properties.stringPropertyNames().contains('KEY_STORE_FILE')) {
+        // from properties
+        keyStoreFile = properties.getProperty('KEY_STORE_FILE')
+        keyStorePassword = properties.getProperty('KEY_STORE_PASSWORD')
+        keyAlias = properties.getProperty('KEY_ALIAS')
+        keyPassword = properties.getProperty('KEY_PASSWORD')
+    } else if (hasProperty('KEY_STORE_FILE')) {
+        // or from gradle.properties
+        keyStoreFile = KEY_STORE_FILE
+        keyStorePassword = hasProperty('KEY_STORE_PASSWORD') ? KEY_STORE_PASSWORD : null
+        keyAlias = hasProperty('KEY_ALIAS') ? KEY_ALIAS : null
+        keyPassword = hasProperty('KEY_PASSWORD') ? KEY_PASSWORD : null
+    } else if (System.getenv().containsKey('KEY_STORE_FILE')) {
+        // or from environment variable
+        keyStoreFile = System.getenv('KEY_STORE_FILE')
+        keyStorePassword = System.getenv('KEY_STORE_PASSWORD')
+        keyAlias = System.getenv('KEY_ALIAS')
+        keyPassword = System.getenv('KEY_PASSWORD')
+    }
+    // try to apply them
+    if (keyStoreFile != null) {
+        android.signingConfigs {
+            release { signingConfig ->
+                signingConfig.storeFile file(keyStoreFile)
+                signingConfig.storePassword keyStorePassword != null ? keyStorePassword :
+                        System.console().readPassword('\n\$ Enter keystore password: ').toString()
+                signingConfig.keyAlias keyAlias != null ? keyAlias :
+                        System.console().readLine('\n\$ Enter key alias: ')
+                signingConfig.keyPassword keyPassword != null ? keyPassword :
+                        System.console().readPassword('\n\$ Enter key password: ').toString()
+            }
+        }
+        android.buildTypes.release.signingConfig android.signingConfigs.release
+        return true
+    } else {
+        return false
+    }
+}
+
 class ResourceException extends org.gradle.api.resources.ResourceException {
+
     final String propertyName;
 
     ResourceException(String propertyName) {
