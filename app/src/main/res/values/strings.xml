@@ -5,7 +5,7 @@
     <string name="popular">热门</string>
     <string name="genre">类型</string>
     <string name="favorites">收藏</string>
-    <string name="watched">历史</string>
+    <string name="history">历史</string>
     <string name="promotion">推荐</string>
 
     <string name="action_settings">设置</string>

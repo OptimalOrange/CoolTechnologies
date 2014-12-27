@@ -15,6 +15,7 @@ import com.viewpagerindicator.TitlePageIndicator;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v13.app.FragmentPagerAdapter;
@@ -33,11 +34,11 @@ public class MainActivity extends Activity {
     private static final String STATE_SELECTED_NAVIGATION_ITEM = "selected_navigation_item";
 
     private static final int[] FRAGMENT_IDS_ORDER_BY_POSITION = {
-            FragmentConfig.FRAGMENT_ID_POPULAR,
-            FragmentConfig.FRAGMENT_ID_CATEGORIES,
-            FragmentConfig.FRAGMENT_ID_FAVORITE,
-            FragmentConfig.FRAGMENT_ID_HISTORY,
-            FragmentConfig.FRAGMENT_ID_PROMOTION
+            R.id.fragment_videos,
+            R.id.fragment_genres,
+            R.id.fragment_favorite,
+            R.id.fragment_history,
+            R.id.fragment_promotion
     };
 
     private ViewPager mPager;
@@ -58,9 +59,10 @@ public class MainActivity extends Activity {
         mIsLogin = !mUserToken.isEmpty();
 
         mPager = (ViewPager) findViewById(R.id.pager);
-        mPager.setAdapter(new MyPagerAdapter(
+        mPager.setAdapter(new MyFragmentPagerAdapter(
+                this,
                 getFragmentManager(),
-                getResources().getStringArray(R.array.titles_in_cool_videos)
+                FRAGMENT_IDS_ORDER_BY_POSITION
         ));
         // Bind the indicators to the ViewPager
         TitlePageIndicator mIndicator = (TitlePageIndicator) findViewById(R.id.indicator);
@@ -136,77 +138,71 @@ public class MainActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    private static class MyPagerAdapter extends FragmentPagerAdapter {
+    private static class MyFragmentPagerAdapter extends FragmentPagerAdapter {
 
-        private final String[] mPageTitles;
+        private Context mContext;
 
-        public MyPagerAdapter(FragmentManager fm, String[] pageTitles) {
+        private int[] mFragmentIdsOrderByPosition;
+
+        public MyFragmentPagerAdapter(
+                Context context, FragmentManager fm, int[] fragmentIdsOrderByPosition) {
             super(fm);
-            mPageTitles = pageTitles;
+            mContext = context;
+            mFragmentIdsOrderByPosition = fragmentIdsOrderByPosition;
         }
 
         @Override
         public int getCount() {
-            return mPageTitles.length;
+            return mFragmentIdsOrderByPosition.length;
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
-            return mPageTitles[position];
+            return getTitleById((int) getItemId(position));
         }
 
         @Override
         public Fragment getItem(int position) {
-            return FragmentConfig.getInstance().getFragment((int) getItemId(position));
+            return getItemById((int) getItemId(position));
         }
 
         @Override
         public long getItemId(int position) {
-            return FRAGMENT_IDS_ORDER_BY_POSITION[position];
-        }
-    }
-
-    private static class FragmentConfig {
-
-        public static final int FRAGMENT_ID_POPULAR = 0;
-
-        public static final int FRAGMENT_ID_CATEGORIES = 1;
-
-        public static final int FRAGMENT_ID_FAVORITE = 2;
-
-        public static final int FRAGMENT_ID_HISTORY = 3;
-
-        public static final int FRAGMENT_ID_PROMOTION = 4;
-
-        public static FragmentConfig instance;
-
-        public static FragmentConfig getInstance() {
-            if (instance == null) {
-                instance = new FragmentConfig();
-            }
-            return instance;
+            return mFragmentIdsOrderByPosition[position];
         }
 
-        public Fragment getFragment(int id) {
-            Fragment newFragment = null;
+        private String getTitleById(int id) {
             switch (id) {
-                case FRAGMENT_ID_POPULAR:
-                    newFragment = new ListVideosFragment();
-                    break;
-                case FRAGMENT_ID_CATEGORIES:
-                    newFragment = new ListGenresFragment();
-                    break;
-                case FRAGMENT_ID_FAVORITE:
-                    newFragment = new FavoriteFragment();
-                    break;
-                case FRAGMENT_ID_HISTORY:
-                    newFragment = new HistoryFragment();
-                    break;
-                case FRAGMENT_ID_PROMOTION:
-                    newFragment = new PromotionFragment();
-                    break;
+                case R.id.fragment_videos:
+                    return mContext.getString(R.string.popular);
+                case R.id.fragment_genres:
+                    return mContext.getString(R.string.genre);
+                case R.id.fragment_favorite:
+                    return mContext.getString(R.string.favorites);
+                case R.id.fragment_history:
+                    return mContext.getString(R.string.history);
+                case R.id.fragment_promotion:
+                    return mContext.getString(R.string.promotion);
+                default:
+                    throw new IllegalArgumentException("Unknown fragment id: " + id);
             }
-            return newFragment;
+        }
+
+        private Fragment getItemById(int id) {
+            switch (id) {
+                case R.id.fragment_videos:
+                    return new ListVideosFragment();
+                case R.id.fragment_genres:
+                    return new ListGenresFragment();
+                case R.id.fragment_favorite:
+                    return new FavoriteFragment();
+                case R.id.fragment_history:
+                    return new HistoryFragment();
+                case R.id.fragment_promotion:
+                    return new PromotionFragment();
+                default:
+                    throw new IllegalArgumentException("Unknown fragment id: " + id);
+            }
         }
     }
 
@@ -244,6 +240,7 @@ public class MainActivity extends Activity {
     /**
      * copy from {@link FragmentPagerAdapter#makeFragmentName(int, long)}
      */
+    // TODO shouldn't depend on others private code
     private static String makeFragmentName(int viewId, long id) {
         return "android:switcher:" + viewId + ":" + id;
     }

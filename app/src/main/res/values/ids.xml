@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <item type="id" name="fragment_videos" />
+    <item type="id" name="fragment_genres" />
+    <item type="id" name="fragment_favorite" />
+    <item type="id" name="fragment_history" />
+    <item type="id" name="fragment_promotion" />
+
+</resources>
