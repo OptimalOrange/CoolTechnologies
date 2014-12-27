@@ -236,7 +236,15 @@ public class MainActivity extends Activity {
     }
 
     private Fragment getCurrentFragment() {
-        return getFragmentManager().findFragmentByTag(
-                "android:switcher:" + R.id.pager + ":" + mPager.getCurrentItem());
+        final String name = makeFragmentName(
+                R.id.pager, FRAGMENT_IDS_ORDER_BY_POSITION[mPager.getCurrentItem()]);
+        return getFragmentManager().findFragmentByTag(name);
+    }
+
+    /**
+     * copy from {@link FragmentPagerAdapter#makeFragmentName(int, long)}
+     */
+    private static String makeFragmentName(int viewId, long id) {
+        return "android:switcher:" + viewId + ":" + id;
     }
 }
