@@ -33,13 +33,21 @@ public class MainActivity extends Activity {
      */
     private static final String STATE_SELECTED_NAVIGATION_ITEM = "selected_navigation_item";
 
+    /**
+     * Pagers列表（有序）
+     */
     private static final int[] FRAGMENT_IDS_ORDER_BY_POSITION = {
+            R.id.fragment_promotion,
             R.id.fragment_videos,
             R.id.fragment_genres,
             R.id.fragment_favorite,
-            R.id.fragment_history,
-            R.id.fragment_promotion
+            R.id.fragment_history
     };
+
+    /**
+     * 默认Pager的位置
+     */
+    private static final int DEFAULT_POSITION = 1;
 
     private ViewPager mPager;
 
@@ -67,7 +75,8 @@ public class MainActivity extends Activity {
         // Bind the indicators to the ViewPager
         TitlePageIndicator mIndicator = (TitlePageIndicator) findViewById(R.id.indicator);
         mIndicator.setViewPager(mPager);
-
+        // goto default pager
+        mPager.setCurrentItem(DEFAULT_POSITION);
     }
 
     @Override
