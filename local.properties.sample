@@ -35,7 +35,7 @@ umeng.appKey=Your UMENG app key
 # 关于gradle.properties，因为项目目录里的gradle.properties很可能在Version Control System控制中，
 # 其中的内容可能会被公开，所以不建议在项目目录里的gradle.properties设置这些属性；
 # 但是您可以在${user.home}\.gradle\gradle.properties（全局配置）中设置。
-# see app/build.gradle中的trySetReleaseSigningConfig()方法
+# see app/build.gradle中的setReleaseSigningConfig()方法
 KEY_STORE_FILE=/path/to/your.keystore
 KEY_STORE_PASSWORD=your keystore password
 KEY_ALIAS=project key alias

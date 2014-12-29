@@ -44,7 +44,26 @@ android {
         String message = "Please set $re.propertyName in local.properties file at root project"
         throw new ResourceException(re.propertyName, message, re)
     }
-    if (!trySetReleaseSigningConfig(localProperties)) {
+    if (shouldSetReleaseSigningConfig(localProperties)) {
+        // initialize release signingConfig
+        android.signingConfigs {
+            release {
+                storeFile file("./debug.jks")
+                storePassword "android"
+                keyAlias "androiddebugkey"
+                keyPassword "android"
+            }
+        }
+        android.buildTypes.release.signingConfig android.signingConfigs.release
+        // set release signingConfig if necessary
+        gradle.taskGraph.whenReady { taskGraph ->
+            // Executed when the task graph is ready (and can be accessed via taskGraph parameter)
+            if (taskGraph.hasTask(project.path + ':assembleRelease')) {
+                // Only execute when we are trying to assemble a release build
+                setReleaseSigningConfig(localProperties)
+            }
+        }
+    } else {
         System.out.println("WARNING: didn't set signingConfig so that " +
                 "you should sign release apk by yourself.")
     }
@@ -116,6 +135,13 @@ void addStringResSetInProperties(String name, Properties properties, String prop
 }
 
 /**
+ * @see #setReleaseSigningConfig
+ */
+boolean shouldSetReleaseSigningConfig(Properties properties) {
+    return properties.stringPropertyNames().contains('KEY_STORE_FILE') ||
+            hasProperty('KEY_STORE_FILE') || System.getenv().containsKey('KEY_STORE_FILE');
+}
+/**
  * <p>尝试设置用于sign release apk的signingConfig。应用配置文件中的KEY_STORE_FILE、KEY_STORE_PASSWORD、
  * KEY_ALIAS、KEY_PASSWORD属性，KEY_STORE_FILE是必设项，其它是可选项，会在构建时提示输入没有设置的项目。</p>
  * <p>可以在{@link Properties properties}（如local.properties）、gradle.properties、
@@ -131,8 +157,8 @@ void addStringResSetInProperties(String name, Properties properties, String prop
  * KEY_STORE_FILE），返回true；否则返回false
  */
 //参考自：http://stackoverflow.com/questions/18328730/how-to-create-a-release-signed-apk-file-using-gradle
-//        https://gist.github.com/gabrielemariotti/6856974
-boolean trySetReleaseSigningConfig(Properties properties) {
+//       https://gist.github.com/gabrielemariotti/6856974
+boolean setReleaseSigningConfig(Properties properties) {
     String keyStoreFile, keyStorePassword, keyAlias, keyPassword
     if (properties.stringPropertyNames().contains('KEY_STORE_FILE')) {
         // from properties
@@ -155,18 +181,15 @@ boolean trySetReleaseSigningConfig(Properties properties) {
     }
     // try to apply them
     if (keyStoreFile != null) {
-        android.signingConfigs {
-            release { signingConfig ->
-                def readLine = getReader(), readPassword = getPasswordReader()
-                signingConfig.storeFile file(keyStoreFile)
-                signingConfig.storePassword keyStorePassword != null ? keyStorePassword :
-                        readPassword('Enter keystore password: ')
-                signingConfig.keyAlias keyAlias != null ? keyAlias : readLine('Enter key alias: ')
-                signingConfig.keyPassword keyPassword != null ? keyPassword :
-                        readPassword('Enter key password: ')
-            }
+        android.signingConfigs.release { signingConfig ->
+            def readLine = getReader(), readPassword = getPasswordReader()
+            signingConfig.storeFile file(keyStoreFile)
+            signingConfig.storePassword keyStorePassword != null ? keyStorePassword :
+                    readPassword('Enter keystore password: ')
+            signingConfig.keyAlias keyAlias != null ? keyAlias : readLine('Enter key alias: ')
+            signingConfig.keyPassword keyPassword != null ? keyPassword :
+                    readPassword('Enter key password: ')
         }
-        android.buildTypes.release.signingConfig android.signingConfigs.release
         return true
     } else {
         return false
