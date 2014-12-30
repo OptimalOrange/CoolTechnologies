@@ -1,14 +1,14 @@
 package com.optimalorange.cooltechnologies.ui;
 
 import com.optimalorange.cooltechnologies.R;
+import com.optimalorange.cooltechnologies.network.NetworkChecker;
+import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingleton;
 import com.optimalorange.cooltechnologies.ui.fragment.FavoriteFragment;
 import com.optimalorange.cooltechnologies.ui.fragment.HistoryFragment;
 import com.optimalorange.cooltechnologies.ui.fragment.ListGenresFragment;
 import com.optimalorange.cooltechnologies.ui.fragment.ListVideosFragment;
 import com.optimalorange.cooltechnologies.ui.fragment.PromotionFragment;
 import com.optimalorange.cooltechnologies.util.Const;
-import com.optimalorange.cooltechnologies.network.NetworkChecker;
-import com.optimalorange.cooltechnologies.util.Utils;
 import com.umeng.update.UmengUpdateAgent;
 import com.viewpagerindicator.TitlePageIndicator;
 
@@ -49,6 +49,8 @@ public class MainActivity extends BaseActivity {
      */
     private static final int DEFAULT_POSITION = 1;
 
+    private DefaultSharedPreferencesSingleton mDefaultSharedPreferencesSingleton;
+
     private ViewPager mPager;
 
     private String mUserToken;
@@ -63,10 +65,12 @@ public class MainActivity extends BaseActivity {
         //set preferences' default values
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
-        setContentView(R.layout.activity_main);
+        mDefaultSharedPreferencesSingleton = DefaultSharedPreferencesSingleton.getInstance(this);
 
-        mUserToken = Utils.getString(this, "user_token", "");
+        mUserToken = mDefaultSharedPreferencesSingleton.retrieveString("user_token", "");
         mIsLogin = !mUserToken.isEmpty();
+
+        setContentView(R.layout.activity_main);
 
         mPager = (ViewPager) findViewById(R.id.pager);
         mPager.setAdapter(new MyFragmentPagerAdapter(
@@ -129,7 +133,7 @@ public class MainActivity extends BaseActivity {
         switch (id) {
             case R.id.action_login:
                 if (mIsLogin) {
-                    Utils.saveString(this, "user_token", "");
+                    mDefaultSharedPreferencesSingleton.saveString("user_token", "");
                     mIsLogin = false;
                     invalidateOptionsMenu();
                     Toast.makeText(this, R.string.action_logout_success, Toast.LENGTH_SHORT).show();

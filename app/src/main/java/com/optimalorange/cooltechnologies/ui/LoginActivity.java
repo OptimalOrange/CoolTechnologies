@@ -1,8 +1,8 @@
 package com.optimalorange.cooltechnologies.ui;
 
 import com.optimalorange.cooltechnologies.R;
+import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingleton;
 import com.optimalorange.cooltechnologies.util.Const;
-import com.optimalorange.cooltechnologies.util.Utils;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -148,8 +148,8 @@ public class LoginActivity extends BaseActivity implements Handler.Callback {
                 showToastInUIThread(R.string.action_login_success);
                 setResult(Const.RESULT_CODE_SUCCESS_LOGIN_ACTIVITY);
                 Log.e("wzz login", "result=" + msg.obj);
-                Utils.saveString(
-                        LoginActivity.this, "user_token", getTokenString(msg.obj.toString()));
+                DefaultSharedPreferencesSingleton.getInstance(LoginActivity.this)
+                        .saveString("user_token", getTokenString(msg.obj.toString()));
                 finish();
                 return true;
             case GET_TOKEN_ERROR:

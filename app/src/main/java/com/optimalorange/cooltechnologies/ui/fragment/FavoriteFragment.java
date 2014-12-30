@@ -9,11 +9,11 @@ import com.android.volley.toolbox.Volley;
 import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.adapter.FavoriteAdapter;
 import com.optimalorange.cooltechnologies.entity.FavoriteBean;
+import com.optimalorange.cooltechnologies.network.NetworkChecker;
+import com.optimalorange.cooltechnologies.network.VolleySingleton;
+import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingleton;
 import com.optimalorange.cooltechnologies.ui.PlayVideoActivity;
 import com.optimalorange.cooltechnologies.ui.view.PullRefreshLayout;
-import com.optimalorange.cooltechnologies.network.NetworkChecker;
-import com.optimalorange.cooltechnologies.util.Utils;
-import com.optimalorange.cooltechnologies.network.VolleySingleton;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -61,6 +61,7 @@ public class FavoriteFragment extends Fragment {
     private static final String FAVORITE_BASE_URL = "https://openapi.youku.com/v2/videos/favorite/by_me.json";
     private ListView favoriteListView;
     private VolleySingleton mVolleySingleton;
+    private DefaultSharedPreferencesSingleton mDefaultSharedPreferencesSingleton;
     private TextView mTvHint;
     private boolean mIsCreated = false;
     private PullRefreshLayout refreshLayout;
@@ -124,6 +125,8 @@ public class FavoriteFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mVolleySingleton = VolleySingleton.getInstance(getActivity());
+        mDefaultSharedPreferencesSingleton =
+                DefaultSharedPreferencesSingleton.getInstance(getActivity());
         favoriteListView = (ListView) view.findViewById(R.id.favorite_list);
         favoriteListView.setVisibility(View.GONE);
         favoriteListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -239,7 +242,7 @@ public class FavoriteFragment extends Fragment {
         if (favoriteListView.getVisibility() == View.GONE) {
             setHint(R.string.favorite_new_loading);
         }
-        String token = Utils.getString(getActivity(), "user_token", "");
+        String token = mDefaultSharedPreferencesSingleton.retrieveString("user_token", "");
         if (!token.isEmpty()) {
             if (!NetworkChecker.isConnected(getActivity())) {
                 setHint(R.string.favorite_hint_no_net);
@@ -330,7 +333,7 @@ public class FavoriteFragment extends Fragment {
             Toast.makeText(getActivity(), R.string.favorite_delete_no_net, Toast.LENGTH_SHORT).show();
             return;
         }
-        String token = Utils.getString(getActivity(), "user_token", "");
+        String token = mDefaultSharedPreferencesSingleton.retrieveString("user_token", "");
         if (token.isEmpty()) {
             Toast.makeText(getActivity(), R.string.favorite_delete_no_login, Toast.LENGTH_SHORT).show();
             return;
