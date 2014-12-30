@@ -7,9 +7,9 @@ import com.etsy.android.grid.StaggeredGridView;
 import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.entity.FavoriteBean;
 import com.optimalorange.cooltechnologies.entity.Video;
-import com.optimalorange.cooltechnologies.util.SearchRequest;
+import com.optimalorange.cooltechnologies.network.SearchRequest;
 import com.optimalorange.cooltechnologies.util.Utils;
-import com.optimalorange.cooltechnologies.util.VolleySingleton;
+import com.optimalorange.cooltechnologies.network.VolleySingleton;
 
 import android.app.SearchManager;
 import android.content.Context;

@@ -1,4 +1,4 @@
-package com.optimalorange.cooltechnologies.util;
+package com.optimalorange.cooltechnologies.network;
 
 import com.optimalorange.cooltechnologies.R;
 

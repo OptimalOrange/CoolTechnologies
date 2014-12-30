@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 //stolen from http://developer.android.com/training/volley/requestqueue.html#singleton
-package com.optimalorange.cooltechnologies.util;
+package com.optimalorange.cooltechnologies.network;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.Volley;
+import com.optimalorange.cooltechnologies.util.LruBitmapCache;
 
 import android.content.Context;
 

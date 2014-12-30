@@ -1,4 +1,4 @@
-package com.optimalorange.cooltechnologies.util;
+package com.optimalorange.cooltechnologies.network;
 
 import com.android.volley.NetworkResponse;
 import com.android.volley.ParseError;

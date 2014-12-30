@@ -12,8 +12,8 @@ import com.optimalorange.cooltechnologies.ui.PlayVideoActivity;
 import com.optimalorange.cooltechnologies.ui.view.VideoCardViewBuilder;
 import com.optimalorange.cooltechnologies.util.ItemsCountCalculater;
 import com.optimalorange.cooltechnologies.util.Utils;
-import com.optimalorange.cooltechnologies.util.VideosRequest;
-import com.optimalorange.cooltechnologies.util.VolleySingleton;
+import com.optimalorange.cooltechnologies.network.VideosRequest;
+import com.optimalorange.cooltechnologies.network.VolleySingleton;
 
 import org.json.JSONArray;
 import org.json.JSONException;

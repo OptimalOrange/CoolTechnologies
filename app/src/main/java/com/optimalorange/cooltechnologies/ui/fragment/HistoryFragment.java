@@ -3,16 +3,15 @@ package com.optimalorange.cooltechnologies.ui.fragment;
 import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.adapter.FavoriteAdapter;
 import com.optimalorange.cooltechnologies.entity.FavoriteBean;
-import com.optimalorange.cooltechnologies.sqlite.DBManager;
+import com.optimalorange.cooltechnologies.storage.sqlite.DBManager;
 import com.optimalorange.cooltechnologies.ui.PlayVideoActivity;
-import com.optimalorange.cooltechnologies.util.VolleySingleton;
+import com.optimalorange.cooltechnologies.network.VolleySingleton;
 
 import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;

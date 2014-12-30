@@ -7,7 +7,7 @@ import com.optimalorange.cooltechnologies.ui.fragment.ListGenresFragment;
 import com.optimalorange.cooltechnologies.ui.fragment.ListVideosFragment;
 import com.optimalorange.cooltechnologies.ui.fragment.PromotionFragment;
 import com.optimalorange.cooltechnologies.util.Const;
-import com.optimalorange.cooltechnologies.util.NetworkChecker;
+import com.optimalorange.cooltechnologies.network.NetworkChecker;
 import com.optimalorange.cooltechnologies.util.Utils;
 import com.umeng.update.UmengUpdateAgent;
 import com.viewpagerindicator.TitlePageIndicator;

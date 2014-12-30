@@ -1,4 +1,4 @@
-package com.optimalorange.cooltechnologies.sqlite;
+package com.optimalorange.cooltechnologies.storage.sqlite;
 
 import com.optimalorange.cooltechnologies.entity.FavoriteBean;
 

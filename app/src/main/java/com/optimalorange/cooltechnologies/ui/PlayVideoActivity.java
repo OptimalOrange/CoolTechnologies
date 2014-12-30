@@ -2,7 +2,7 @@ package com.optimalorange.cooltechnologies.ui;
 
 import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.entity.FavoriteBean;
-import com.optimalorange.cooltechnologies.sqlite.DBManager;
+import com.optimalorange.cooltechnologies.storage.sqlite.DBManager;
 import com.optimalorange.cooltechnologies.ui.fragment.ListCommentsFragment;
 
 import android.annotation.TargetApi;
