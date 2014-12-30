@@ -9,13 +9,13 @@
         <CheckBoxPreference
                 android:key="@string/pref_key_show_images"
                 android:title="@string/pref_title_show_images"
-                android:defaultValue="false"
+                android:defaultValue="@bool/pref_default_value_show_images"
                 />
 
         <CheckBoxPreference
                 android:key="@string/pref_key_play_video"
                 android:title="@string/pref_title_play_video"
-                android:defaultValue="true"
+                android:defaultValue="@bool/pref_default_value_play_video"
                 />
 
     </PreferenceCategory>
