@@ -12,12 +12,12 @@ import com.optimalorange.cooltechnologies.util.Utils;
 import com.umeng.update.UmengUpdateAgent;
 import com.viewpagerindicator.TitlePageIndicator;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
@@ -25,7 +25,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 
-public class MainActivity extends Activity {
+public class MainActivity extends BaseActivity {
 
     /**
      * The serialization (saved instance state) Bundle key representing the
@@ -60,6 +60,8 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         //友盟自动更新
         UmengUpdateAgent.update(this);
+        //set preferences' default values
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
         setContentView(R.layout.activity_main);
 
@@ -98,6 +100,7 @@ public class MainActivity extends Activity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
@@ -124,8 +127,6 @@ public class MainActivity extends Activity {
         //noinspection SimplifiableIfStatement
 
         switch (id) {
-            case R.id.action_settings:
-                return true;
             case R.id.action_login:
                 if (mIsLogin) {
                     Utils.saveString(this, "user_token", "");

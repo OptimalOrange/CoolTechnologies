@@ -16,7 +16,6 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -33,7 +32,7 @@ import java.util.ArrayList;
 /**
  * Created by WANGZHENGZE on 2014/11/26.
  */
-public class LoginActivity extends Activity implements Handler.Callback {
+public class LoginActivity extends BaseActivity implements Handler.Callback {
 
     private static final String MY_URL = "http://59.67.152.71/wangzhengze/";
 

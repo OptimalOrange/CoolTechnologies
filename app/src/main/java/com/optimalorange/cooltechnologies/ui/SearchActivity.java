@@ -11,7 +11,6 @@ import com.optimalorange.cooltechnologies.util.SearchRequest;
 import com.optimalorange.cooltechnologies.util.Utils;
 import com.optimalorange.cooltechnologies.util.VolleySingleton;
 
-import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -35,7 +34,7 @@ import java.util.List;
  *
  * @author Zhou Peican
  */
-public class SearchActivity extends Activity {
+public class SearchActivity extends BaseActivity {
 
     private static final String CATEGORY_LABEL_OF_TECH = "科技";
 
@@ -133,6 +132,7 @@ public class SearchActivity extends Activity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.menu_search, menu);
 
         SearchManager searchManager =

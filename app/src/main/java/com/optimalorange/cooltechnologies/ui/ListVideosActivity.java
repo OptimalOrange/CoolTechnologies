@@ -3,11 +3,10 @@ package com.optimalorange.cooltechnologies.ui;
 import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.ui.fragment.ListVideosFragment;
 
-import android.app.Activity;
 import android.os.Bundle;
 
 //TODO back in ActionBar
-public class ListVideosActivity extends Activity {
+public class ListVideosActivity extends BaseActivity {
 
     /**
      * 应当显示的Video的genre（类型，示例：手机）<br/>

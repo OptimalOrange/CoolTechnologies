@@ -1,12 +1,11 @@
 package com.optimalorange.cooltechnologies.ui;
 
 import com.optimalorange.cooltechnologies.R;
-import com.optimalorange.cooltechnologies.ui.fragment.ListCommentsFragment;
 import com.optimalorange.cooltechnologies.entity.FavoriteBean;
 import com.optimalorange.cooltechnologies.sqlite.DBManager;
+import com.optimalorange.cooltechnologies.ui.fragment.ListCommentsFragment;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Build;
@@ -24,7 +23,7 @@ import name.cpr.VideoEnabledWebChromeClient;
 import name.cpr.VideoEnabledWebView;
 
 //TODO 处理横竖屏切换等onConfigurationChange
-public class PlayVideoActivity extends Activity {
+public class PlayVideoActivity extends BaseActivity {
 
     /**
      * 应当播放的Video的id<br/>
