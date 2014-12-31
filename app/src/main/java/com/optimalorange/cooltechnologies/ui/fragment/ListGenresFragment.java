@@ -7,19 +7,18 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.entity.FavoriteBean;
 import com.optimalorange.cooltechnologies.entity.Video;
+import com.optimalorange.cooltechnologies.network.VideosRequest;
+import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.optimalorange.cooltechnologies.ui.ListVideosActivity;
 import com.optimalorange.cooltechnologies.ui.PlayVideoActivity;
 import com.optimalorange.cooltechnologies.ui.view.VideoCardViewBuilder;
 import com.optimalorange.cooltechnologies.util.ItemsCountCalculater;
 import com.optimalorange.cooltechnologies.util.Utils;
-import com.optimalorange.cooltechnologies.network.VideosRequest;
-import com.optimalorange.cooltechnologies.network.VolleySingleton;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Fragment;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -44,7 +43,7 @@ import java.util.List;
 //TODO 刷新
 //TODO reCreat问题（横竖屏转换、接完电话回来时）
 //TODO 点击时的视觉表现（动画等）
-public class ListGenresFragment extends Fragment {
+public class ListGenresFragment extends SwipeRefreshFragment {
 
     /**
      * @see {@literal http://open.youku.com/docs/api_searches.html#schemas-video-category}
@@ -120,6 +119,7 @@ public class ListGenresFragment extends Fragment {
                         }
                         mGenres = newGenres;
                         mAdapter.notifyDataSetChanged();
+                        onLoadFinished(); //TODO 更好的实现
                     }
                 }
             },
@@ -132,8 +132,9 @@ public class ListGenresFragment extends Fragment {
     ).setTag(this);
 
     /**
-     * @param genre 类型
-     * @param index 在{@link #mGenres}中的索引
+     * @param genre  类型
+     * @param genres {@link #mGenres}
+     * @param index  在{@code genres}中的索引
      * @see #mGenres
      */
     private Request buildQueryVideosRequest(final String genre,
@@ -176,7 +177,7 @@ public class ListGenresFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateViewInSwipeRefreshLayout(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_list_categories, container, false);
@@ -204,6 +205,11 @@ public class ListGenresFragment extends Fragment {
         super.onDestroyView();
     }
 
+    @Override
+    public void onRefresh() {
+        restartLoad();
+    }
+
     //--------------------------------------------------------------------------
     // Private methods
     //--------------------------------------------------------------------------
@@ -219,6 +225,10 @@ public class ListGenresFragment extends Fragment {
 
     private void cancelLoad() {
         mVolleySingleton.getRequestQueue().cancelAll(this);
+    }
+
+    private void onLoadFinished() {
+        setRefreshing(false);
     }
 
     private static ItemsCountCalculater.Result calculateItemsCount(View parent) {

@@ -46,6 +46,9 @@
     <!-- SearchActivity -->
     <string name="search">搜索</string>
 
+    <!-- SwipeRefreshFragment -->
+    <string name="action_refresh">刷新</string>
+
     <!-- SettingsActivity.java -->
     <string name="settings">设置</string>
 
