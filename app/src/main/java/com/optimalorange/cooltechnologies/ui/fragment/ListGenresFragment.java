@@ -76,14 +76,15 @@ public class ListGenresFragment extends Fragment {
     // Network Request to Youku
     //--------------------------------------------------------------------------
 
-    private final JsonObjectRequest mVideoCategorySchemaRequest = new JsonObjectRequest(
+    private final Request mVideoCategorySchemaRequest = new JsonObjectRequest(
             Request.Method.GET,
             YOUKU_API_SCHEMAS_VIDEO_CATEGORY,
             null,
             new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject jsonObject) {
-                    JSONObject category = null;
+                    // see YOUKU_API_SCHEMAS_VIDEO_CATEGORY
+                    JSONObject techCategory = null;
                     try {
                         JSONArray jsonArray = jsonObject.getJSONArray("categories");
                         for (int i = 0; i < jsonArray.length(); i++) {
@@ -92,30 +93,32 @@ public class ListGenresFragment extends Fragment {
                                 continue;
                             }
                             if (CATEGORY_LABEL_OF_TECH.equals(currentObject.optString("label"))) {
-                                category = currentObject;
+                                techCategory = currentObject;
                                 break;
                             }
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                    if (category != null) {
-                        JSONArray genresJson = category.optJSONArray("genres");
+                    if (techCategory != null) {
+                        JSONArray genresJson = techCategory.optJSONArray("genres");
                         final int length = genresJson != null ? genresJson.length() : 0;
                         ArrayList<String> genres = new ArrayList<>(length);
                         ArrayList<List<Video>> videos = new ArrayList<>(length);
+                        final Pair<ArrayList<String>, ArrayList<List<Video>>> newGenres
+                                = new Pair<>(genres, videos);
                         for (int i = 0; i < length; i++) {
                             try {
                                 String genre = genresJson.getJSONObject(i).getString("label");
                                 genres.add(genre);
                                 videos.add(null);
-                                mVolleySingleton
-                                        .addToRequestQueue(buildQueryVideosRequest(genre, i));
+                                mVolleySingleton.addToRequestQueue(
+                                        buildQueryVideosRequest(genre, newGenres, i));
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
                         }
-                        mGenres = new Pair<>(genres, videos);
+                        mGenres = newGenres;
                         mAdapter.notifyDataSetChanged();
                     }
                 }
@@ -126,14 +129,15 @@ public class ListGenresFragment extends Fragment {
                     volleyError.printStackTrace();
                 }
             }
-    );
+    ).setTag(this);
 
     /**
      * @param genre 类型
      * @param index 在{@link #mGenres}中的索引
      * @see #mGenres
      */
-    private VideosRequest buildQueryVideosRequest(final String genre, final int index) {
+    private Request buildQueryVideosRequest(final String genre,
+            final Pair<ArrayList<String>, ArrayList<List<Video>>> genres, final int index) {
         if (mItemsCountAndDimension == null) {
             throw new IllegalStateException("calculateItemsCount before query");
         }
@@ -146,7 +150,7 @@ public class ListGenresFragment extends Fragment {
                 .setResponseListener(new Response.Listener<List<Video>>() {
                     @Override
                     public void onResponse(List<Video> videos) {
-                        mGenres.second.set(index, videos);
+                        genres.second.set(index, videos);
                         mAdapter.notifyItemChanged(index);
                     }
                 })
@@ -156,7 +160,8 @@ public class ListGenresFragment extends Fragment {
                         error.printStackTrace();
                     }
                 })
-                .build();
+                .build()
+                .setTag(this);
     }
 
     //--------------------------------------------------------------------------
@@ -168,7 +173,6 @@ public class ListGenresFragment extends Fragment {
         super.onCreate(savedInstanceState);
         mYoukuClientId = getString(R.string.youku_client_id);
         mVolleySingleton = VolleySingleton.getInstance(getActivity());
-        mVolleySingleton.addToRequestQueue(mVideoCategorySchemaRequest);
     }
 
     @Override
@@ -190,11 +194,32 @@ public class ListGenresFragment extends Fragment {
         mItemsCountAndDimension = calculateItemsCount(mRecyclerView);
         mAdapter = new MyAdapter();
         mRecyclerView.setAdapter(mAdapter);
+
+        startLoad(); // important! must do this later than calculateItemsCount
+    }
+
+    @Override
+    public void onDestroyView() {
+        cancelLoad();
+        super.onDestroyView();
     }
 
     //--------------------------------------------------------------------------
     // Private methods
     //--------------------------------------------------------------------------
+
+    private void startLoad() {
+        mVolleySingleton.addToRequestQueue(mVideoCategorySchemaRequest);
+    }
+
+    private void restartLoad() {
+        cancelLoad();
+        startLoad();
+    }
+
+    private void cancelLoad() {
+        mVolleySingleton.getRequestQueue().cancelAll(this);
+    }
 
     private static ItemsCountCalculater.Result calculateItemsCount(View parent) {
         Resources resources = parent.getResources();
