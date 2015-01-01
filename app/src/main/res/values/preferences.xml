@@ -4,7 +4,7 @@
     <string name="pref_category_key_network" translatable="false">pref_category_key_network</string>
     <string name="pref_category_title_network">网络</string>
     <string name="pref_key_show_images" translatable="false">pref_key_show_images</string>
-    <bool name="pref_default_value_show_images">false</bool>
+    <bool name="pref_default_value_show_images">true</bool>
     <string name="pref_title_show_images">使用移动网络时,显示图片</string>
     <string name="pref_key_play_video" translatable="false">pref_key_play_video</string>
     <bool name="pref_default_value_play_video">true</bool>
