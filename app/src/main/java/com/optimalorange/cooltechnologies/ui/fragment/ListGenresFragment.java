@@ -62,6 +62,8 @@ public class ListGenresFragment extends SwipeRefreshFragment {
      */
     private Pair<ArrayList<String>, ArrayList<List<Video>>> mGenres;
 
+    private final RequestsManager mRequestsManager = new RequestsManager();
+
 
     private RecyclerView mRecyclerView;
 
@@ -111,7 +113,7 @@ public class ListGenresFragment extends SwipeRefreshFragment {
                                 String genre = genresJson.getJSONObject(i).getString("label");
                                 genres.add(genre);
                                 videos.add(null);
-                                mVolleySingleton.addToRequestQueue(
+                                mRequestsManager.addRequest(
                                         buildQueryVideosRequest(genre, newGenres, i));
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -119,7 +121,7 @@ public class ListGenresFragment extends SwipeRefreshFragment {
                         }
                         mGenres = newGenres;
                         mAdapter.notifyDataSetChanged();
-                        onLoadFinished(); //TODO 更好的实现
+                        mRequestsManager.addRequestRespondeds();
                     }
                 }
             },
@@ -127,6 +129,7 @@ public class ListGenresFragment extends SwipeRefreshFragment {
                 @Override
                 public void onErrorResponse(VolleyError volleyError) {
                     volleyError.printStackTrace();
+                    mRequestsManager.addRequestErrors();
                 }
             }
     ).setTag(this);
@@ -153,12 +156,14 @@ public class ListGenresFragment extends SwipeRefreshFragment {
                     public void onResponse(List<Video> videos) {
                         genres.second.set(index, videos);
                         mAdapter.notifyItemChanged(index);
+                        mRequestsManager.addRequestRespondeds();
                     }
                 })
                 .setErrorListener(new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         error.printStackTrace();
+                        mRequestsManager.addRequestErrors();
                     }
                 })
                 .build()
@@ -215,7 +220,7 @@ public class ListGenresFragment extends SwipeRefreshFragment {
     //--------------------------------------------------------------------------
 
     private void startLoad() {
-        mVolleySingleton.addToRequestQueue(mVideoCategorySchemaRequest);
+        mRequestsManager.addRequest(mVideoCategorySchemaRequest);
     }
 
     private void restartLoad() {
@@ -225,6 +230,7 @@ public class ListGenresFragment extends SwipeRefreshFragment {
 
     private void cancelLoad() {
         mVolleySingleton.getRequestQueue().cancelAll(this);
+        mRequestsManager.reset();
     }
 
     private void onLoadFinished() {
@@ -244,8 +250,90 @@ public class ListGenresFragment extends SwipeRefreshFragment {
     }
 
     //--------------------------------------------------------------------------
-    // Adapter
+    // 内部类
     //--------------------------------------------------------------------------
+
+    /**
+     * {@link Request Requests}管理器。用于统计Requests状态。
+     */
+    private class RequestsManager {
+
+        private int mRequests = 0;
+
+        private int mRequestRespondeds = 0;
+
+        private int mRequestErrors = 0;
+
+        private int mRequestCancelleds = 0;
+
+        /**
+         * 初始化总{@link Request}数为0
+         */
+        private void reset() {
+            mRequests = mRequestRespondeds = mRequestErrors = mRequestCancelleds = 0;
+        }
+
+        /**
+         * 添加{@link Request}数
+         *
+         * @return 添加后，总Request数
+         */
+        public int addRequest(Request request) {
+            mVolleySingleton.addToRequestQueue(request);
+            return mRequests++;
+        }
+
+        /**
+         * 添加收到响应的{@link Request}数
+         *
+         * @return 添加后，总收到响应的Request数
+         */
+        public int addRequestRespondeds() {
+            int result = mRequestRespondeds++;
+            checkIsAllRequestsFinished();
+            return result;
+        }
+
+        /**
+         * 添加失败的{@link Request}数
+         *
+         * @return 添加后，总失败的Request数
+         */
+        public int addRequestErrors() {
+            int result = mRequestErrors++;
+            checkIsAllRequestsFinished();
+            return result;
+        }
+
+        /**
+         * 添加取消的{@link Request}数
+         *
+         * @return 添加后，总取消的Request数
+         */
+        public int addRequestCancelleds() {
+            int result = mRequestCancelleds++;
+            checkIsAllRequestsFinished();
+            return result;
+        }
+
+        public int getRequestFinisheds() {
+            return mRequestRespondeds + mRequestErrors;
+        }
+
+        public boolean isAllRequestsFinished() {
+            return mRequests == getRequestFinisheds() + mRequestCancelleds;
+        }
+
+        private void checkIsAllRequestsFinished() {
+            if (isAllRequestsFinished()) {
+                onLoadFinished();
+            }
+        }
+    }
+
+    //-------------------------------------
+    // Adapter
+    //-------------------------------------
 
     public class MyAdapter extends RecyclerView.Adapter<ViewHolder> {
 

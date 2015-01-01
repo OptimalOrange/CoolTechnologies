@@ -79,7 +79,9 @@ public abstract class SwipeRefreshFragment
      * @see SwipeRefreshLayout#setRefreshing(boolean)
      */
     public void setRefreshing(boolean refreshing) {
-        mSwipeRefreshLayout.setRefreshing(refreshing);
+        if (mSwipeRefreshLayout != null) {
+            mSwipeRefreshLayout.setRefreshing(refreshing);
+        }
     }
 
     /**
