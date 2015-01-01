@@ -185,7 +185,7 @@ public class ListGenresFragment extends SwipeRefreshFragment {
     public View onCreateViewInSwipeRefreshLayout(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_list_categories, container, false);
+        return inflater.inflate(R.layout.fragment_list_genres, container, false);
     }
 
     @Override
@@ -342,7 +342,7 @@ public class ListGenresFragment extends SwipeRefreshFragment {
         public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             // create a new view
             LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-            View v = inflater.inflate(R.layout.list_item_categories, parent, false);
+            View v = inflater.inflate(R.layout.list_item_genre, parent, false);
             ViewHolder viewHolder = new ViewHolder(v);
             addCardViews(inflater, viewHolder);
             return viewHolder;

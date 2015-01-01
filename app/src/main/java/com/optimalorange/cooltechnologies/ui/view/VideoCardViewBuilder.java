@@ -83,7 +83,7 @@ public class VideoCardViewBuilder {
             imageHeight = (int) (mWidth / DEFAULT_ASPECT_RATIO);
         }
         CardView newCardView = (CardView) mInflater.inflate(
-                R.layout.list_item_categories_card, mParent, false);
+                R.layout.view_video_card, mParent, false);
         newCardView.getLayoutParams().width = mWidth;
         VideoCardViewHolder cardViewHolder = new VideoCardViewHolder(newCardView);
         cardViewHolder.mImageView.getLayoutParams().height = imageHeight;
