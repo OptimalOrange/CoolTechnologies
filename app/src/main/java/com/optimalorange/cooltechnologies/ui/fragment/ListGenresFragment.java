@@ -7,6 +7,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.entity.FavoriteBean;
 import com.optimalorange.cooltechnologies.entity.Video;
+import com.optimalorange.cooltechnologies.network.NetworkChecker;
 import com.optimalorange.cooltechnologies.network.VideosRequest;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.optimalorange.cooltechnologies.ui.ListVideosActivity;
@@ -19,8 +20,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
@@ -64,8 +69,19 @@ public class ListGenresFragment extends SwipeRefreshFragment {
 
     private final RequestsManager mRequestsManager = new RequestsManager();
 
+    /**
+     * 状态属性：网络联通性。true表示已连接网络；false表示网络已断开。
+     */
+    private boolean mIsConnected;
+
+    private BroadcastReceiver mNetworkReceiver;
+
 
     private RecyclerView mRecyclerView;
+
+    private View mEmptyView;
+
+    private View mNoConnectionView;
 
     private RecyclerView.Adapter mAdapter;
 
@@ -179,19 +195,44 @@ public class ListGenresFragment extends SwipeRefreshFragment {
         super.onCreate(savedInstanceState);
         mYoukuClientId = getString(R.string.youku_client_id);
         mVolleySingleton = VolleySingleton.getInstance(getActivity());
+        // Register BroadcastReceiver to track connection changes.
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        mNetworkReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                setIsConnected(NetworkChecker.isConnected(context));
+            }
+        };
+        getActivity().registerReceiver(mNetworkReceiver, filter);
+        // update isConnected state now
+        setIsConnected(NetworkChecker.isConnected(getActivity()));
+        applyIsConnected();
     }
 
     @Override
     public View onCreateChildView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_list_genres, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_list_genres, container, false);
+        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
+        mEmptyView = rootView.findViewById(android.R.id.empty);
+        mNoConnectionView = rootView.findViewById(R.id.no_connection);
+        return rootView;
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
+
+        // set NoConnectionView
+        mNoConnectionView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                setConnection();
+            }
+        });
+
+        // set RecyclerView
         // use RecyclerView.setHasFixedSize(true) to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
         mRecyclerView.setHasFixedSize(true);
@@ -201,13 +242,26 @@ public class ListGenresFragment extends SwipeRefreshFragment {
         mAdapter = new MyAdapter();
         mRecyclerView.setAdapter(mAdapter);
 
+        applyIsConnected();
+
         startLoad(); // important! must do this later than calculateItemsCount
     }
 
     @Override
     public void onDestroyView() {
         cancelLoad();
+        mRecyclerView = null;
+        mEmptyView = null;
+        mNoConnectionView = null;
         super.onDestroyView();
+    }
+
+    @Override
+    public void onDestroy() {
+        if (mNetworkReceiver != null) {
+            getActivity().unregisterReceiver(mNetworkReceiver);
+        }
+        super.onDestroy();
     }
 
     @Override
@@ -215,12 +269,20 @@ public class ListGenresFragment extends SwipeRefreshFragment {
         restartLoad();
     }
 
+    @Override
+    protected boolean canChildScrollUp() {
+        return mRecyclerView.getVisibility() == View.VISIBLE &&
+                mRecyclerView.canScrollVertically(-1);
+    }
+
     //--------------------------------------------------------------------------
     // Private methods
     //--------------------------------------------------------------------------
 
     private void startLoad() {
-        mRequestsManager.addRequest(mVideoCategorySchemaRequest);
+        if (mIsConnected) {
+            mRequestsManager.addRequest(mVideoCategorySchemaRequest);
+        }
     }
 
     private void restartLoad() {
@@ -235,6 +297,30 @@ public class ListGenresFragment extends SwipeRefreshFragment {
 
     private void onLoadFinished() {
         setRefreshing(false);
+    }
+
+    public void setIsConnected(boolean isConnected) {
+        if (mIsConnected != isConnected) {
+            mIsConnected = isConnected;
+            applyIsConnected();
+        }
+    }
+
+    private void applyIsConnected() {
+        if (mNoConnectionView != null) {
+            mNoConnectionView.setVisibility(mIsConnected ? View.GONE : View.VISIBLE);
+        }
+        if (mRecyclerView != null) {
+            mRecyclerView.setVisibility(mIsConnected ? View.VISIBLE : View.GONE);
+        }
+        setRefreshable(mIsConnected);
+    }
+
+    /**
+     * 跳转到网络设置
+     */
+    private boolean setConnection() {
+        return NetworkChecker.openWirelessSettings(getActivity());
     }
 
     private static ItemsCountCalculater.Result calculateItemsCount(View parent) {
