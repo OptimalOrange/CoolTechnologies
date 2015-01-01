@@ -182,7 +182,7 @@ public class ListGenresFragment extends SwipeRefreshFragment {
     }
 
     @Override
-    public View onCreateViewInSwipeRefreshLayout(LayoutInflater inflater, ViewGroup container,
+    public View onCreateChildView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_list_genres, container, false);

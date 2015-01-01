@@ -16,7 +16,16 @@ import android.view.ViewGroup;
 public abstract class SwipeRefreshFragment
         extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
 
+    /**
+     * 状态属性：可刷新状态
+     */
+    private boolean mRefreshable = true;
+
     private SwipeRefreshLayout mSwipeRefreshLayout;
+
+    private View mChildView;
+
+    private MenuItem mRefreshMenuItem;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -29,9 +38,15 @@ public abstract class SwipeRefreshFragment
     @Override
     public final View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-        mSwipeRefreshLayout = new SwipeRefreshLayout(getActivity());
+        mChildView = onCreateChildView(inflater, container, savedInstanceState);
+        mSwipeRefreshLayout = new SwipeRefreshLayout(getActivity()) {
+            @Override
+            public boolean canChildScrollUp() {
+                return SwipeRefreshFragment.this.canChildScrollUp();
+            }
+        };
         mSwipeRefreshLayout.addView(
-                onCreateViewInSwipeRefreshLayout(inflater, container, savedInstanceState),
+                mChildView,
                 SwipeRefreshLayout.LayoutParams.MATCH_PARENT,
                 SwipeRefreshLayout.LayoutParams.MATCH_PARENT);
         mSwipeRefreshLayout.setLayoutParams(new ViewGroup.LayoutParams(
@@ -39,6 +54,7 @@ public abstract class SwipeRefreshFragment
                 ViewGroup.LayoutParams.MATCH_PARENT));
         mSwipeRefreshLayout.setColorSchemeResources(R.color.primary);
         mSwipeRefreshLayout.setOnRefreshListener(this);
+        applyRefreshable();
         return mSwipeRefreshLayout;
     }
 
@@ -55,6 +71,8 @@ public abstract class SwipeRefreshFragment
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.menu_refresh, menu);
+        mRefreshMenuItem = menu.findItem(R.id.action_refresh);
+        applyRefreshable();
     }
 
     @Override
@@ -76,6 +94,28 @@ public abstract class SwipeRefreshFragment
     }
 
     /**
+     * 设置可刷新状态
+     *
+     * @param refreshable true表示当前可刷新；false表示当前不可刷新
+     */
+    public void setRefreshable(boolean refreshable) {
+        if (mRefreshable != refreshable) {
+            mRefreshable = refreshable;
+            applyRefreshable();
+        }
+    }
+
+    private void applyRefreshable() {
+        if (mSwipeRefreshLayout != null) {
+            mSwipeRefreshLayout.setEnabled(mRefreshable);
+        }
+        if (mRefreshMenuItem != null) {
+            mRefreshMenuItem.setEnabled(mRefreshable);
+            mRefreshMenuItem.setVisible(mRefreshable);
+        }
+    }
+
+    /**
      * @see SwipeRefreshLayout#setRefreshing(boolean)
      */
     public void setRefreshing(boolean refreshing) {
@@ -85,13 +125,21 @@ public abstract class SwipeRefreshFragment
     }
 
     /**
+     * @see SwipeRefreshLayout#canChildScrollUp()
+     */
+    protected boolean canChildScrollUp() {
+        return mChildView.canScrollVertically(-1);
+    }
+
+    /**
      * 当{@link #onCreateView}时调用，返回{@link SwipeRefreshLayout}的内容。<br/>
-     * SwipeRefreshLayout只能有一个直接子孩子。
+     * SwipeRefreshLayout只能有一个直接子孩子，除非{@link SwipeRefreshFragment}的子类重新实现了
+     * {@link #canChildScrollUp()}。
      *
      * @see SwipeRefreshLayout
      * @see #onCreateView(android.view.LayoutInflater, android.view.ViewGroup, android.os.Bundle)
      */
-    protected abstract View onCreateViewInSwipeRefreshLayout(
+    protected abstract View onCreateChildView(
             LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState);
 
     /**
