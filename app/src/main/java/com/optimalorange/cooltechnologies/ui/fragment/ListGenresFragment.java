@@ -77,6 +77,8 @@ public class ListGenresFragment extends SwipeRefreshFragment {
     private BroadcastReceiver mNetworkReceiver;
 
 
+    private View mMainContentView;
+
     private RecyclerView mRecyclerView;
 
     private View mEmptyView;
@@ -135,8 +137,9 @@ public class ListGenresFragment extends SwipeRefreshFragment {
                                 e.printStackTrace();
                             }
                         }
-                        mGenres = newGenres;
-                        mAdapter.notifyDataSetChanged();
+                        setGenres(newGenres);
+                    } else {
+                        setGenres(null);
                     }
                     mRequestsManager.addRequestRespondeds();
                 }
@@ -214,6 +217,7 @@ public class ListGenresFragment extends SwipeRefreshFragment {
             Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_list_genres, container, false);
+        mMainContentView = rootView.findViewById(R.id.main_content);
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
         mEmptyView = rootView.findViewById(android.R.id.empty);
         mNoConnectionView = rootView.findViewById(R.id.no_connection);
@@ -242,6 +246,7 @@ public class ListGenresFragment extends SwipeRefreshFragment {
         mAdapter = new MyAdapter();
         mRecyclerView.setAdapter(mAdapter);
 
+        applyGenres();
         applyIsConnected();
 
         startLoad(); // important! must do this later than calculateItemsCount
@@ -250,6 +255,7 @@ public class ListGenresFragment extends SwipeRefreshFragment {
     @Override
     public void onDestroyView() {
         cancelLoad();
+        mMainContentView = null;
         mRecyclerView = null;
         mEmptyView = null;
         mNoConnectionView = null;
@@ -310,10 +316,30 @@ public class ListGenresFragment extends SwipeRefreshFragment {
         if (mNoConnectionView != null) {
             mNoConnectionView.setVisibility(mIsConnected ? View.GONE : View.VISIBLE);
         }
-        if (mRecyclerView != null) {
-            mRecyclerView.setVisibility(mIsConnected ? View.VISIBLE : View.GONE);
+        if (mMainContentView != null) {
+            mMainContentView.setVisibility(mIsConnected ? View.VISIBLE : View.GONE);
         }
         setRefreshable(mIsConnected);
+    }
+
+    public void setGenres(Pair<ArrayList<String>, ArrayList<List<Video>>> genres) {
+        mGenres = genres;
+        applyGenres();
+    }
+
+    public boolean genresIsEmpty() {
+        return mGenres == null || mGenres.first.isEmpty();
+    }
+
+    private void applyGenres() {
+        mAdapter.notifyDataSetChanged();
+        final boolean isEmpty = genresIsEmpty();
+        if (mEmptyView != null) {
+            mEmptyView.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
+        }
+        if (mRecyclerView != null) {
+            mRecyclerView.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
+        }
     }
 
     /**
@@ -503,7 +529,7 @@ public class ListGenresFragment extends SwipeRefreshFragment {
         // Return the size of your dataset (invoked by the layout manager)
         @Override
         public int getItemCount() {
-            return mGenres != null ? mGenres.first.size() : 0;
+            return genresIsEmpty() ? 0 : mGenres.first.size();
         }
     }
 

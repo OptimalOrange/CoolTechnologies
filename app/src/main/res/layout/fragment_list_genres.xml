@@ -7,21 +7,30 @@
         tools:context=".ui.fragment.ListGenresFragment"
         >
 
-    <android.support.v7.widget.RecyclerView
-            android:id="@+id/recycler_view"
-            android:scrollbars="vertical"
+    <FrameLayout
+            android:id="@+id/main_content"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            />
+            >
 
-    <TextView
-            android:id="@android:id/empty"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="@string/no_genres"
-            android:visibility="gone"
-            />
+        <android.support.v7.widget.RecyclerView
+                android:id="@+id/recycler_view"
+                android:scrollbars="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                />
+
+        <TextView
+                android:id="@android:id/empty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/no_genres"
+                android:visibility="gone"
+                />
+
+    </FrameLayout>
+
 
     <TextView
             android:id="@+id/no_connection"
