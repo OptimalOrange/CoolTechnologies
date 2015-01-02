@@ -137,8 +137,8 @@ public class ListGenresFragment extends SwipeRefreshFragment {
                         }
                         mGenres = newGenres;
                         mAdapter.notifyDataSetChanged();
-                        mRequestsManager.addRequestRespondeds();
                     }
+                    mRequestsManager.addRequestRespondeds();
                 }
             },
             new Response.ErrorListener() {
