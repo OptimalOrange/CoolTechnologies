@@ -4,6 +4,7 @@ import com.optimalorange.cooltechnologies.R;
 
 import android.app.Fragment;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
@@ -15,6 +16,8 @@ import android.view.ViewGroup;
 
 public abstract class SwipeRefreshFragment
         extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
+
+    private final Handler mHandler = new Handler();
 
     /**
      * 状态属性：可刷新状态
@@ -79,9 +82,7 @@ public abstract class SwipeRefreshFragment
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_refresh:
-                if (!mSwipeRefreshLayout.isRefreshing()) {
-                    mSwipeRefreshLayout.setRefreshing(true);
-                }
+                setRefreshing(true);
                 onRefresh();
                 return true;
             default:
@@ -118,9 +119,18 @@ public abstract class SwipeRefreshFragment
     /**
      * @see SwipeRefreshLayout#setRefreshing(boolean)
      */
-    public void setRefreshing(boolean refreshing) {
+    public void setRefreshing(final boolean refreshing) {
         if (mSwipeRefreshLayout != null) {
-            mSwipeRefreshLayout.setRefreshing(refreshing);
+            //TODO bug of SwipeRefreshLayout
+            // SwipeRefreshLayout indicator does not appear when the setRefreshing(true) is called
+            // before the SwipeRefreshLayout.onMeasure(). This is a unreliable workaround from
+            // http://stackoverflow.com/questions/26858692/swiperefreshlayout-setrefreshing-not-showing-indicator-initially
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSwipeRefreshLayout.setRefreshing(refreshing);
+                }
+            });
         }
     }
 

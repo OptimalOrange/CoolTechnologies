@@ -53,7 +53,7 @@
     <string name="settings">设置</string>
 
     <!-- ListGenresFragment.java -->
-    <string name="no_genres">查询不到类型列表，请刷新重试。</string>
+    <string name="no_genres">类型列表为空，请刷新重试。</string>
     <string name="no_connection">无网络连接，点击此处跳转到网络设置。</string>
 
 </resources>

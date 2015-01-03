@@ -249,6 +249,7 @@ public class ListGenresFragment extends SwipeRefreshFragment {
         applyGenres();
         applyIsConnected();
 
+        setRefreshing(true);
         startLoad(); // important! must do this later than calculateItemsCount
     }
 
@@ -336,9 +337,6 @@ public class ListGenresFragment extends SwipeRefreshFragment {
         final boolean isEmpty = genresIsEmpty();
         if (mEmptyView != null) {
             mEmptyView.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
-        }
-        if (mRecyclerView != null) {
-            mRecyclerView.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
         }
     }
 
