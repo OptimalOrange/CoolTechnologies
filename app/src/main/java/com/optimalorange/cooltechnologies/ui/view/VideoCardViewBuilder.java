@@ -1,7 +1,10 @@
 package com.optimalorange.cooltechnologies.ui.view;
 
+import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.optimalorange.cooltechnologies.R;
+import com.optimalorange.cooltechnologies.entity.Video;
+import com.optimalorange.cooltechnologies.util.Utils;
 
 import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
@@ -129,6 +132,32 @@ public class VideoCardViewBuilder {
             mViewCountView = (TextView) rootCardView.findViewById(R.id.view_count);
             mdurationView = (TextView) rootCardView.findViewById(R.id.duration);
             mTextView = (TextView) rootCardView.findViewById(R.id.card_simple_title);
+        }
+
+        /**
+         * 把video绑定到当前VideoCardView中
+         *
+         * @param video       要绑定到this VideoCardView的Video数据
+         * @param showImage   是否加载缩略图。
+         *                    true表示加载缩略图；false表示不加载缩略图，加载默认图像（如果设置了的话）
+         * @param imageLoader 用于加载缩略图的{@link ImageLoader}
+         * @throws NullPointerException 如果 showImage && imageLoader == null
+         * @see NetworkImageView#setImageUrl(String, ImageLoader)
+         */
+        public void bindVideo(Video video, boolean showImage, ImageLoader imageLoader) {
+            if (showImage) {
+                if (imageLoader == null) {
+                    throw new NullPointerException("imageLoader shouldn't be null");
+                }
+                mImageView.setImageUrl(video.getThumbnail_v2(), imageLoader);
+            } else {
+                mImageView.setImageUrl(null, null);
+            }
+            mViewCountView.setText(Utils.formatViewCount(
+                    video.getView_count(), mViewCountView.getContext()));
+            mdurationView.setText(
+                    Utils.getDurationString(video.getDuration()));
+            mTextView.setText(video.getTitle());
         }
     }
 }

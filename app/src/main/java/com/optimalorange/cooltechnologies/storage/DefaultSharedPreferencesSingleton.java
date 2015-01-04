@@ -61,26 +61,26 @@ public class DefaultSharedPreferencesSingleton {
     }
 
     /**
-     * 使用移动网络时,显示图片
+     * 仅在WLAN下，显示图片
      *
-     * @see R.string#pref_key_show_images
+     * @see R.string#pref_key_only_show_images_when_use_wlan
      */
-    public boolean shouldShowImagesWhenUseMobileNetwork() {
+    public boolean onlyShowImagesWhenUseWlan() {
         return mDefaultSharedPreferences.getBoolean(
-                mResources.getString(R.string.pref_key_show_images),
-                mResources.getBoolean(R.bool.pref_default_value_show_images)
+                mResources.getString(R.string.pref_key_only_show_images_when_use_wlan),
+                mResources.getBoolean(R.bool.pref_default_value_only_show_images_when_use_wlan)
         );
     }
 
     /**
-     * 使用移动网络时,播放视频
+     * 仅在WLAN下，播放视频
      *
-     * @see R.string#pref_key_play_video
+     * @see R.string#pref_key_only_play_video_when_use_wlan
      */
-    public boolean shouldPlayVideoWhenUseMobileNetwork() {
+    public boolean onlyPlayVideoWhenUseWlan() {
         return mDefaultSharedPreferences.getBoolean(
-                mResources.getString(R.string.pref_key_play_video),
-                mResources.getBoolean(R.bool.pref_default_value_play_video)
+                mResources.getString(R.string.pref_key_only_play_video_when_use_wlan),
+                mResources.getBoolean(R.bool.pref_default_value_only_play_video_when_use_wlan)
         );
     }
 

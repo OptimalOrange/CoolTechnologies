@@ -10,11 +10,11 @@ import com.optimalorange.cooltechnologies.entity.Video;
 import com.optimalorange.cooltechnologies.network.NetworkChecker;
 import com.optimalorange.cooltechnologies.network.VideosRequest;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
+import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingleton;
 import com.optimalorange.cooltechnologies.ui.ListVideosActivity;
 import com.optimalorange.cooltechnologies.ui.PlayVideoActivity;
 import com.optimalorange.cooltechnologies.ui.view.VideoCardViewBuilder;
 import com.optimalorange.cooltechnologies.util.ItemsCountCalculater;
-import com.optimalorange.cooltechnologies.util.Utils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -59,6 +59,8 @@ public class ListGenresFragment extends SwipeRefreshFragment {
     private String mYoukuClientId;
 
     private VolleySingleton mVolleySingleton;
+
+    private DefaultSharedPreferencesSingleton mSharedPreferencesSingleton;
 
     /**
      * 类型列表及每种类型对应的视频
@@ -194,6 +196,7 @@ public class ListGenresFragment extends SwipeRefreshFragment {
         super.onCreate(savedInstanceState);
         mYoukuClientId = getString(R.string.youku_client_id);
         mVolleySingleton = VolleySingleton.getInstance(getActivity());
+        mSharedPreferencesSingleton = DefaultSharedPreferencesSingleton.getInstance(getActivity());
         // Register BroadcastReceiver to track connection changes.
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         mNetworkReceiver = new BroadcastReceiver() {
@@ -493,8 +496,10 @@ public class ListGenresFragment extends SwipeRefreshFragment {
             List<Video> videos = mGenres.second.get(position);
             int cardViewsIndex = 0;
             if (videos != null) {
+                final boolean shouldShowImages = shouldShowImage();
                 for (final Video video : videos) {
-                    bindVideoCardView(holder.mCardViews.get(cardViewsIndex), video);
+                    bindVideoCardView(
+                            holder.mCardViews.get(cardViewsIndex), video, shouldShowImages);
                     cardViewsIndex++;
                 }
             }
@@ -503,15 +508,16 @@ public class ListGenresFragment extends SwipeRefreshFragment {
             }
         }
 
+        private boolean shouldShowImage() {
+            return !mSharedPreferencesSingleton.onlyShowImagesWhenUseWlan() ||
+                    NetworkChecker.isWifiConnected(getActivity());
+        }
+
         private void bindVideoCardView(
-                final VideoCardViewBuilder.VideoCardViewHolder videoCardView, final Video video) {
-            videoCardView.mImageView.setImageUrl(
-                    video.getThumbnail_v2(), mVolleySingleton.getImageLoader());
-            videoCardView.mViewCountView.setText(Utils.formatViewCount(
-                    video.getView_count(), videoCardView.mViewCountView.getContext()));
-            videoCardView.mdurationView.setText(
-                    Utils.getDurationString(video.getDuration()));
-            videoCardView.mTextView.setText(video.getTitle());
+                final VideoCardViewBuilder.VideoCardViewHolder videoCardView,
+                final Video video,
+                final boolean showImage) {
+            videoCardView.bindVideo(video, showImage, mVolleySingleton.getImageLoader());
             videoCardView.mRootCardView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

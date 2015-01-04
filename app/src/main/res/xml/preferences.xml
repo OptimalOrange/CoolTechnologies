@@ -7,17 +7,17 @@
             >
 
         <CheckBoxPreference
-                android:key="@string/pref_key_show_images"
-                android:title="@string/pref_title_show_images"
-                android:summary="@string/pref_summary_show_images"
-                android:defaultValue="@bool/pref_default_value_show_images"
+                android:key="@string/pref_key_only_show_images_when_use_wlan"
+                android:title="@string/pref_title_only_show_images_when_use_wlan"
+                android:summary="@string/pref_summary_only_show_images_when_use_wlan"
+                android:defaultValue="@bool/pref_default_value_only_show_images_when_use_wlan"
                 />
 
         <CheckBoxPreference
-                android:key="@string/pref_key_play_video"
-                android:title="@string/pref_title_play_video"
-                android:summary="@string/pref_summary_play_video"
-                android:defaultValue="@bool/pref_default_value_play_video"
+                android:key="@string/pref_key_only_play_video_when_use_wlan"
+                android:title="@string/pref_title_only_play_video_when_use_wlan"
+                android:summary="@string/pref_summary_only_play_video_when_use_wlan"
+                android:defaultValue="@bool/pref_default_value_only_play_video_when_use_wlan"
                 />
 
     </PreferenceCategory>
