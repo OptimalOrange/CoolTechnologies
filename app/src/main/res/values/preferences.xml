@@ -5,10 +5,12 @@
     <string name="pref_category_title_network">网络</string>
     <string name="pref_key_show_images" translatable="false">pref_key_show_images</string>
     <bool name="pref_default_value_show_images">true</bool>
-    <string name="pref_title_show_images">使用移动网络时,显示图片</string>
+    <string name="pref_title_show_images">非WLAN下，显示图片</string>
+    <string name="pref_summary_show_images">使用移动网络时，下载并显示图片</string>
     <string name="pref_key_play_video" translatable="false">pref_key_play_video</string>
     <bool name="pref_default_value_play_video">true</bool>
-    <string name="pref_title_play_video">使用移动网络时,播放视频</string>
+    <string name="pref_title_play_video">非WLAN下，播放视频</string>
+    <string name="pref_summary_play_video">使用移动网络时，允许播放视频</string>
 
     <string name="pref_category_key_other_information" translatable="false">
         pref_category_key_other_information

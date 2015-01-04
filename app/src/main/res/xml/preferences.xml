@@ -9,12 +9,14 @@
         <CheckBoxPreference
                 android:key="@string/pref_key_show_images"
                 android:title="@string/pref_title_show_images"
+                android:summary="@string/pref_summary_show_images"
                 android:defaultValue="@bool/pref_default_value_show_images"
                 />
 
         <CheckBoxPreference
                 android:key="@string/pref_key_play_video"
                 android:title="@string/pref_title_play_video"
+                android:summary="@string/pref_summary_play_video"
                 android:defaultValue="@bool/pref_default_value_play_video"
                 />
 
