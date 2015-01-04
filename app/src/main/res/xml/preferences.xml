@@ -20,4 +20,24 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory
+            android:key="@string/pref_category_key_other_information"
+            android:title="@string/pref_category_title_other_information"
+            >
+
+        <com.optimalorange.cooltechnologies.ui.preference.VersionPreference/>
+
+        <Preference
+                android:key="@string/pref_key_licenses"
+                android:title="@string/pref_title_licenses"
+                android:summary="@string/pref_summary_licenses"
+                >
+            <intent
+                    android:targetPackage="com.optimalorange.cooltechnologies"
+                    android:targetClass="com.optimalorange.cooltechnologies.ui.LicensesActivity"
+                    />
+        </Preference>
+
+    </PreferenceCategory>
+
 </PreferenceScreen>

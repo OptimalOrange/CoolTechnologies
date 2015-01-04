@@ -67,6 +67,11 @@
             </intent-filter>
         </activity>
 
+        <activity
+                android:name=".ui.LicensesActivity"
+                android:label="@string/licenses"
+                android:configChanges="keyboardHidden|orientation|screenSize"/>
+
     </application>
 
 </manifest>

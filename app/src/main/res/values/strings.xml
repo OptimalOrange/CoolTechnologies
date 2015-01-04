@@ -52,8 +52,15 @@
     <!-- SettingsActivity.java -->
     <string name="settings">设置</string>
 
+    <!-- SettingsActivity & LicensesActivity -->
+    <string name="licenses">开放源代码许可</string>
+
     <!-- ListGenresFragment.java -->
     <string name="no_genres">类型列表为空，请刷新重试。</string>
     <string name="no_connection">无网络连接，点击此处跳转到网络设置。</string>
+
+    <!-- VersionPreference -->
+    <string name="check_for_update">检查更新</string>
+    <string name="version">当前版本：%s</string>
 
 </resources>

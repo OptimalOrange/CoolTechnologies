@@ -10,4 +10,12 @@
     <bool name="pref_default_value_play_video">true</bool>
     <string name="pref_title_play_video">使用移动网络时,播放视频</string>
 
+    <string name="pref_category_key_other_information" translatable="false">
+        pref_category_key_other_information
+    </string>
+    <string name="pref_category_title_other_information">其他信息</string>
+    <string name="pref_key_licenses" translatable="false">pref_key_licenses</string>
+    <string name="pref_title_licenses">@string/licenses</string>
+    <string name="pref_summary_licenses">开放源代码软件的许可详情</string>
+
 </resources>
