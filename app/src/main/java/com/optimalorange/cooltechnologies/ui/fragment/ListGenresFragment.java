@@ -44,8 +44,6 @@ import java.util.List;
  * Created by WANGZHENGZE on 2014/11/20.
  * 分类
  */
-//TODO 执行网络操作前，检查网络可用性
-//TODO 刷新
 //TODO reCreat问题（横竖屏转换、接完电话回来时）
 //TODO 点击时的视觉表现（动画等）
 public class ListGenresFragment extends SwipeRefreshFragment {
@@ -86,8 +84,6 @@ public class ListGenresFragment extends SwipeRefreshFragment {
     private View mNoConnectionView;
 
     private RecyclerView.Adapter mAdapter;
-
-    private RecyclerView.LayoutManager mLayoutManager;
 
     private ItemsCountCalculater.Result mItemsCountAndDimension;
 
@@ -240,8 +236,7 @@ public class ListGenresFragment extends SwipeRefreshFragment {
         // use RecyclerView.setHasFixedSize(true) to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
         mRecyclerView.setHasFixedSize(true);
-        mLayoutManager = new LinearLayoutManager(getActivity());
-        mRecyclerView.setLayoutManager(mLayoutManager);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mItemsCountAndDimension = calculateItemsCount(mRecyclerView);
         mAdapter = new MyAdapter();
         mRecyclerView.setAdapter(mAdapter);
@@ -260,6 +255,8 @@ public class ListGenresFragment extends SwipeRefreshFragment {
         mRecyclerView = null;
         mEmptyView = null;
         mNoConnectionView = null;
+        mItemsCountAndDimension = null;
+        mAdapter = null;
         super.onDestroyView();
     }
 
@@ -497,31 +494,34 @@ public class ListGenresFragment extends SwipeRefreshFragment {
             int cardViewsIndex = 0;
             if (videos != null) {
                 for (final Video video : videos) {
-                    VideoCardViewBuilder.VideoCardViewHolder currentCardView =
-                            holder.mCardViews.get(cardViewsIndex);
-                    currentCardView.mImageView.setImageUrl(
-                            video.getThumbnail_v2(), mVolleySingleton.getImageLoader());
-                    currentCardView.mViewCountView.setText(Utils.formatViewCount(
-                            video.getView_count(), currentCardView.mViewCountView.getContext()));
-                    currentCardView.mdurationView.setText(
-                            Utils.getDurationString(video.getDuration()));
-                    currentCardView.mTextView.setText(video.getTitle());
-                    currentCardView.mRootCardView.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Intent intent = new Intent(v.getContext(), PlayVideoActivity.class);
-                            FavoriteBean favoriteBean = new FavoriteBean(video);
-                            intent.putExtra(PlayVideoActivity.EXTRA_KEY_VIDEO_ID, favoriteBean);
-                            startActivity(intent);
-                        }
-                    });
-                    currentCardView.mRootCardView.setVisibility(CardView.VISIBLE);
+                    bindVideoCardView(holder.mCardViews.get(cardViewsIndex), video);
                     cardViewsIndex++;
                 }
             }
             for (; cardViewsIndex < holder.mCardViews.size(); cardViewsIndex++) {
                 holder.mCardViews.get(cardViewsIndex).mRootCardView.setVisibility(CardView.GONE);
             }
+        }
+
+        private void bindVideoCardView(
+                final VideoCardViewBuilder.VideoCardViewHolder videoCardView, final Video video) {
+            videoCardView.mImageView.setImageUrl(
+                    video.getThumbnail_v2(), mVolleySingleton.getImageLoader());
+            videoCardView.mViewCountView.setText(Utils.formatViewCount(
+                    video.getView_count(), videoCardView.mViewCountView.getContext()));
+            videoCardView.mdurationView.setText(
+                    Utils.getDurationString(video.getDuration()));
+            videoCardView.mTextView.setText(video.getTitle());
+            videoCardView.mRootCardView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(v.getContext(), PlayVideoActivity.class);
+                    FavoriteBean favoriteBean = new FavoriteBean(video);
+                    intent.putExtra(PlayVideoActivity.EXTRA_KEY_VIDEO_ID, favoriteBean);
+                    startActivity(intent);
+                }
+            });
+            videoCardView.mRootCardView.setVisibility(CardView.VISIBLE);
         }
 
         // Return the size of your dataset (invoked by the layout manager)
