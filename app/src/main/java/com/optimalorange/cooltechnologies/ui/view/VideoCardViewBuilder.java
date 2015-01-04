@@ -135,6 +135,18 @@ public class VideoCardViewBuilder {
         }
 
         /**
+         * 清空所以Views的内容。文本设为""，图像设为默认图像。
+         *
+         * @see NetworkImageView#setDefaultImageResId(int defaultImage)
+         */
+        public void clearAllViewsContent() {
+            mImageView.setImageUrl(null, null);
+            mViewCountView.setText("");
+            mdurationView.setText("");
+            mTextView.setText("");
+        }
+
+        /**
          * 把video绑定到当前VideoCardView中
          *
          * @param video       要绑定到this VideoCardView的Video数据

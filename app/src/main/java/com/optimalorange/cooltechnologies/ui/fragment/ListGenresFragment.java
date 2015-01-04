@@ -27,7 +27,6 @@ import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
-import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Pair;
@@ -504,7 +503,7 @@ public class ListGenresFragment extends SwipeRefreshFragment {
                 }
             }
             for (; cardViewsIndex < holder.mCardViews.size(); cardViewsIndex++) {
-                holder.mCardViews.get(cardViewsIndex).mRootCardView.setVisibility(CardView.GONE);
+                holder.mCardViews.get(cardViewsIndex).clearAllViewsContent();
             }
         }
 
@@ -527,7 +526,6 @@ public class ListGenresFragment extends SwipeRefreshFragment {
                     startActivity(intent);
                 }
             });
-            videoCardView.mRootCardView.setVisibility(CardView.VISIBLE);
         }
 
         // Return the size of your dataset (invoked by the layout manager)
