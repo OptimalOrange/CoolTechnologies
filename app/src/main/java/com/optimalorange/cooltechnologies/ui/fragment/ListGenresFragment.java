@@ -43,6 +43,7 @@ import java.util.List;
  * Created by WANGZHENGZE on 2014/11/20.
  * 分类
  */
+//TODO fix Bug：刷新中时，Tab滑倒最右，使本Fragment onDestroyView的话，本Fragment的视图会错乱
 //TODO reCreat问题（横竖屏转换、接完电话回来时）
 //TODO 点击时的视觉表现（动画等）
 public class ListGenresFragment extends SwipeRefreshFragment {
@@ -73,7 +74,7 @@ public class ListGenresFragment extends SwipeRefreshFragment {
     /**
      * 状态属性：网络联通性。true表示已连接网络；false表示网络已断开。
      */
-    private boolean mIsConnected;
+    private boolean mIsConnected = false;
 
     private BroadcastReceiver mNetworkReceiver;
 
@@ -249,8 +250,10 @@ public class ListGenresFragment extends SwipeRefreshFragment {
         applyGenres();
         applyIsConnected();
 
-        setRefreshing(true);
-        startLoad(); // important! must do this later than calculateItemsCount
+        if (mIsConnected && genresIsEmpty()) {
+            setRefreshing(true);
+            startLoad(); // important! must do this later than calculateItemsCount
+        }
     }
 
     @Override

@@ -64,6 +64,7 @@ public abstract class SwipeRefreshFragment
     @Override
     public void onDestroyView() {
         mSwipeRefreshLayout = null;
+        mChildView = null;
         super.onDestroyView();
     }
 
@@ -128,7 +129,9 @@ public abstract class SwipeRefreshFragment
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    mSwipeRefreshLayout.setRefreshing(refreshing);
+                    if (mSwipeRefreshLayout != null) {
+                        mSwipeRefreshLayout.setRefreshing(refreshing);
+                    }
                 }
             });
         }
