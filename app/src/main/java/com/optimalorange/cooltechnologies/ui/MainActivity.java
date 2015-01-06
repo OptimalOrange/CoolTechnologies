@@ -51,6 +51,8 @@ public class MainActivity extends BaseActivity {
 
     private DefaultSharedPreferencesSingleton mDefaultSharedPreferencesSingleton;
 
+    private NetworkChecker mNetworkChecker;
+
     private ViewPager mPager;
 
     private String mUserToken;
@@ -66,6 +68,7 @@ public class MainActivity extends BaseActivity {
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
         mDefaultSharedPreferencesSingleton = DefaultSharedPreferencesSingleton.getInstance(this);
+        mNetworkChecker = NetworkChecker.newInstance(this);
 
         mUserToken = mDefaultSharedPreferencesSingleton.retrieveString("user_token", "");
         mIsLogin = !mUserToken.isEmpty();
@@ -83,6 +86,21 @@ public class MainActivity extends BaseActivity {
         mIndicator.setViewPager(mPager);
         // goto default pager
         mPager.setCurrentItem(DEFAULT_POSITION);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Fragment fragment = getCurrentFragment();
+        if (fragment instanceof HistoryFragment) {
+            ((HistoryFragment) fragment).refreshData();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        mNetworkChecker = null;
+        super.onDestroy();
     }
 
     @Override
@@ -138,7 +156,7 @@ public class MainActivity extends BaseActivity {
                     invalidateOptionsMenu();
                     Toast.makeText(this, R.string.action_logout_success, Toast.LENGTH_SHORT).show();
                 } else {
-                    if (!NetworkChecker.isConnected(this)) {
+                    if (!mNetworkChecker.isConnected()) {
                         Toast.makeText(this, R.string.action_login_no_net, Toast.LENGTH_SHORT)
                                 .show();
                         return true;
@@ -151,6 +169,23 @@ public class MainActivity extends BaseActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+
+    private Fragment getCurrentFragment() {
+        final String name = makeFragmentName(
+                R.id.pager, FRAGMENT_IDS_ORDER_BY_POSITION[mPager.getCurrentItem()]);
+        return getFragmentManager().findFragmentByTag(name);
+    }
+
+    /**
+     * copy from {@link FragmentPagerAdapter#makeFragmentName(int, long)}
+     */
+    // TODO shouldn't depend on others private code
+    private static String makeFragmentName(int viewId, long id) {
+        return "android:switcher:" + viewId + ":" + id;
+    }
+
+
 
     private static class MyFragmentPagerAdapter extends FragmentPagerAdapter {
 
@@ -236,26 +271,4 @@ public class MainActivity extends BaseActivity {
         }
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Fragment fragment = getCurrentFragment();
-        if (fragment instanceof HistoryFragment) {
-            ((HistoryFragment) fragment).refreshData();
-        }
-    }
-
-    private Fragment getCurrentFragment() {
-        final String name = makeFragmentName(
-                R.id.pager, FRAGMENT_IDS_ORDER_BY_POSITION[mPager.getCurrentItem()]);
-        return getFragmentManager().findFragmentByTag(name);
-    }
-
-    /**
-     * copy from {@link FragmentPagerAdapter#makeFragmentName(int, long)}
-     */
-    // TODO shouldn't depend on others private code
-    private static String makeFragmentName(int viewId, long id) {
-        return "android:switcher:" + viewId + ":" + id;
-    }
 }

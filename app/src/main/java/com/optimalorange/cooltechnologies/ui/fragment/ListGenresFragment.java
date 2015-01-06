@@ -61,6 +61,8 @@ public class ListGenresFragment extends SwipeRefreshFragment {
 
     private DefaultSharedPreferencesSingleton mSharedPreferencesSingleton;
 
+    private NetworkChecker mNetworkChecker;
+
     /**
      * 类型列表及每种类型对应的视频
      */
@@ -196,17 +198,18 @@ public class ListGenresFragment extends SwipeRefreshFragment {
         mYoukuClientId = getString(R.string.youku_client_id);
         mVolleySingleton = VolleySingleton.getInstance(getActivity());
         mSharedPreferencesSingleton = DefaultSharedPreferencesSingleton.getInstance(getActivity());
+        mNetworkChecker = NetworkChecker.newInstance(getActivity());
         // Register BroadcastReceiver to track connection changes.
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
         mNetworkReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                setIsConnected(NetworkChecker.isConnected(context));
+                setIsConnected(mNetworkChecker.isConnected());
             }
         };
         getActivity().registerReceiver(mNetworkReceiver, filter);
         // update isConnected state now
-        setIsConnected(NetworkChecker.isConnected(getActivity()));
+        setIsConnected(mNetworkChecker.isConnected());
         applyIsConnected();
     }
 
@@ -267,6 +270,8 @@ public class ListGenresFragment extends SwipeRefreshFragment {
         if (mNetworkReceiver != null) {
             getActivity().unregisterReceiver(mNetworkReceiver);
         }
+        mNetworkReceiver = null;
+        mNetworkChecker = null;
         super.onDestroy();
     }
 
@@ -509,7 +514,7 @@ public class ListGenresFragment extends SwipeRefreshFragment {
 
         private boolean shouldShowImage() {
             return !mSharedPreferencesSingleton.onlyShowImagesWhenUseWlan() ||
-                    NetworkChecker.isWifiConnected(getActivity());
+                    mNetworkChecker.isWifiConnected();
         }
 
         private void bindVideoCardView(

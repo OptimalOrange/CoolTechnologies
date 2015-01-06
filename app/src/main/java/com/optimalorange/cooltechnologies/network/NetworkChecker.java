@@ -19,26 +19,40 @@ import android.os.Bundle;
  */
 public class NetworkChecker {
 
+    private final ConnectivityManager mConnectivityManager;
+
     /**
      * {@link #openNoConnectionDialog(android.app.FragmentManager)}打开的{@link DialogFragment}的tag
      */
-    private static final String FRAGMENT_TAG_NO_CONNECTION_DIALOG =
-            NetworkChecker.class.getName() + "noConnectionDialog";
+    public static final String FRAGMENT_TAG_NO_CONNECTION_DIALOG =
+            NetworkChecker.class.getName() + ".fragment_tag_no_connection_dialog";
 
     /**
-     * 禁止实例化（因为本类只有静态方法，实例无用）
+     * 用{@link #newInstance(Context context)}实例化
      */
-    private NetworkChecker() {
+    private NetworkChecker(Context context) {
+        mConnectivityManager =
+                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+    }
+
+    /**
+     * 获取新{@link NetworkChecker}实例
+     *
+     * @param context 用于获取{@link ConnectivityManager}的{@link Context}。
+     * @return 新创建的NetworkChecker实例
+     * @see Context#getSystemService(String)
+     */
+    public static NetworkChecker newInstance(Context context) {
+        return new NetworkChecker(context);
     }
 
     /**
      * 根据{@link Context}取得{@link ConnectivityManager}
      *
-     * @param context 应用程序环境
      * @return {@code context.getSystemService(Context.CONNECTIVITY_SERVICE)}
      */
-    public static ConnectivityManager getConnectivityManager(Context context) {
-        return (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+    public ConnectivityManager getConnectivityManager() {
+        return mConnectivityManager;
     }
 
     /**
@@ -53,8 +67,8 @@ public class NetworkChecker {
      * 或者其它{@link ConnectivityManager}定义的网络类型。
      * @see android.net.ConnectivityManager#getActiveNetworkInfo()
      */
-    public static Integer getActiveNetworkType(Context context) {
-        NetworkInfo networkInfo = getConnectivityManager(context).getActiveNetworkInfo();
+    public Integer getActiveNetworkType() {
+        NetworkInfo networkInfo = getConnectivityManager().getActiveNetworkInfo();
         return networkInfo == null || !networkInfo.isConnected() ? null : networkInfo.getType();
     }
 
@@ -63,8 +77,8 @@ public class NetworkChecker {
      *
      * @return 可以返回true；不可能建立返回false
      */
-    public static boolean isConnected(Context context) {
-        return getActiveNetworkType(context) != null;
+    public boolean isConnected() {
+        return getActiveNetworkType() != null;
     }
 
     /**
@@ -72,8 +86,8 @@ public class NetworkChecker {
      *
      * @return 是返回true；不是返回false
      */
-    public static boolean isMobileConnected(Context context) {
-        Integer type = getActiveNetworkType(context);
+    public boolean isMobileConnected() {
+        Integer type = getActiveNetworkType();
         return type != null && type == ConnectivityManager.TYPE_MOBILE;
     }
 
@@ -82,8 +96,8 @@ public class NetworkChecker {
      *
      * @return 是返回true；不是返回false
      */
-    public static boolean isWifiConnected(Context context) {
-        Integer type = getActiveNetworkType(context);
+    public boolean isWifiConnected() {
+        Integer type = getActiveNetworkType();
         return type != null && type == ConnectivityManager.TYPE_WIFI;
     }
 

@@ -62,6 +62,7 @@ public class FavoriteFragment extends Fragment {
     private ListView favoriteListView;
     private VolleySingleton mVolleySingleton;
     private DefaultSharedPreferencesSingleton mDefaultSharedPreferencesSingleton;
+    private NetworkChecker mNetworkChecker;
     private TextView mTvHint;
     private boolean mIsCreated = false;
     private PullRefreshLayout refreshLayout;
@@ -112,6 +113,12 @@ public class FavoriteFragment extends Fragment {
     };
 
     private boolean mIsDelButtonCreate;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mNetworkChecker = NetworkChecker.newInstance(getActivity());
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -223,6 +230,12 @@ public class FavoriteFragment extends Fragment {
         });
     }
 
+    @Override
+    public void onDestroy() {
+        mNetworkChecker = null;
+        super.onDestroy();
+    }
+
     private void removeWindowView() {
         if (windowManager != null && deleteView != null) {
             windowManager.removeViewImmediate(deleteView);
@@ -244,7 +257,7 @@ public class FavoriteFragment extends Fragment {
         }
         String token = mDefaultSharedPreferencesSingleton.retrieveString("user_token", "");
         if (!token.isEmpty()) {
-            if (!NetworkChecker.isConnected(getActivity())) {
+            if (!mNetworkChecker.isConnected()) {
                 setHint(R.string.favorite_hint_no_net);
                 return;
             }
@@ -329,7 +342,7 @@ public class FavoriteFragment extends Fragment {
     }
 
     private void sendDeleteRequest(String id, final int index) {
-        if (!NetworkChecker.isConnected(getActivity())) {
+        if (!mNetworkChecker.isConnected()) {
             Toast.makeText(getActivity(), R.string.favorite_delete_no_net, Toast.LENGTH_SHORT).show();
             return;
         }
