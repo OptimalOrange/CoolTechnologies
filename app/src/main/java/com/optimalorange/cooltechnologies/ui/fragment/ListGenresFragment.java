@@ -43,7 +43,6 @@ import java.util.List;
  * Created by WANGZHENGZE on 2014/11/20.
  * 分类
  */
-//TODO fix Bug：刷新中时，Tab滑倒最右，使本Fragment onDestroyView的话，本Fragment的视图会错乱
 //TODO reCreat问题（横竖屏转换、接完电话回来时）
 //TODO 点击时的视觉表现（动画等）
 public class ListGenresFragment extends SwipeRefreshFragment {
@@ -212,6 +211,8 @@ public class ListGenresFragment extends SwipeRefreshFragment {
         // update isConnected state now
         setIsConnected(mNetworkChecker.isConnected());
         applyIsConnected();
+        mAdapter = new MyAdapter();
+        mItemsCountAndDimension = calculateItemsCount(getActivity());
     }
 
     @Override
@@ -243,8 +244,6 @@ public class ListGenresFragment extends SwipeRefreshFragment {
         // in content do not change the layout size of the RecyclerView
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mItemsCountAndDimension = calculateItemsCount(mRecyclerView);
-        mAdapter = new MyAdapter();
         mRecyclerView.setAdapter(mAdapter);
 
         applyGenres();
@@ -258,18 +257,19 @@ public class ListGenresFragment extends SwipeRefreshFragment {
 
     @Override
     public void onDestroyView() {
-        cancelLoad();
-        mMainContentView = null;
-        mRecyclerView = null;
-        mEmptyView = null;
         mNoConnectionView = null;
-        mItemsCountAndDimension = null;
-        mAdapter = null;
+        mEmptyView = null;
+        mRecyclerView.setAdapter(null);
+        mRecyclerView = null;
+        mMainContentView = null;
         super.onDestroyView();
     }
 
     @Override
     public void onDestroy() {
+        cancelLoad();
+        mItemsCountAndDimension = null;
+        mAdapter = null;
         if (mNetworkReceiver != null) {
             getActivity().unregisterReceiver(mNetworkReceiver);
         }
@@ -354,8 +354,8 @@ public class ListGenresFragment extends SwipeRefreshFragment {
         return NetworkChecker.openWirelessSettings(getActivity());
     }
 
-    private static ItemsCountCalculater.Result calculateItemsCount(View parent) {
-        Resources resources = parent.getResources();
+    private static ItemsCountCalculater.Result calculateItemsCount(Context context) {
+        Resources resources = context.getResources();
         float margin = resources.getDimension(R.dimen.card_margin_half);
         float cardWidthMin = resources.getDimension(R.dimen.card_width_min);
         float cardWidthMax = resources.getDimension(R.dimen.card_width_max);

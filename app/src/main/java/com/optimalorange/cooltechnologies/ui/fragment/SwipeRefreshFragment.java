@@ -63,6 +63,10 @@ public abstract class SwipeRefreshFragment
 
     @Override
     public void onDestroyView() {
+        //TODO circle progress view won't be detached?
+        if (getSwipeRefreshLayout().isRefreshing()) {
+            setRefreshing(false); // hide circle progress view
+        }
         mSwipeRefreshLayout = null;
         mChildView = null;
         super.onDestroyView();
@@ -127,11 +131,10 @@ public abstract class SwipeRefreshFragment
             // before the SwipeRefreshLayout.onMeasure(). This is a unreliable workaround from
             // http://stackoverflow.com/questions/26858692/swiperefreshlayout-setrefreshing-not-showing-indicator-initially
             mHandler.post(new Runnable() {
+                private final SwipeRefreshLayout mRefreshLayout = mSwipeRefreshLayout;
                 @Override
                 public void run() {
-                    if (mSwipeRefreshLayout != null) {
-                        mSwipeRefreshLayout.setRefreshing(refreshing);
-                    }
+                    mRefreshLayout.setRefreshing(refreshing);
                 }
             });
         }
