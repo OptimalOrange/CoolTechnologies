@@ -1,19 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:paddingLeft="@dimen/activity_horizontal_margin"
-                android:paddingRight="@dimen/activity_horizontal_margin"
-                android:paddingTop="@dimen/activity_vertical_margin"
-                android:paddingBottom="@dimen/activity_vertical_margin"
-                tools:context=".ui.fragment.ListVideosFragment"
+<FrameLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".ui.fragment.ListVideosFragment"
         >
 
-    <com.optimalorange.cooltechnologies.ui.view.PullRefreshLayout
-            android:id="@+id/pull_refresh_layout"
+    <FrameLayout
+            android:id="@+id/main_content"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            >
 
         <com.etsy.android.grid.StaggeredGridView
                 xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -24,6 +22,16 @@
                 app:item_margin="@dimen/gridview_margin"
                 />
 
-    </com.optimalorange.cooltechnologies.ui.view.PullRefreshLayout>
+    </FrameLayout>
 
-</RelativeLayout>
+
+    <TextView
+            android:id="@+id/no_connection"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/no_connection"
+            android:visibility="gone"
+            />
+
+</FrameLayout>

@@ -1,5 +1,6 @@
 package com.optimalorange.cooltechnologies.ui.fragment;
 
+import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
@@ -7,16 +8,18 @@ import com.etsy.android.grid.StaggeredGridView;
 import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.entity.FavoriteBean;
 import com.optimalorange.cooltechnologies.entity.Video;
-import com.optimalorange.cooltechnologies.ui.PlayVideoActivity;
-import com.optimalorange.cooltechnologies.ui.view.PullRefreshLayout;
-import com.optimalorange.cooltechnologies.util.Utils;
+import com.optimalorange.cooltechnologies.network.NetworkChecker;
 import com.optimalorange.cooltechnologies.network.VideosRequest;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
+import com.optimalorange.cooltechnologies.ui.PlayVideoActivity;
+import com.optimalorange.cooltechnologies.util.Utils;
 
-import android.app.Fragment;
 import android.app.SearchManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -37,7 +40,7 @@ import java.util.List;
  * Created by WANGZHENGZE on 2014/11/20.
  * 热门
  */
-public class ListVideosFragment extends Fragment {
+public class ListVideosFragment extends SwipeRefreshFragment {
 
     // Fragment初始化参数
 
@@ -54,6 +57,22 @@ public class ListVideosFragment extends Fragment {
 
     private String mYoukuClientId;
 
+    private NetworkChecker mNetworkChecker;
+
+    /** 网络请求管理器 */
+    private final RequestsManager mRequestsManager = new RequestsManager();
+
+    /**
+     * 状态属性：网络联通性。true表示已连接网络；false表示网络已断开。
+     */
+    private boolean mIsConnected = false;
+
+    private BroadcastReceiver mNetworkReceiver;
+
+    private View mNoConnectionView;
+
+    private View mMainContentView;
+
     private VolleySingleton mVolleySingleton;
 
     /**
@@ -67,8 +86,6 @@ public class ListVideosFragment extends Fragment {
     private int mPage = 1;
 
     private StaggeredGridView mGridView;
-
-    private PullRefreshLayout mPullRefreshLayout;
 
     private ItemsAdapter mItemsAdapter;
 
@@ -94,16 +111,15 @@ public class ListVideosFragment extends Fragment {
                             if (mItemsAdapter != null) {
                                 mItemsAdapter.notifyDataSetChanged();
                             }
-                            if (mPullRefreshLayout != null) {
-                                mPullRefreshLayout.setRefreshing(false);
-                            }
                         }
+                        mRequestsManager.addRequestRespondeds();
                     }
                 })
                 .setErrorListener(new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         error.printStackTrace();
+                        mRequestsManager.addRequestErrors();
                     }
                 });
 
@@ -141,39 +157,55 @@ public class ListVideosFragment extends Fragment {
         }
         mYoukuClientId = getString(R.string.youku_client_id);
         mVolleySingleton = VolleySingleton.getInstance(getActivity());
-        mVolleySingleton.addToRequestQueue(buildQueryVideosRequest());
+        //检测网络是否连接
+        mNetworkChecker = NetworkChecker.newInstance(getActivity());
+        /* 注册网络监听 */
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        mNetworkReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                setIsConnected(mNetworkChecker.isConnected());
+            }
+        };
+        getActivity().registerReceiver(mNetworkReceiver, filter);
+        //根据网络状态设置显示的view
+        setIsConnected(mNetworkChecker.isConnected());
+        applyIsConnected();
 
         setHasOptionsMenu(true);
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateChildView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-
-        return inflater.inflate(R.layout.fragment_list_videos, container, false);
+        // Inflate the layout for this fragment
+        View rootView = inflater.inflate(R.layout.fragment_list_videos, container, false);
+        mMainContentView = rootView.findViewById(R.id.main_content);
+        mGridView = (StaggeredGridView) rootView.findViewById(R.id.grid_view);
+        mNoConnectionView = rootView.findViewById(R.id.no_connection);
+        return rootView;
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mGridView = (StaggeredGridView) view.findViewById(R.id.grid_view);
-        mPullRefreshLayout = (PullRefreshLayout) view.findViewById(R.id.pull_refresh_layout);
         mItemsAdapter = new ItemsAdapter(mListVideos, mVolleySingleton.getImageLoader());
         mGridView.setAdapter(mItemsAdapter);
 
-        mPullRefreshLayout.setOnRefreshListener(new PullRefreshLayout.OnRefreshListener() {
+        /* 点击设置网络 */
+        mNoConnectionView.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onRefresh() {
-                //每次刷新时去除所有Video
-                mListVideos.clear();
-                //重新请求第一页的内容
-                mPage = 1;
-                mItemsAdapter.notifyDataSetChanged();
-                //开始请求刷新Video
-                mVolleySingleton.addToRequestQueue(buildQueryVideosRequest());
+            public void onClick(View v) {
+                setConnection();
             }
         });
+
+        applyIsConnected();
+        if (mIsConnected) {
+            setRefreshing(true);
+            startLoad();
+        }
 
         //item点击监听，点击进行播放视频
         mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -188,6 +220,85 @@ public class ListVideosFragment extends Fragment {
     }
 
     @Override
+    public void onDestroyView() {
+        mNoConnectionView = null;
+        mGridView.setAdapter(null);
+        mGridView = null;
+        mMainContentView = null;
+        super.onDestroyView();
+    }
+
+    @Override
+    public void onDestroy() {
+        cancelLoad();
+        mItemsAdapter = null;
+        if (mNetworkReceiver != null) {
+            getActivity().unregisterReceiver(mNetworkReceiver);
+        }
+        mNetworkReceiver = null;
+        mNetworkChecker = null;
+        super.onDestroy();
+    }
+
+    @Override
+    public void onRefresh() {
+        //每次刷新时去除所有Video
+        mListVideos.clear();
+        //重新请求第一页的内容
+        mPage = 1;
+        mItemsAdapter.notifyDataSetChanged();
+        restartLoad();
+    }
+
+    @Override
+    protected boolean canChildScrollUp() {
+        return mGridView.getVisibility() == View.VISIBLE &&
+                mGridView.canScrollVertically(-1);
+    }
+
+    private void startLoad() {
+        if (mIsConnected) {
+            mRequestsManager.addRequest(buildQueryVideosRequest());
+        }
+    }
+
+    private void restartLoad() {
+        cancelLoad();
+        startLoad();
+    }
+
+    private void cancelLoad() {
+        mVolleySingleton.getRequestQueue().cancelAll(this);
+        mRequestsManager.reset();
+    }
+
+    private void onLoadFinished() {
+        setRefreshing(false);
+    }
+
+    public void setIsConnected(boolean isConnected) {
+        if (mIsConnected != isConnected) {
+            mIsConnected = isConnected;
+            applyIsConnected();
+        }
+    }
+
+    private void applyIsConnected() {
+        if (mNoConnectionView != null) {
+            mNoConnectionView.setVisibility(mIsConnected ? View.GONE : View.VISIBLE);
+        }
+        if (mMainContentView != null) {
+            mMainContentView.setVisibility(mIsConnected ? View.VISIBLE : View.GONE);
+        }
+        restartLoad();
+        setRefreshable(mIsConnected);
+    }
+
+    private boolean setConnection() {
+        return NetworkChecker.openWirelessSettings(getActivity());
+    }
+
+    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_search, menu);
 
@@ -199,6 +310,84 @@ public class ListVideosFragment extends Fragment {
         searchView.setSearchableInfo(
                 searchManager.getSearchableInfo(getActivity().getComponentName()));
 
+    }
+
+    /**
+     * {@link com.android.volley.Request Requests}管理器。用于统计Requests状态。
+     */
+    private class RequestsManager {
+
+        private int mRequests = 0;
+
+        private int mRequestRespondeds = 0;
+
+        private int mRequestErrors = 0;
+
+        private int mRequestCancelleds = 0;
+
+        /**
+         * 初始化总{@link com.android.volley.Request}数为0
+         */
+        private void reset() {
+            mRequests = mRequestRespondeds = mRequestErrors = mRequestCancelleds = 0;
+        }
+
+        /**
+         * 添加{@link com.android.volley.Request}数
+         *
+         * @return 添加后，总Request数
+         */
+        public int addRequest(Request request) {
+            mVolleySingleton.addToRequestQueue(request);
+            return mRequests++;
+        }
+
+        /**
+         * 添加收到响应的{@link Request}数
+         *
+         * @return 添加后，总收到响应的Request数
+         */
+        public int addRequestRespondeds() {
+            int result = mRequestRespondeds++;
+            checkIsAllRequestsFinished();
+            return result;
+        }
+
+        /**
+         * 添加失败的{@link Request}数
+         *
+         * @return 添加后，总失败的Request数
+         */
+        public int addRequestErrors() {
+            int result = mRequestErrors++;
+            checkIsAllRequestsFinished();
+            return result;
+        }
+
+        /**
+         * 添加取消的{@link Request}数
+         *
+         * @return 添加后，总取消的Request数
+         */
+        public int addRequestCancelleds() {
+            int result = mRequestCancelleds++;
+            checkIsAllRequestsFinished();
+            return result;
+        }
+
+        public int getRequestFinisheds() {
+            return mRequestRespondeds + mRequestErrors;
+        }
+
+        public boolean isAllRequestsFinished() {
+            return mRequests == getRequestFinisheds() + mRequestCancelleds;
+        }
+
+        private void checkIsAllRequestsFinished() {
+            if (isAllRequestsFinished()) {
+                onLoadFinished();
+            }
+        }
     }
 
     /**
