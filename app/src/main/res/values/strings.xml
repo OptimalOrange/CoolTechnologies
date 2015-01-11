@@ -22,7 +22,7 @@
     <string name="no_connection_title">打开网络设置</string>
     <string name="no_connection_message">网络连接不可用，现在打开网络开关？</string>
 
-    <!-- list_item_videos -->
+    <!-- list_item_video -->
     <string name="view_count">播放:%1$s</string>
     <string name="favorite_hint_no_login">没有登录不能查看收藏哦~~</string>
     <string name="favorite_delete_no_login">没有登录不能删除收藏哦~~</string>

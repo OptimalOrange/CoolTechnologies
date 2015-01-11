@@ -8,8 +8,8 @@ import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.entity.FavoriteBean;
 import com.optimalorange.cooltechnologies.entity.Video;
 import com.optimalorange.cooltechnologies.network.SearchRequest;
-import com.optimalorange.cooltechnologies.util.Utils;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
+import com.optimalorange.cooltechnologies.util.Utils;
 
 import android.app.SearchManager;
 import android.content.Context;
@@ -187,7 +187,7 @@ public class SearchActivity extends BaseActivity {
             ViewHolder vh;
             if (convertView == null) {
                 convertView = LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.list_item_videos, parent, false);
+                        .inflate(R.layout.list_item_video, parent, false);
                 vh = new ViewHolder();
                 vh.thumbnail = (ImageView) convertView.findViewById(R.id.thumbnail);
                 vh.duration = (TextView) convertView.findViewById(R.id.duration);
