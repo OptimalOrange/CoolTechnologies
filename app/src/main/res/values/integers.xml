@@ -6,4 +6,6 @@
         <item>@color/google_yellow</item>
         <item>@color/google_green</item>
     </integer-array>
+
+    <integer name="comment_word_number">300</integer>
 </resources>
