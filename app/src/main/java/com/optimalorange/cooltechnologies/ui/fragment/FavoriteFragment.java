@@ -13,7 +13,6 @@ import com.optimalorange.cooltechnologies.network.NetworkChecker;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingleton;
 import com.optimalorange.cooltechnologies.ui.PlayVideoActivity;
-import com.optimalorange.cooltechnologies.ui.view.PullRefreshLayout;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -28,7 +27,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
@@ -55,7 +53,7 @@ import java.util.ArrayList;
  * Created by WANGZHENGZE on 2014/11/20.
  * 收藏
  */
-public class FavoriteFragment extends Fragment {
+public class FavoriteFragment extends SwipeRefreshFragment {
 
     private View v;
     private static final String FAVORITE_BASE_URL = "https://openapi.youku.com/v2/videos/favorite/by_me.json";
@@ -65,7 +63,6 @@ public class FavoriteFragment extends Fragment {
     private NetworkChecker mNetworkChecker;
     private TextView mTvHint;
     private boolean mIsCreated = false;
-    private PullRefreshLayout refreshLayout;
 
     private WindowManager windowManager = null;
     private WindowManager.LayoutParams windowParams = null;
@@ -121,11 +118,22 @@ public class FavoriteFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    protected View onCreateChildView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (v == null) {
             v = inflater.inflate(R.layout.fragment_favorite, container, false);
         }
         return v;
+    }
+
+    @Override
+    public void onRefresh() {
+        getNewData();
+        favoriteListView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return true;
+            }
+        });
     }
 
     @Override
@@ -155,7 +163,7 @@ public class FavoriteFragment extends Fragment {
         tvViewMore.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((TextView)v).setText(getString(R.string.favorite_view_more_loading));
+                ((TextView) v).setText(getString(R.string.favorite_view_more_loading));
                 getJsonData();
             }
         });
@@ -164,13 +172,6 @@ public class FavoriteFragment extends Fragment {
         Log.e("wzz fav", "is onCreated!!!");
         getNewData();
         mIsCreated = true;
-        refreshLayout = (PullRefreshLayout) view.findViewById(R.id.pull_refresh_layout);
-        refreshLayout.setOnRefreshListener(new PullRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                getNewData();
-            }
-        });
         favoriteListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
@@ -295,7 +296,8 @@ public class FavoriteFragment extends Fragment {
                             setHint(R.string.favorite_no_fav);
                         }
 
-                        refreshLayout.setRefreshing(false);
+                        setRefreshing(false);
+                        favoriteListView.setOnTouchListener(null);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -324,6 +326,12 @@ public class FavoriteFragment extends Fragment {
         });
     }
 
+
+    @Override
+    protected boolean canChildScrollUp() {
+        return favoriteListView.getVisibility() == View.VISIBLE &&
+                favoriteListView.canScrollVertically(-1);
+    }
 
 
     @Override
