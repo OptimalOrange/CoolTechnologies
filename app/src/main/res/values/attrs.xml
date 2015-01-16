@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- used in PullRefreshLayout.java and see the license in this file -->
-    <declare-styleable name="PullRefreshLayout">
-        <attr name="colors" format="reference"/>
-    </declare-styleable>
-</resources>
