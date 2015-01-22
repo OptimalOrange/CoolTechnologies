@@ -67,6 +67,8 @@ public abstract class SwipeRefreshFragment
         if (getSwipeRefreshLayout().isRefreshing()) {
             setRefreshing(false); // hide circle progress view
         }
+        mSwipeRefreshLayout.setOnRefreshListener(null);
+        mSwipeRefreshLayout.removeView(mChildView);
         mSwipeRefreshLayout = null;
         mChildView = null;
         super.onDestroyView();
