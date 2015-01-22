@@ -16,6 +16,8 @@ import android.view.ViewParent;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
@@ -51,6 +53,8 @@ public class PlayVideoActivity extends BaseActivity {
 
     private VideoEnabledWebView mWebView;
 
+    private CustomWebViewClient mWebViewClient;
+
     private VideoEnabledWebChromeClient mChromeClient;
 
 
@@ -73,6 +77,10 @@ public class PlayVideoActivity extends BaseActivity {
         addWebViewToNonVideoLayout();
         addOthersToNonVideoLayout(savedInstanceState);
 
+        // setWebViewClient
+        mWebViewClient = new CustomWebViewClient();
+        mWebView.setWebViewClient(mWebViewClient);
+        // setWebChromeClient
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
             mChromeClient = new VideoEnabledWebChromeClient(
                     mNonVideoLayout, videoLayout, loadingView, mWebView);
@@ -84,7 +92,7 @@ public class PlayVideoActivity extends BaseActivity {
                     fullscreenToggleSwitch, JAVASCRIPT_INTERFACE_FULLSCREEN_TOGGLE_SWITCH);
             mChromeClient = new VideoEnabledWebChromeClient(
                     mNonVideoLayout, videoLayout, loadingView, mWebView) {
-                // API level <19时，super.onHideCustomView不会触发callback.onCustomViewHidden，
+                // API level >= 19 时，super.onHideCustomView不会触发callback.onCustomViewHidden，
                 // 需要覆写以触发此事件方法。
                 @Override
                 public void onHideCustomView() {
@@ -135,14 +143,13 @@ public class PlayVideoActivity extends BaseActivity {
                 .setVid(getVideoId());
         //TODO 分析解决安全问题
         mWebView.addJavascriptInterface(webAppInterface, JAVASCRIPT_INTERFACE_GENERIC);
-        mWebView.loadUrl(PATH_PLAY_VIDEO_HTML);
     }
 
     @Override
-    protected void onPause() {
-        mWebView.onPause();
-        mWebView.pauseTimers();
-        super.onPause();
+    protected void onStart() {
+        super.onStart();
+        mWebViewClient.shouldClearHistory(true);
+        mWebView.loadUrl(PATH_PLAY_VIDEO_HTML);
     }
 
     @Override
@@ -153,13 +160,31 @@ public class PlayVideoActivity extends BaseActivity {
     }
 
     @Override
+    protected void onPause() {
+        mWebView.onPause();
+        mWebView.pauseTimers();
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        mWebViewClient.shouldClearHistory(true);
+        mWebView.loadUrl("about:blank");
+        super.onStop();
+    }
+
+    @Override
     protected void onDestroy() {
+        mChromeClient = null;
+        mWebViewClient = null;
+        mNonVideoLayout = null;
         if (mWebView != null) {
             ViewParent parent = mWebView.getParent();
             if (parent != null) {
                 ((ViewGroup) parent).removeView(mWebView);
             }
             mWebView.destroy();
+            mWebView = null;
         }
         super.onDestroy();
     }
@@ -189,7 +214,7 @@ public class PlayVideoActivity extends BaseActivity {
     }
 
     //--------------------------------------------------------------------------
-    // 私有方法
+    // 新声明方法
     //--------------------------------------------------------------------------
 
     private String getVideoId() {
@@ -223,8 +248,34 @@ public class PlayVideoActivity extends BaseActivity {
     }
 
     //--------------------------------------------------------------------------
-    // 内部类
+    // 嵌套类
     //--------------------------------------------------------------------------
+
+    //-------------------------------------
+    // WebViewClient
+    //-------------------------------------
+
+    private static class CustomWebViewClient extends WebViewClient {
+
+        private boolean mShouldClearHistory = false;
+
+        public void shouldClearHistory(boolean shouldClearHistory) {
+            mShouldClearHistory = shouldClearHistory;
+        }
+
+        @Override
+        public void onPageFinished(WebView view, String url) {
+            super.onPageFinished(view, url);
+            if (mShouldClearHistory) {
+                view.clearHistory();
+                mShouldClearHistory = false;
+            }
+        }
+    }
+
+    //-------------------------------------
+    // JavascriptInterface
+    //-------------------------------------
 
     /**
      * {@link android.webkit.WebView WebView}中网页可以访问的本地API，用于设置参数，如
