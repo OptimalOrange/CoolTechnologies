@@ -56,27 +56,47 @@ import java.util.ArrayList;
 public class FavoriteFragment extends SwipeRefreshFragment {
 
     private View v;
-    private static final String FAVORITE_BASE_URL = "https://openapi.youku.com/v2/videos/favorite/by_me.json";
+
+    private static final String FAVORITE_BASE_URL
+            = "https://openapi.youku.com/v2/videos/favorite/by_me.json";
+
     private ListView favoriteListView;
+
     private VolleySingleton mVolleySingleton;
+
     private DefaultSharedPreferencesSingleton mDefaultSharedPreferencesSingleton;
+
     private NetworkChecker mNetworkChecker;
+
     private TextView mTvHint;
+
     private boolean mIsCreated = false;
 
     private WindowManager windowManager = null;
+
     private WindowManager.LayoutParams windowParams = null;
+
     private View deleteView = null;
+
     private ArrayList<FavoriteBean> favoriteBeans;
+
     private FavoriteAdapter adapter;
 
-    private static final String BASE_FAVORITE_DELETE_URL = "https://openapi.youku.com/v2/videos/favorite/destroy.json";
+    private static final String BASE_FAVORITE_DELETE_URL
+            = "https://openapi.youku.com/v2/videos/favorite/destroy.json";
+
     private static final int DELETE_FAVORITE_OK = 0;
+
     private static final int DELETE_FAVORITE_ERROR = 1;
+
     private int page = 1;
+
     private int total = 0;
+
     private int currentCount = 0;
+
     private TextView tvViewMore;
+
     private View footer;
 
     private Handler mHandler = new Handler() {
@@ -90,7 +110,9 @@ public class FavoriteFragment extends SwipeRefreshFragment {
                         public void run() {
                             adapter.notifyDataSetChanged();
                             removeWindowView();
-                            Toast.makeText(getActivity(), getString(R.string.favorite_delete_success), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getActivity(),
+                                    getString(R.string.favorite_delete_success), Toast.LENGTH_SHORT)
+                                    .show();
                             if (favoriteBeans.size() == 0) {
                                 setHint(R.string.favorite_no_fav);
                             }
@@ -101,7 +123,8 @@ public class FavoriteFragment extends SwipeRefreshFragment {
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            Toast.makeText(getActivity(), getString(R.string.favorite_delete_fail), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getActivity(), getString(R.string.favorite_delete_fail),
+                                    Toast.LENGTH_SHORT).show();
                         }
                     });
                     break;
@@ -118,10 +141,9 @@ public class FavoriteFragment extends SwipeRefreshFragment {
     }
 
     @Override
-    protected View onCreateChildView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        if (v == null) {
-            v = inflater.inflate(R.layout.fragment_favorite, container, false);
-        }
+    protected View onCreateChildView(LayoutInflater inflater, ViewGroup container,
+            Bundle savedInstanceState) {
+        v = inflater.inflate(R.layout.fragment_favorite, container, false);
         return v;
     }
 
@@ -154,7 +176,8 @@ public class FavoriteFragment extends SwipeRefreshFragment {
         });
         mTvHint = (TextView) v.findViewById(R.id.favorite_hint);
         favoriteBeans = new ArrayList<>();
-        adapter = new FavoriteAdapter(getActivity(), favoriteBeans, mVolleySingleton.getImageLoader());
+        adapter = new FavoriteAdapter(getActivity(), favoriteBeans,
+                mVolleySingleton.getImageLoader());
         if (footer != null) {
             favoriteListView.removeFooterView(footer);
         }
@@ -174,7 +197,8 @@ public class FavoriteFragment extends SwipeRefreshFragment {
         mIsCreated = true;
         favoriteListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
+            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position,
+                    long id) {
                 int[] locationInWindow = new int[2];
                 view.getLocationInWindow(locationInWindow);
                 windowParams = new WindowManager.LayoutParams();
@@ -189,11 +213,13 @@ public class FavoriteFragment extends SwipeRefreshFragment {
                         | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
                 windowParams.format = PixelFormat.TRANSLUCENT;
                 windowParams.windowAnimations = 0;
-                windowManager = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
+                windowManager = (WindowManager) getActivity()
+                        .getSystemService(Context.WINDOW_SERVICE);
                 if (deleteView != null) {
                     windowManager.removeViewImmediate(deleteView);
                 }
-                deleteView = LayoutInflater.from(getActivity()).inflate(R.layout.ll_favorite_delete, null);
+                deleteView = LayoutInflater.from(getActivity())
+                        .inflate(R.layout.ll_favorite_delete, null);
                 deleteView.measure(0, 0);
                 int deleteViewHeight = deleteView.getMeasuredHeight();
                 windowParams.y = locationInWindow[1] - deleteViewHeight;
@@ -212,7 +238,6 @@ public class FavoriteFragment extends SwipeRefreshFragment {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
 
-
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     if (deleteView == null) {
                         mIsDelButtonCreate = true;
@@ -222,7 +247,8 @@ public class FavoriteFragment extends SwipeRefreshFragment {
                     }
                 }
 
-                if (event.getAction() == MotionEvent.ACTION_UP && deleteView != null && !mIsDelButtonCreate) {
+                if (event.getAction() == MotionEvent.ACTION_UP && deleteView != null
+                        && !mIsDelButtonCreate) {
                     removeWindowView();
                     return true;
                 }
@@ -263,9 +289,11 @@ public class FavoriteFragment extends SwipeRefreshFragment {
                 return;
             }
             RequestQueue requestQueue = Volley.newRequestQueue(getActivity());
-            String url = FAVORITE_BASE_URL + "?client_id=" + getString(R.string.youku_client_id) + "&access_token=" + token + "&page=" + page + "&count=10";
+            String url = FAVORITE_BASE_URL + "?client_id=" + getString(R.string.youku_client_id)
+                    + "&access_token=" + token + "&page=" + page + "&count=10";
             Log.e("wzz json", "url=" + url);
-            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url,
+                    null, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject jsonObject) {
                     try {
@@ -351,12 +379,14 @@ public class FavoriteFragment extends SwipeRefreshFragment {
 
     private void sendDeleteRequest(String id, final int index) {
         if (!mNetworkChecker.isConnected()) {
-            Toast.makeText(getActivity(), R.string.favorite_delete_no_net, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), R.string.favorite_delete_no_net, Toast.LENGTH_SHORT)
+                    .show();
             return;
         }
         String token = mDefaultSharedPreferencesSingleton.retrieveString("user_token", "");
         if (token.isEmpty()) {
-            Toast.makeText(getActivity(), R.string.favorite_delete_no_login, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), R.string.favorite_delete_no_login, Toast.LENGTH_SHORT)
+                    .show();
             return;
         }
         final HttpPost request = new HttpPost(BASE_FAVORITE_DELETE_URL);
