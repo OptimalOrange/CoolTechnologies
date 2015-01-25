@@ -36,11 +36,11 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textSize="@dimen/text_size_micro"
-                            android:textColor="@color/text_black"
+                            android:textColor="@color/text_secondary_black"
                             />
                 </LinearLayout>
                 <Button
-                        android:id="@+id/login"
+                        android:id="@+id/favorite"
                         android:layout_width="@dimen/login_button_width"
                         android:layout_height="@dimen/login_button_height"
                         android:layout_alignParentRight="true"
@@ -66,40 +66,5 @@
         </android.support.v7.widget.CardView>
 
     </LinearLayout>
-
-
-    <android.support.v7.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/comments_margin_5dp"
-            android:layout_marginRight="@dimen/comments_margin_5dp"
-            android:layout_alignParentBottom="true"
-            android:background="@color/cardview_light_background"
-            android:visibility="gone"
-            >
-        <RelativeLayout android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
-            <EditText
-                    android:id="@+id/comment"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentLeft="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginRight="@dimen/comments_edit_margin"
-                    android:maxEms="@integer/comment_word_number"
-                    android:hint="@string/comment_word_number"
-                    android:textColorHint="@color/text_disabled_or_hint_black"
-                    />
-            <ImageView
-                    android:id="@+id/send"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="@dimen/comments_margin_10dp"
-                    android:layout_alignParentRight="true"
-                    android:layout_centerVertical="true"
-                    android:background="@drawable/ic_send_black_24dp"
-                    />
-        </RelativeLayout>
-    </android.support.v7.widget.CardView>
 
 </RelativeLayout>

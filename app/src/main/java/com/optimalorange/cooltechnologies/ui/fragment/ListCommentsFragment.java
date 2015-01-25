@@ -4,24 +4,30 @@ package com.optimalorange.cooltechnologies.ui.fragment;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.entity.Comment;
 import com.optimalorange.cooltechnologies.network.CommentsRequest;
+import com.optimalorange.cooltechnologies.network.NetworkChecker;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Fragment;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -32,7 +38,7 @@ import java.util.List;
  * 评论{@link Fragment}<br/>
  * Tip: 可以使用{@link ListCommentsFragment#newInstance}工厂方法创建{@link ListCommentsFragment}实例。
  */
-public class ListCommentsFragment extends Fragment {
+public class ListCommentsFragment extends SwipeRefreshFragment {
 
     // Fragment初始化参数
 
@@ -56,6 +62,18 @@ public class ListCommentsFragment extends Fragment {
     private String mVideoID;
 
     private String mYoukuClientId;
+
+    private NetworkChecker mNetworkChecker;
+
+    /** 网络请求管理器 */
+    private final RequestsManager mRequestsManager = new RequestsManager();
+
+    /**
+     * 状态属性：网络联通性。true表示已连接网络；false表示网络已断开。
+     */
+    private boolean mIsConnected = false;
+
+    private BroadcastReceiver mNetworkReceiver;
 
     private VolleySingleton mVolleySingleton;
 
@@ -86,16 +104,16 @@ public class ListCommentsFragment extends Fragment {
                     public void onResponse(List<Comment> comments) {
                         for (Comment mComment : comments) {
                             mListComments.add(mComment);
-                            if (mItemsAdapter != null) {
-                                mItemsAdapter.notifyDataSetChanged();
-                            }
                         }
+                        applyVideos();
+                        mRequestsManager.addRequestRespondeds();
                     }
                 })
                 .setErrorListener(new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         error.printStackTrace();
+                        mRequestsManager.addRequestErrors();
                     }
                 });
 
@@ -172,26 +190,201 @@ public class ListCommentsFragment extends Fragment {
 
         mYoukuClientId = getString(R.string.youku_client_id);
         mVolleySingleton = VolleySingleton.getInstance(getActivity());
-        mVolleySingleton.addToRequestQueue(buildQueryCommentsRequest());
+        //检测网络是否连接
+        mNetworkChecker = NetworkChecker.newInstance(getActivity());
+        /* 注册网络监听 */
+        IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        mNetworkReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                setIsConnected(mNetworkChecker.isConnected());
+            }
+        };
+        getActivity().registerReceiver(mNetworkReceiver, filter);
+        //根据网络状态设置显示的view
+        setIsConnected(mNetworkChecker.isConnected());
+        applyIsConnected();
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateChildView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_list_comments, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_list_comments, container, false);
+        mCommentsCount = (TextView) rootView.findViewById(R.id.comments_count);
+        mListView = (ListView) rootView.findViewById(R.id.comments_list);
+        mHeader = LayoutInflater.from(getActivity()).inflate(R.layout.list_comments_header, null);
+        mListView.addHeaderView(mHeader);
+        return rootView;
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        mCommentsCount = (TextView) view.findViewById(R.id.comments_count);
-        mListView = (ListView) view.findViewById(R.id.comments_list);
-        mHeader = LayoutInflater.from(getActivity()).inflate(R.layout.list_comments_header, null);
-        mListView.addHeaderView(mHeader);
+        super.onViewCreated(view, savedInstanceState);
         mItemsAdapter = new ItemsAdapter(mListComments);
         mListView.setAdapter(mItemsAdapter);
 
-        mVolleySingleton.addToRequestQueue(buildQueryTotalRequest());
+        applyIsConnected();
+        if (mIsConnected) {
+            setRefreshing(true);
+            startLoad();
+        }
 
+    }
+
+    @Override
+    public void onDestroyView() {
+        mCommentsCount = null;
+        mListView.setAdapter(null);
+        mListView = null;
+        mHeader = null;
+        super.onDestroyView();
+    }
+
+    @Override
+    public void onDestroy() {
+        cancelLoad();
+        mItemsAdapter = null;
+        if (mNetworkReceiver != null) {
+            getActivity().unregisterReceiver(mNetworkReceiver);
+        }
+        mNetworkReceiver = null;
+        mNetworkChecker = null;
+        super.onDestroy();
+    }
+
+    @Override
+    public void onRefresh() {
+        //每次刷新时去除所有comments
+        mListComments.clear();
+        //重新请求第一页的内容
+        mPage = 1;
+        mItemsAdapter.notifyDataSetChanged();
+        restartLoad();
+    }
+
+    @Override
+    protected boolean canChildScrollUp() {
+        return mListView.getVisibility() == View.VISIBLE &&
+                mListView.canScrollVertically(-1);
+    }
+
+    private void startLoad() {
+        if (mIsConnected) {
+            mRequestsManager.addRequest(buildQueryCommentsRequest());
+            mVolleySingleton.addToRequestQueue(buildQueryTotalRequest());
+        }
+    }
+
+    private void restartLoad() {
+        cancelLoad();
+        startLoad();
+    }
+
+    private void cancelLoad() {
+        mVolleySingleton.getRequestQueue().cancelAll(this);
+        mRequestsManager.reset();
+    }
+
+    private void onLoadFinished() {
+        setRefreshing(false);
+    }
+
+    public void setIsConnected(boolean isConnected) {
+        if (mIsConnected != isConnected) {
+            mIsConnected = isConnected;
+            applyIsConnected();
+        }
+    }
+
+    private void applyIsConnected() {
+        setRefreshable(mIsConnected);
+    }
+
+    private void applyVideos() {
+        if (mItemsAdapter != null) {
+            mItemsAdapter.notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {}
+
+    /**
+     * {@link com.android.volley.Request Requests}管理器。用于统计Requests状态。
+     */
+    private class RequestsManager {
+
+        private int mRequests = 0;
+
+        private int mRequestRespondeds = 0;
+
+        private int mRequestErrors = 0;
+
+        private int mRequestCancelleds = 0;
+
+        /**
+         * 初始化总{@link com.android.volley.Request}数为0
+         */
+        private void reset() {
+            mRequests = mRequestRespondeds = mRequestErrors = mRequestCancelleds = 0;
+        }
+
+        /**
+         * 添加{@link com.android.volley.Request}数
+         *
+         * @return 添加后，总Request数
+         */
+        public int addRequest(Request request) {
+            mVolleySingleton.addToRequestQueue(request);
+            return mRequests++;
+        }
+
+        /**
+         * 添加收到响应的{@link Request}数
+         *
+         * @return 添加后，总收到响应的Request数
+         */
+        public int addRequestRespondeds() {
+            int result = mRequestRespondeds++;
+            checkIsAllRequestsFinished();
+            return result;
+        }
+
+        /**
+         * 添加失败的{@link Request}数
+         *
+         * @return 添加后，总失败的Request数
+         */
+        public int addRequestErrors() {
+            int result = mRequestErrors++;
+            checkIsAllRequestsFinished();
+            return result;
+        }
+
+        /**
+         * 添加取消的{@link Request}数
+         *
+         * @return 添加后，总取消的Request数
+         */
+        public int addRequestCancelleds() {
+            int result = mRequestCancelleds++;
+            checkIsAllRequestsFinished();
+            return result;
+        }
+
+        public int getRequestFinisheds() {
+            return mRequestRespondeds + mRequestErrors;
+        }
+
+        public boolean isAllRequestsFinished() {
+            return mRequests == getRequestFinisheds() + mRequestCancelleds;
+        }
+
+        private void checkIsAllRequestsFinished() {
+            if (isAllRequestsFinished()) {
+                onLoadFinished();
+            }
+        }
     }
 
     /**
@@ -228,7 +421,6 @@ public class ListCommentsFragment extends Fragment {
                 convertView = LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.list_item_comment, parent, false);
                 vh = new ViewHolder();
-                vh.mImageView = (ImageView) convertView.findViewById(R.id.image_view);
                 vh.mUserName = (TextView) convertView.findViewById(R.id.user_name);
                 vh.mContent = (TextView) convertView.findViewById(R.id.content);
                 vh.mDate = (TextView) convertView.findViewById(R.id.date);
@@ -250,8 +442,6 @@ public class ListCommentsFragment extends Fragment {
         }
 
         private class ViewHolder {
-
-            ImageView mImageView;
 
             TextView mUserName;
 

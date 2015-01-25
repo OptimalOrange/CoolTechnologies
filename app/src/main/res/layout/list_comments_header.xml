@@ -10,6 +10,7 @@
             android:layout_marginRight="@dimen/comments_edit_margin"
             android:maxEms="@integer/comment_word_number"
             android:hint="@string/comment_word_number"
+            android:textSize="@dimen/text_size_medium"
             android:textColorHint="@color/text_disabled_or_hint_black"
             android:enabled="false"
             />
