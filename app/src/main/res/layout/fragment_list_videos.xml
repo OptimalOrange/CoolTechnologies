@@ -22,6 +22,15 @@
                 app:item_margin="@dimen/gridview_margin"
                 />
 
+        <TextView
+                android:id="@android:id/empty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/no_videos"
+                android:visibility="gone"
+                />
+
     </FrameLayout>
 
 

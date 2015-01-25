@@ -24,6 +24,7 @@
 
     <!-- list_item_video -->
     <string name="view_count">播放:%1$s</string>
+    <string name="no_videos">热门视频为空，请刷新重试。</string>
     <string name="favorite_hint_no_login">没有登录不能查看收藏哦~~</string>
     <string name="favorite_delete_no_login">没有登录不能删除收藏哦~~</string>
     <string name="favorite_hint_no_net">没有网络看不到收藏的啦~~点我可以刷新</string>

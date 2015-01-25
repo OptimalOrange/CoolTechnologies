@@ -71,6 +71,8 @@ public class ListVideosFragment extends SwipeRefreshFragment {
 
     private View mNoConnectionView;
 
+    private View mEmptyView;
+
     private View mMainContentView;
 
     private VolleySingleton mVolleySingleton;
@@ -108,10 +110,8 @@ public class ListVideosFragment extends SwipeRefreshFragment {
                     public void onResponse(List<Video> videos) {
                         for (Video mVideo : videos) {
                             mListVideos.add(mVideo);
-                            if (mItemsAdapter != null) {
-                                mItemsAdapter.notifyDataSetChanged();
-                            }
                         }
+                        applyVideos();
                         mRequestsManager.addRequestRespondeds();
                     }
                 })
@@ -182,6 +182,7 @@ public class ListVideosFragment extends SwipeRefreshFragment {
         View rootView = inflater.inflate(R.layout.fragment_list_videos, container, false);
         mMainContentView = rootView.findViewById(R.id.main_content);
         mGridView = (StaggeredGridView) rootView.findViewById(R.id.grid_view);
+        mEmptyView = rootView.findViewById(android.R.id.empty);
         mNoConnectionView = rootView.findViewById(R.id.no_connection);
         return rootView;
     }
@@ -201,6 +202,7 @@ public class ListVideosFragment extends SwipeRefreshFragment {
             }
         });
 
+        applyVideos();
         applyIsConnected();
         if (mIsConnected) {
             setRefreshing(true);
@@ -222,6 +224,7 @@ public class ListVideosFragment extends SwipeRefreshFragment {
     @Override
     public void onDestroyView() {
         mNoConnectionView = null;
+        mEmptyView = null;
         mGridView.setAdapter(null);
         mGridView = null;
         mMainContentView = null;
@@ -290,8 +293,21 @@ public class ListVideosFragment extends SwipeRefreshFragment {
         if (mMainContentView != null) {
             mMainContentView.setVisibility(mIsConnected ? View.VISIBLE : View.GONE);
         }
-        restartLoad();
         setRefreshable(mIsConnected);
+    }
+
+    public boolean videosIsEmpty() {
+        return mListVideos == null || mListVideos.size() == 0;
+    }
+
+    private void applyVideos() {
+        if (mItemsAdapter != null) {
+            mItemsAdapter.notifyDataSetChanged();
+        }
+        final boolean isEmpty = videosIsEmpty();
+        if (mEmptyView != null) {
+            mEmptyView.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
+        }
     }
 
     private boolean setConnection() {
