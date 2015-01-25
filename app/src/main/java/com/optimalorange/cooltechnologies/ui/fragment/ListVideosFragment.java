@@ -300,6 +300,7 @@ public class ListVideosFragment extends SwipeRefreshFragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.menu_search, menu);
 
         // Associate searchable configuration with the SearchView
