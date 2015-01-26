@@ -51,12 +51,18 @@ public class PlayVideoActivity extends BaseActivity {
     /** {@link #PATH_PLAY_VIDEO_HTML}中用到的{@link WebAppInterface WebAppInterface}实例名 */
     private static final String JAVASCRIPT_INTERFACE_GENERIC = "webAppInterface";
 
+    /** {@link #PATH_PLAY_VIDEO_HTML}中用到的{@link OnPlayStartListener OnPlayStartListener}实例名 */
+    private static final String JAVASCRIPT_INTERFACE_ON_PLAY_START_LISTENER =
+            "webAppOnPlayStartListener";
+
     /**
      * {@link #PATH_PLAY_VIDEO_HTML}中用到的
      * {@link WebAppFullscreenToggleSwitch WebAppFullscreenToggleSwitch}实例名
      */
     private static final String JAVASCRIPT_INTERFACE_FULLSCREEN_TOGGLE_SWITCH =
             "webAppFullscreenToggleSwitch";
+
+    private FavoriteBean mFavoriteBean;
 
     private DefaultSharedPreferencesSingleton mDefaultSharedPreferencesSingleton;
 
@@ -90,7 +96,6 @@ public class PlayVideoActivity extends BaseActivity {
         };
     }
 
-
     //--------------------------------------------------------------------------
     // 覆写Activity的生命周期方法
     //--------------------------------------------------------------------------
@@ -98,6 +103,11 @@ public class PlayVideoActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mFavoriteBean = (FavoriteBean) getIntent().getSerializableExtra(EXTRA_KEY_VIDEO_ID);
+        if (mFavoriteBean == null) {
+            throw new IllegalStateException("Please do intent.putExtra(EXTRA_KEY_VIDEO_ID, vid)");
+        }
 
         setContentView(R.layout.activity_play_video);
 
@@ -176,6 +186,9 @@ public class PlayVideoActivity extends BaseActivity {
                 .setVid(getVideoId());
         //TODO 分析解决安全问题
         mWebView.addJavascriptInterface(webAppInterface, JAVASCRIPT_INTERFACE_GENERIC);
+        mWebView.addJavascriptInterface(
+                new OnPlayStartListener(DBManager.getInstance(this), mFavoriteBean),
+                JAVASCRIPT_INTERFACE_ON_PLAY_START_LISTENER);
 
         mDefaultSharedPreferencesSingleton = DefaultSharedPreferencesSingleton.getInstance(this);
         mNetworkChecker = NetworkChecker.newInstance(this);
@@ -257,13 +270,7 @@ public class PlayVideoActivity extends BaseActivity {
     //--------------------------------------------------------------------------
 
     private String getVideoId() {
-        final FavoriteBean favoriteBean = (FavoriteBean) getIntent().getSerializableExtra(EXTRA_KEY_VIDEO_ID);
-        final String vid = favoriteBean.videoId;
-        DBManager.getInstance(this).saveHistory(favoriteBean);
-        if (vid == null) {
-            throw new IllegalStateException("Please do intent.putExtra(EXTRA_KEY_VIDEO_ID, vid)");
-        }
-        return vid;
+        return mFavoriteBean.videoId;
     }
 
     private void addWebViewToNonVideoLayout() {
@@ -293,6 +300,7 @@ public class PlayVideoActivity extends BaseActivity {
 
     /**
      * 如果条件允许的话，加载播放器；否则，加载{@link #URL_BLANK}
+     *
      * @return {@link #mPlayerIsLoaded}
      */
     private boolean initializeWebView() {
@@ -436,6 +444,27 @@ public class PlayVideoActivity extends BaseActivity {
         @JavascriptInterface
         public boolean isShowRelated() {
             return mShowRelated;
+        }
+    }
+
+    /**
+     * {@link WebView}中的播放器开始播放时被调用。
+     * <p>本类是线程安全的。</p>
+     */
+    private static class OnPlayStartListener {
+
+        private final DBManager mDBManager;
+
+        private final FavoriteBean mFavoriteBean;
+
+        private OnPlayStartListener(DBManager dbManager, FavoriteBean favoriteBean) {
+            mDBManager = dbManager;
+            mFavoriteBean = favoriteBean;
+        }
+
+        @JavascriptInterface
+        public void onPlayStart() {
+            mDBManager.saveHistory(mFavoriteBean);
         }
     }
 
