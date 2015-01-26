@@ -2,12 +2,19 @@ package com.optimalorange.cooltechnologies.ui;
 
 import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.entity.FavoriteBean;
+import com.optimalorange.cooltechnologies.network.NetworkChecker;
+import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingleton;
 import com.optimalorange.cooltechnologies.storage.sqlite.DBManager;
 import com.optimalorange.cooltechnologies.ui.fragment.ListCommentsFragment;
 
 import android.annotation.TargetApi;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
@@ -39,6 +46,8 @@ public class PlayVideoActivity extends BaseActivity {
     /** {@link android.webkit.WebView WebView}要加载的网页的路径 */
     private static final String PATH_PLAY_VIDEO_HTML = "file:///android_asset/playvideo.html";
 
+    private static final String URL_BLANK = "about:blank";
+
     /** {@link #PATH_PLAY_VIDEO_HTML}中用到的{@link WebAppInterface WebAppInterface}实例名 */
     private static final String JAVASCRIPT_INTERFACE_GENERIC = "webAppInterface";
 
@@ -49,6 +58,17 @@ public class PlayVideoActivity extends BaseActivity {
     private static final String JAVASCRIPT_INTERFACE_FULLSCREEN_TOGGLE_SWITCH =
             "webAppFullscreenToggleSwitch";
 
+    private DefaultSharedPreferencesSingleton mDefaultSharedPreferencesSingleton;
+
+    private NetworkChecker mNetworkChecker;
+
+    private BroadcastReceiver mNetworkReceiver;
+
+    /**
+     * 状态属性：已经加载播放器
+     */
+    private boolean mPlayerIsLoaded = false;
+
     private LinearLayout mNonVideoLayout;
 
     private VideoEnabledWebView mWebView;
@@ -56,6 +76,19 @@ public class PlayVideoActivity extends BaseActivity {
     private CustomWebViewClient mWebViewClient;
 
     private VideoEnabledWebChromeClient mChromeClient;
+
+    //--------------------------------------------------------------------------
+    // 初始化属性
+    //--------------------------------------------------------------------------
+
+    {
+        mNetworkReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                initializeWebView();
+            }
+        };
+    }
 
 
     //--------------------------------------------------------------------------
@@ -143,13 +176,17 @@ public class PlayVideoActivity extends BaseActivity {
                 .setVid(getVideoId());
         //TODO 分析解决安全问题
         mWebView.addJavascriptInterface(webAppInterface, JAVASCRIPT_INTERFACE_GENERIC);
+
+        mDefaultSharedPreferencesSingleton = DefaultSharedPreferencesSingleton.getInstance(this);
+        mNetworkChecker = NetworkChecker.newInstance(this);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        mWebViewClient.shouldClearHistory(true);
-        mWebView.loadUrl(PATH_PLAY_VIDEO_HTML);
+        registerReceiver(
+                mNetworkReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
+        initializeWebView();
     }
 
     @Override
@@ -168,13 +205,15 @@ public class PlayVideoActivity extends BaseActivity {
 
     @Override
     protected void onStop() {
-        mWebViewClient.shouldClearHistory(true);
-        mWebView.loadUrl("about:blank");
+        unregisterReceiver(mNetworkReceiver);
+        finalizeWebView();
         super.onStop();
     }
 
     @Override
     protected void onDestroy() {
+        mNetworkChecker = null;
+        mDefaultSharedPreferencesSingleton = null;
         mChromeClient = null;
         mWebViewClient = null;
         mNonVideoLayout = null;
@@ -247,6 +286,43 @@ public class PlayVideoActivity extends BaseActivity {
         }
     }
 
+    private void loadUrlAndClearHistory(String url) {
+        mWebViewClient.shouldClearHistory(true);
+        mWebView.loadUrl(url);
+    }
+
+    /**
+     * 如果条件允许的话，加载播放器；否则，加载{@link #URL_BLANK}
+     * @return {@link #mPlayerIsLoaded}
+     */
+    private boolean initializeWebView() {
+        boolean loadPlayer = canPlayNow();
+        if (loadPlayer) {
+            if (!mPlayerIsLoaded) {
+                loadUrlAndClearHistory(PATH_PLAY_VIDEO_HTML);
+            }
+        } else {
+            if (mPlayerIsLoaded) {
+                loadUrlAndClearHistory(URL_BLANK);
+            }
+        }
+        mPlayerIsLoaded = loadPlayer;
+        return loadPlayer;
+    }
+
+    private void finalizeWebView() {
+        loadUrlAndClearHistory(URL_BLANK);
+        mPlayerIsLoaded = false;
+    }
+
+    private boolean canPlayNow() {
+        if (mDefaultSharedPreferencesSingleton.onlyPlayVideoWhenUseWlan()) {
+            return mNetworkChecker.isWifiConnected();
+        } else {
+            return mNetworkChecker.isConnected();
+        }
+    }
+
     //--------------------------------------------------------------------------
     // 嵌套类
     //--------------------------------------------------------------------------
@@ -257,6 +333,7 @@ public class PlayVideoActivity extends BaseActivity {
 
     private static class CustomWebViewClient extends WebViewClient {
 
+        // 参考自 http://stackoverflow.com/questions/8103532/how-to-clear-webview-history-in-android#20657089
         private boolean mShouldClearHistory = false;
 
         public void shouldClearHistory(boolean shouldClearHistory) {
