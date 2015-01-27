@@ -18,11 +18,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class MainActivity extends BaseActivity {
@@ -53,6 +58,8 @@ public class MainActivity extends BaseActivity {
 
     private NetworkChecker mNetworkChecker;
 
+    private MyFragmentPagerAdapter mAdapter;
+
     private ViewPager mPager;
 
     private String mUserToken;
@@ -79,12 +86,13 @@ public class MainActivity extends BaseActivity {
 
         setContentView(R.layout.activity_main);
 
-        mPager = (ViewPager) findViewById(R.id.pager);
-        mPager.setAdapter(new MyFragmentPagerAdapter(
+        mAdapter = new MyFragmentPagerAdapter(
                 this,
                 getFragmentManager(),
                 FRAGMENT_IDS_ORDER_BY_POSITION
-        ));
+        );
+        mPager = (ViewPager) findViewById(R.id.pager);
+        mPager.setAdapter(mAdapter);
         // Bind the indicators to the ViewPager
         TitlePageIndicator mIndicator = (TitlePageIndicator) findViewById(R.id.indicator);
         mIndicator.setViewPager(mPager);
@@ -103,6 +111,8 @@ public class MainActivity extends BaseActivity {
 
     @Override
     protected void onDestroy() {
+        mPager = null;
+        mAdapter = null;
         mNetworkChecker = null;
         super.onDestroy();
     }
@@ -193,34 +203,32 @@ public class MainActivity extends BaseActivity {
     //--------------------------------------------------------------------------
 
     private Fragment getCurrentFragment() {
-        final String name = makeFragmentName(
-                R.id.pager, FRAGMENT_IDS_ORDER_BY_POSITION[mPager.getCurrentItem()]);
-        return getFragmentManager().findFragmentByTag(name);
-    }
-
-    /**
-     * copy from {@link FragmentPagerAdapter#makeFragmentName(int, long)}
-     */
-    // TODO shouldn't depend on others private code
-    private static String makeFragmentName(int viewId, long id) {
-        return "android:switcher:" + viewId + ":" + id;
+        return mAdapter.getItem(mPager.getCurrentItem());
     }
 
     //--------------------------------------------------------------------------
     // 嵌套类
     //--------------------------------------------------------------------------
 
+    /**
+     * 本类不是线程安全的。请仅在主线程中使用。
+     */
     private static class MyFragmentPagerAdapter extends FragmentPagerAdapter {
 
-        private Context mContext;
+        private final Context mContext;
 
-        private int[] mFragmentIdsOrderByPosition;
+        private final int[] mFragmentIdsOrderByPosition;
+
+        private final Map<Integer, FragmentHolder> mIdFragmentMap;
 
         public MyFragmentPagerAdapter(
                 Context context, FragmentManager fm, int[] fragmentIdsOrderByPosition) {
             super(fm);
             mContext = context;
-            mFragmentIdsOrderByPosition = fragmentIdsOrderByPosition;
+            mFragmentIdsOrderByPosition =
+                    Arrays.copyOf(fragmentIdsOrderByPosition, fragmentIdsOrderByPosition.length);
+            // 参考 http://stackoverflow.com/questions/15844035/best-hashmap-initial-capacity-while-indexing-a-list#15844186
+            mIdFragmentMap = new HashMap<>(mFragmentIdsOrderByPosition.length, 1);
         }
 
         @Override
@@ -228,14 +236,22 @@ public class MainActivity extends BaseActivity {
             return mFragmentIdsOrderByPosition.length;
         }
 
+        /**
+         * @see #getItemById(int)
+         */
+        @NonNull
         @Override
         public CharSequence getPageTitle(int position) {
-            return getTitleById((int) getItemId(position));
+            return getItemById((int) getItemId(position)).title;
         }
 
+        /**
+         * @see #getItemById(int)
+         */
+        @NonNull
         @Override
         public Fragment getItem(int position) {
-            return getItemById((int) getItemId(position));
+            return getItemById((int) getItemId(position)).fragment;
         }
 
         @Override
@@ -243,37 +259,60 @@ public class MainActivity extends BaseActivity {
             return mFragmentIdsOrderByPosition[position];
         }
 
-        private String getTitleById(int id) {
+        /**
+         * 取得指定ID的{@link Fragment}和它的Title。
+         * <p>每次用相同的id调用此方法，都会返回相同的实例。</p>
+         *
+         * @see MyFragmentPagerAdapter
+         */
+        public FragmentHolder getItemById(int id) {
+            if (!mIdFragmentMap.containsKey(id)) {
+                mIdFragmentMap.put(id, createItemById(id));
+            }
+            return mIdFragmentMap.get(id);
+        }
+
+        private FragmentHolder createItemById(int id) {
+            Fragment fragment;
+            String title;
             switch (id) {
                 case R.id.fragment_videos:
-                    return mContext.getString(R.string.popular);
+                    fragment = new ListVideosFragment();
+                    title = mContext.getString(R.string.popular);
+                    break;
                 case R.id.fragment_genres:
-                    return mContext.getString(R.string.genre);
+                    fragment = new ListGenresFragment();
+                    title = mContext.getString(R.string.genre);
+                    break;
                 case R.id.fragment_favorite:
-                    return mContext.getString(R.string.favorites);
+                    fragment = new FavoriteFragment();
+                    title = mContext.getString(R.string.favorites);
+                    break;
                 case R.id.fragment_history:
-                    return mContext.getString(R.string.history);
+                    fragment = new HistoryFragment();
+                    title = mContext.getString(R.string.history);
+                    break;
                 case R.id.fragment_promotion:
-                    return mContext.getString(R.string.promotion);
+                    fragment = new PromotionFragment();
+                    title = mContext.getString(R.string.promotion);
+                    break;
                 default:
                     throw new IllegalArgumentException("Unknown fragment id: " + id);
             }
+            return new FragmentHolder(fragment, title);
         }
 
-        private Fragment getItemById(int id) {
-            switch (id) {
-                case R.id.fragment_videos:
-                    return new ListVideosFragment();
-                case R.id.fragment_genres:
-                    return new ListGenresFragment();
-                case R.id.fragment_favorite:
-                    return new FavoriteFragment();
-                case R.id.fragment_history:
-                    return new HistoryFragment();
-                case R.id.fragment_promotion:
-                    return new PromotionFragment();
-                default:
-                    throw new IllegalArgumentException("Unknown fragment id: " + id);
+        private static class FragmentHolder {
+
+            @NonNull
+            public final Fragment fragment;
+
+            @NonNull
+            public final String title;
+
+            private FragmentHolder(@NonNull Fragment fragment, @NonNull String title) {
+                this.fragment = fragment;
+                this.title = title;
             }
         }
     }
