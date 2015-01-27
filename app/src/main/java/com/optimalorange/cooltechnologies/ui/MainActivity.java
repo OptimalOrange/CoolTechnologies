@@ -59,6 +59,10 @@ public class MainActivity extends BaseActivity {
 
     private boolean mIsLogin;
 
+    //--------------------------------------------------------------------------
+    // 覆写Activity的生命周期方法
+    //--------------------------------------------------------------------------
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -144,11 +148,7 @@ public class MainActivity extends BaseActivity {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-
-        switch (id) {
+        switch (item.getItemId()) {
             case R.id.action_login:
                 if (mIsLogin) {
                     mDefaultSharedPreferencesSingleton.saveString("user_token", "");
@@ -165,11 +165,30 @@ public class MainActivity extends BaseActivity {
                     startActivityForResult(intent, Const.REQUEST_CODE_LOGIN_ACTIVITY);
                 }
                 return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-
-        return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case Const.REQUEST_CODE_LOGIN_ACTIVITY:
+                if (resultCode == Const.RESULT_CODE_SUCCESS_LOGIN_ACTIVITY) {
+                    mIsLogin = true;
+                    invalidateOptionsMenu();
+                    Fragment fragment = getCurrentFragment();
+                    if (fragment instanceof FavoriteFragment) {
+                        ((FavoriteFragment) fragment).getJsonData();
+                    }
+                }
+        }
+    }
+
+    //--------------------------------------------------------------------------
+    // 新声明方法
+    //--------------------------------------------------------------------------
 
     private Fragment getCurrentFragment() {
         final String name = makeFragmentName(
@@ -185,7 +204,9 @@ public class MainActivity extends BaseActivity {
         return "android:switcher:" + viewId + ":" + id;
     }
 
-
+    //--------------------------------------------------------------------------
+    // 嵌套类
+    //--------------------------------------------------------------------------
 
     private static class MyFragmentPagerAdapter extends FragmentPagerAdapter {
 
@@ -252,22 +273,6 @@ public class MainActivity extends BaseActivity {
                 default:
                     throw new IllegalArgumentException("Unknown fragment id: " + id);
             }
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode) {
-            case Const.REQUEST_CODE_LOGIN_ACTIVITY:
-                if (resultCode == Const.RESULT_CODE_SUCCESS_LOGIN_ACTIVITY) {
-                    mIsLogin = true;
-                    invalidateOptionsMenu();
-                    Fragment fragment = getCurrentFragment();
-                    if (fragment instanceof FavoriteFragment) {
-                        ((FavoriteFragment) fragment).getJsonData();
-                    }
-                }
         }
     }
 
