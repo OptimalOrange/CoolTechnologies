@@ -62,8 +62,6 @@ public class MainActivity extends BaseActivity {
 
     private ViewPager mPager;
 
-    private MenuItem mLoginOrLogoutMenuItem;
-
     private boolean mShowLoginOrLogoutMenuItem = true;
 
     /** 状态属性：已登录优酷账号 */
@@ -99,6 +97,17 @@ public class MainActivity extends BaseActivity {
         // Bind the indicators to the ViewPager
         TitlePageIndicator mIndicator = (TitlePageIndicator) findViewById(R.id.indicator);
         mIndicator.setViewPager(mPager);
+        // setOnPageChangeListener
+        mIndicator.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+            @Override
+            public void onPageSelected(int position) {
+                if (FRAGMENT_IDS_ORDER_BY_POSITION[position] == R.id.fragment_promotion) {
+                    showLoginOrLogoutMenuItem(false);
+                } else {
+                    showLoginOrLogoutMenuItem(true);
+                }
+            }
+        });
         // goto default pager
         mPager.setCurrentItem(DEFAULT_POSITION);
     }
@@ -142,9 +151,6 @@ public class MainActivity extends BaseActivity {
         super.onCreateOptionsMenu(menu);
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        mLoginOrLogoutMenuItem = menu.findItem(R.id.action_login_or_logout);
-        // 创建mLoginOrLogoutMenuItem后应用mShowLoginOrLogoutMenuItem
-        showLoginOrLogoutMenuItem(mShowLoginOrLogoutMenuItem);
         return true;
     }
 
@@ -159,6 +165,8 @@ public class MainActivity extends BaseActivity {
             loginItem.setIcon(R.drawable.login);
             loginItem.setTitle(R.string.action_login);
         }
+        loginItem.setEnabled(mShowLoginOrLogoutMenuItem);
+        loginItem.setVisible(mShowLoginOrLogoutMenuItem);
         return true;
     }
 
@@ -219,11 +227,10 @@ public class MainActivity extends BaseActivity {
      * @param show true：显示，false：不显示
      */
     public void showLoginOrLogoutMenuItem(boolean show) {
-        if (mLoginOrLogoutMenuItem != null) {
-            mLoginOrLogoutMenuItem.setEnabled(show);
-            mLoginOrLogoutMenuItem.setVisible(show);
+        if (mShowLoginOrLogoutMenuItem != show) {
+            mShowLoginOrLogoutMenuItem = show;
+            invalidateOptionsMenu();
         }
-        mShowLoginOrLogoutMenuItem = show;
     }
 
     //--------------------------------------------------------------------------
