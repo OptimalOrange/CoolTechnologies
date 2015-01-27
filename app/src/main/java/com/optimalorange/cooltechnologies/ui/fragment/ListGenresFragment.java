@@ -530,7 +530,7 @@ public class ListGenresFragment extends SwipeRefreshFragment {
                 public void onClick(View v) {
                     Intent intent = new Intent(v.getContext(), PlayVideoActivity.class);
                     FavoriteBean favoriteBean = new FavoriteBean(video);
-                    intent.putExtra(PlayVideoActivity.EXTRA_KEY_VIDEO_ID, favoriteBean);
+                    intent.putExtra(PlayVideoActivity.EXTRA_KEY_VIDEO, favoriteBean);
                     startActivity(intent);
                 }
             });

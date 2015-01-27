@@ -215,7 +215,7 @@ public class ListVideosFragment extends SwipeRefreshFragment {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Intent mIntent = new Intent(getActivity(), PlayVideoActivity.class);
                 FavoriteBean favoriteBean = new FavoriteBean(mListVideos.get(i));
-                mIntent.putExtra(PlayVideoActivity.EXTRA_KEY_VIDEO_ID, favoriteBean);
+                mIntent.putExtra(PlayVideoActivity.EXTRA_KEY_VIDEO, favoriteBean);
                 startActivity(mIntent);
             }
         });

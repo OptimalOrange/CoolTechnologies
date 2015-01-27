@@ -35,13 +35,11 @@ import name.cpr.VideoEnabledWebView;
 public class PlayVideoActivity extends BaseActivity {
 
     /**
-     * 应当播放的Video的id<br/>
-     * Type: String
-     *
-     * @see com.optimalorange.cooltechnologies.entity.Video#getId() Video.getId()
+     * 应当播放的Video<br/>
+     * Type: {@link FavoriteBean}
      */
-    public static final String EXTRA_KEY_VIDEO_ID =
-            PlayVideoActivity.class.getName() + ".extra.KEY_VIDEO_ID";
+    public static final String EXTRA_KEY_VIDEO =
+            PlayVideoActivity.class.getName() + ".extra.KEY_VIDEO";
 
     /** {@link android.webkit.WebView WebView}要加载的网页的路径 */
     private static final String PATH_PLAY_VIDEO_HTML = "file:///android_asset/playvideo.html";
@@ -104,9 +102,9 @@ public class PlayVideoActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mFavoriteBean = (FavoriteBean) getIntent().getSerializableExtra(EXTRA_KEY_VIDEO_ID);
+        mFavoriteBean = (FavoriteBean) getIntent().getSerializableExtra(EXTRA_KEY_VIDEO);
         if (mFavoriteBean == null) {
-            throw new IllegalStateException("Please do intent.putExtra(EXTRA_KEY_VIDEO_ID, vid)");
+            throw new IllegalStateException("Please do intent.putExtra(EXTRA_KEY_VIDEO, vid)");
         }
 
         setContentView(R.layout.activity_play_video);
