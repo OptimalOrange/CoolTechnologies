@@ -62,9 +62,12 @@ public class MainActivity extends BaseActivity {
 
     private ViewPager mPager;
 
-    private String mUserToken;
+    private MenuItem mLoginOrLogoutMenuItem;
 
-    private boolean mIsLogin;
+    private boolean mShowLoginOrLogoutMenuItem = true;
+
+    /** 状态属性：已登录优酷账号 */
+    private boolean mhasLoggedIn;
 
     //--------------------------------------------------------------------------
     // 覆写Activity的生命周期方法
@@ -81,8 +84,8 @@ public class MainActivity extends BaseActivity {
         mDefaultSharedPreferencesSingleton = DefaultSharedPreferencesSingleton.getInstance(this);
         mNetworkChecker = NetworkChecker.newInstance(this);
 
-        mUserToken = mDefaultSharedPreferencesSingleton.retrieveString("user_token", "");
-        mIsLogin = !mUserToken.isEmpty();
+        mhasLoggedIn =
+                !mDefaultSharedPreferencesSingleton.retrieveString("user_token", "").isEmpty();
 
         setContentView(R.layout.activity_main);
 
@@ -139,20 +142,24 @@ public class MainActivity extends BaseActivity {
         super.onCreateOptionsMenu(menu);
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        mLoginOrLogoutMenuItem = menu.findItem(R.id.action_login_or_logout);
+        // 创建mLoginOrLogoutMenuItem后应用mShowLoginOrLogoutMenuItem
+        showLoginOrLogoutMenuItem(mShowLoginOrLogoutMenuItem);
         return true;
     }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem loginItem = menu.findItem(R.id.action_login);
-        if (mIsLogin) {
+        super.onPrepareOptionsMenu(menu);
+        MenuItem loginItem = menu.findItem(R.id.action_login_or_logout);
+        if (mhasLoggedIn) {
             loginItem.setIcon(R.drawable.logout);
             loginItem.setTitle(R.string.action_logout);
         } else {
             loginItem.setIcon(R.drawable.login);
             loginItem.setTitle(R.string.action_login);
         }
-        return super.onPrepareOptionsMenu(menu);
+        return true;
     }
 
     @Override
@@ -161,10 +168,10 @@ public class MainActivity extends BaseActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         switch (item.getItemId()) {
-            case R.id.action_login:
-                if (mIsLogin) {
+            case R.id.action_login_or_logout:
+                if (mhasLoggedIn) {
                     mDefaultSharedPreferencesSingleton.saveString("user_token", "");
-                    mIsLogin = false;
+                    mhasLoggedIn = false;
                     invalidateOptionsMenu();
                     Toast.makeText(this, R.string.action_logout_success, Toast.LENGTH_SHORT).show();
                 } else {
@@ -188,13 +195,14 @@ public class MainActivity extends BaseActivity {
         switch (requestCode) {
             case Const.REQUEST_CODE_LOGIN_ACTIVITY:
                 if (resultCode == Const.RESULT_CODE_SUCCESS_LOGIN_ACTIVITY) {
-                    mIsLogin = true;
+                    mhasLoggedIn = true;
                     invalidateOptionsMenu();
                     Fragment fragment = getCurrentFragment();
                     if (fragment instanceof FavoriteFragment) {
                         ((FavoriteFragment) fragment).getJsonData();
                     }
                 }
+                break;
         }
     }
 
@@ -204,6 +212,18 @@ public class MainActivity extends BaseActivity {
 
     private Fragment getCurrentFragment() {
         return mAdapter.getItem(mPager.getCurrentItem());
+    }
+
+    /**
+     * 设置是否显示“登录”或“注销”菜单项
+     * @param show true：显示，false：不显示
+     */
+    public void showLoginOrLogoutMenuItem(boolean show) {
+        if (mLoginOrLogoutMenuItem != null) {
+            mLoginOrLogoutMenuItem.setEnabled(show);
+            mLoginOrLogoutMenuItem.setVisible(show);
+        }
+        mShowLoginOrLogoutMenuItem = show;
     }
 
     //--------------------------------------------------------------------------

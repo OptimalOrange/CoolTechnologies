@@ -3,7 +3,7 @@
       tools:context=".ui.MainActivity">
 
     <item
-            android:id="@+id/action_login"
+            android:id="@+id/action_login_or_logout"
             android:title="@string/action_login"
             android:icon="@drawable/login"
             android:showAsAction="ifRoom|withText"
