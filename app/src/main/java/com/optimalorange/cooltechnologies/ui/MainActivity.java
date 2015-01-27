@@ -137,8 +137,10 @@ public class MainActivity extends BaseActivity {
         MenuItem loginItem = menu.findItem(R.id.action_login);
         if (mIsLogin) {
             loginItem.setIcon(R.drawable.logout);
+            loginItem.setTitle(R.string.action_logout);
         } else {
             loginItem.setIcon(R.drawable.login);
+            loginItem.setTitle(R.string.action_login);
         }
         return super.onPrepareOptionsMenu(menu);
     }
