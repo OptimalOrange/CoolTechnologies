@@ -1,36 +1,29 @@
 package com.optimalorange.cooltechnologies.ui;
 
 import com.optimalorange.cooltechnologies.R;
-import com.optimalorange.cooltechnologies.network.NetworkChecker;
-import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingleton;
 import com.optimalorange.cooltechnologies.ui.fragment.FavoriteFragment;
 import com.optimalorange.cooltechnologies.ui.fragment.HistoryFragment;
 import com.optimalorange.cooltechnologies.ui.fragment.ListGenresFragment;
 import com.optimalorange.cooltechnologies.ui.fragment.ListVideosFragment;
 import com.optimalorange.cooltechnologies.ui.fragment.PromotionFragment;
-import com.optimalorange.cooltechnologies.util.Const;
 import com.umeng.update.UmengUpdateAgent;
 import com.viewpagerindicator.TitlePageIndicator;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.widget.Toast;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 
-public class MainActivity extends BaseActivity {
+public class MainActivity extends LoginableBaseActivity {
 
     /**
      * The serialization (saved instance state) Bundle key representing the
@@ -54,18 +47,9 @@ public class MainActivity extends BaseActivity {
      */
     private static final int DEFAULT_POSITION = 1;
 
-    private DefaultSharedPreferencesSingleton mDefaultSharedPreferencesSingleton;
-
-    private NetworkChecker mNetworkChecker;
-
     private MyFragmentPagerAdapter mAdapter;
 
     private ViewPager mPager;
-
-    private boolean mShowLoginOrLogoutMenuItem = true;
-
-    /** 状态属性：已登录优酷账号 */
-    private boolean mhasLoggedIn;
 
     //--------------------------------------------------------------------------
     // 覆写Activity的生命周期方法
@@ -78,12 +62,6 @@ public class MainActivity extends BaseActivity {
         UmengUpdateAgent.update(this);
         //set preferences' default values
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-
-        mDefaultSharedPreferencesSingleton = DefaultSharedPreferencesSingleton.getInstance(this);
-        mNetworkChecker = NetworkChecker.newInstance(this);
-
-        mhasLoggedIn =
-                !mDefaultSharedPreferencesSingleton.retrieveString("user_token", "").isEmpty();
 
         setContentView(R.layout.activity_main);
 
@@ -110,6 +88,18 @@ public class MainActivity extends BaseActivity {
         });
         // goto default pager
         mPager.setCurrentItem(DEFAULT_POSITION);
+        // set OnLoginStatusChangeListener
+        addLoginStatusChangeListener(new OnLoginStatusChangeListener() {
+            @Override
+            public void onLoginStatusChanged(boolean hasLoggedIn) {
+                if (hasLoggedIn) {
+                    Fragment fragment = getCurrentFragment();
+                    if (fragment instanceof FavoriteFragment) {
+                        ((FavoriteFragment) fragment).getJsonData();
+                    }
+                }
+            }
+        });
     }
 
     @Override
@@ -125,7 +115,6 @@ public class MainActivity extends BaseActivity {
     protected void onDestroy() {
         mPager = null;
         mAdapter = null;
-        mNetworkChecker = null;
         super.onDestroy();
     }
 
@@ -145,92 +134,12 @@ public class MainActivity extends BaseActivity {
         super.onSaveInstanceState(outState);
     }
 
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        super.onCreateOptionsMenu(menu);
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        super.onPrepareOptionsMenu(menu);
-        MenuItem loginItem = menu.findItem(R.id.action_login_or_logout);
-        if (mhasLoggedIn) {
-            loginItem.setIcon(R.drawable.logout);
-            loginItem.setTitle(R.string.action_logout);
-        } else {
-            loginItem.setIcon(R.drawable.login);
-            loginItem.setTitle(R.string.action_login);
-        }
-        loginItem.setEnabled(mShowLoginOrLogoutMenuItem);
-        loginItem.setVisible(mShowLoginOrLogoutMenuItem);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        switch (item.getItemId()) {
-            case R.id.action_login_or_logout:
-                if (mhasLoggedIn) {
-                    mDefaultSharedPreferencesSingleton.saveString("user_token", "");
-                    mhasLoggedIn = false;
-                    invalidateOptionsMenu();
-                    Toast.makeText(this, R.string.action_logout_success, Toast.LENGTH_SHORT).show();
-                } else {
-                    if (!mNetworkChecker.isConnected()) {
-                        Toast.makeText(this, R.string.action_login_no_net, Toast.LENGTH_SHORT)
-                                .show();
-                        return true;
-                    }
-                    Intent intent = new Intent(this, LoginActivity.class);
-                    startActivityForResult(intent, Const.REQUEST_CODE_LOGIN_ACTIVITY);
-                }
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode) {
-            case Const.REQUEST_CODE_LOGIN_ACTIVITY:
-                if (resultCode == Const.RESULT_CODE_SUCCESS_LOGIN_ACTIVITY) {
-                    mhasLoggedIn = true;
-                    invalidateOptionsMenu();
-                    Fragment fragment = getCurrentFragment();
-                    if (fragment instanceof FavoriteFragment) {
-                        ((FavoriteFragment) fragment).getJsonData();
-                    }
-                }
-                break;
-        }
-    }
-
     //--------------------------------------------------------------------------
     // 新声明方法
     //--------------------------------------------------------------------------
 
     private Fragment getCurrentFragment() {
         return mAdapter.getItem(mPager.getCurrentItem());
-    }
-
-    /**
-     * 设置是否显示“登录”或“注销”菜单项
-     * @param show true：显示，false：不显示
-     */
-    public void showLoginOrLogoutMenuItem(boolean show) {
-        if (mShowLoginOrLogoutMenuItem != show) {
-            mShowLoginOrLogoutMenuItem = show;
-            invalidateOptionsMenu();
-        }
     }
 
     //--------------------------------------------------------------------------
