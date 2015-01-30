@@ -32,7 +32,7 @@ import name.cpr.VideoEnabledWebChromeClient;
 import name.cpr.VideoEnabledWebView;
 
 //TODO 处理横竖屏切换等onConfigurationChange
-public class PlayVideoActivity extends BaseActivity {
+public class PlayVideoActivity extends LoginableBaseActivity {
 
     /**
      * 应当播放的Video<br/>
@@ -102,10 +102,13 @@ public class PlayVideoActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // 初始化属性
         mFavoriteBean = (FavoriteBean) getIntent().getSerializableExtra(EXTRA_KEY_VIDEO);
         if (mFavoriteBean == null) {
             throw new IllegalStateException("Please do intent.putExtra(EXTRA_KEY_VIDEO, vid)");
         }
+        mDefaultSharedPreferencesSingleton = DefaultSharedPreferencesSingleton.getInstance(this);
+        mNetworkChecker = NetworkChecker.newInstance(this);
 
         setContentView(R.layout.activity_play_video);
 
@@ -178,7 +181,9 @@ public class PlayVideoActivity extends BaseActivity {
                     }
                 });
         mWebView.setWebChromeClient(mChromeClient);
+        // end setWebChromeClient
 
+        // addJavascriptInterface
         WebAppInterface webAppInterface = new WebAppInterface()
                 .setClientId(getString(R.string.youku_client_id))
                 .setVid(getVideoId());
@@ -187,9 +192,6 @@ public class PlayVideoActivity extends BaseActivity {
         mWebView.addJavascriptInterface(
                 new OnPlayStartListener(DBManager.getInstance(this), mFavoriteBean),
                 JAVASCRIPT_INTERFACE_ON_PLAY_START_LISTENER);
-
-        mDefaultSharedPreferencesSingleton = DefaultSharedPreferencesSingleton.getInstance(this);
-        mNetworkChecker = NetworkChecker.newInstance(this);
     }
 
     @Override
@@ -223,8 +225,6 @@ public class PlayVideoActivity extends BaseActivity {
 
     @Override
     protected void onDestroy() {
-        mNetworkChecker = null;
-        mDefaultSharedPreferencesSingleton = null;
         mChromeClient = null;
         mWebViewClient = null;
         mNonVideoLayout = null;
@@ -236,6 +236,9 @@ public class PlayVideoActivity extends BaseActivity {
             mWebView.destroy();
             mWebView = null;
         }
+        mNetworkChecker = null;
+        mDefaultSharedPreferencesSingleton = null;
+        mFavoriteBean = null;
         super.onDestroy();
     }
 
