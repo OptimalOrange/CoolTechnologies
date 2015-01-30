@@ -145,13 +145,14 @@ public class LoginActivity extends BaseActivity implements Handler.Callback {
     public boolean handleMessage(Message msg) {
         switch (msg.what) {
             case GET_TOKEN_OK:
-                showToastInUIThread(R.string.action_login_success);
-                setResult(Const.RESULT_CODE_SUCCESS_LOGIN_ACTIVITY);
-                Log.e("wzz login", "result=" + msg.obj);
-                DefaultSharedPreferencesSingleton.getInstance(LoginActivity.this)
-                        .saveString("user_token", getTokenString(msg.obj.toString()));
-                finish();
-                return true;
+                if (DefaultSharedPreferencesSingleton.getInstance(LoginActivity.this)
+                        .commitSaveString("user_token", getTokenString(msg.obj.toString()))) {
+                    showToastInUIThread(R.string.action_login_success);
+                    setResult(Const.RESULT_CODE_SUCCESS_LOGIN_ACTIVITY);
+                    Log.e("wzz login", "result=" + msg.obj);
+                    finish();
+                    return true;
+                } // else goto case GET_TOKEN_ERROR
             case GET_TOKEN_ERROR:
                 setResult(Const.RESULT_CODE_FAIL_LOGIN_ACTIVITY);
                 finish();

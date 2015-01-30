@@ -13,6 +13,7 @@
     <string name="action_logout">注销</string>
     <string name="action_login_success">登录成功！</string>
     <string name="action_logout_success">注销成功！</string>
+    <string name="action_logout_fail">注销失败！</string>
     <string name="action_login_fail">登录失败！</string>
     <string name="action_login_no_net">没有网络不能登录的啦~~</string>
     <string name="action_search">搜索</string>

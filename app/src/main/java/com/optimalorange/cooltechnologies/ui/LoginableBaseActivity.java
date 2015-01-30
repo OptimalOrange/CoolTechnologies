@@ -73,9 +73,14 @@ public abstract class LoginableBaseActivity extends BaseActivity {
         switch (item.getItemId()) {
             case R.id.action_login_or_logout:
                 if (hasLoggedIn()) {
-                    mDefaultSharedPreferencesSingleton.saveString("user_token", "");
-                    hasLoggedIn(false);
-                    Toast.makeText(this, R.string.action_logout_success, Toast.LENGTH_SHORT).show();
+                    int message;
+                    if (mDefaultSharedPreferencesSingleton.commitSaveString("user_token", "")) {
+                        hasLoggedIn(false);
+                        message = R.string.action_logout_success;
+                    } else {
+                        message = R.string.action_logout_fail;
+                    }
+                    Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
                 } else {
                     if (!mNetworkChecker.isConnected()) {
                         Toast.makeText(this, R.string.action_login_no_net, Toast.LENGTH_SHORT).show();

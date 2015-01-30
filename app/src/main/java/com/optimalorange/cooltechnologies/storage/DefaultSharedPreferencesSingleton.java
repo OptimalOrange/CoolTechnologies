@@ -8,6 +8,12 @@ import android.content.res.Resources;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 
+/**
+ * 全局{@link SharedPreferences}单例。
+ * <p><i>本类是线程安全的</i></p>
+ *
+ * @see SharedPreferences
+ */
 public class DefaultSharedPreferencesSingleton {
 
     private static DefaultSharedPreferencesSingleton mInstance;
@@ -40,11 +46,27 @@ public class DefaultSharedPreferencesSingleton {
      *
      * @param key   关键字
      * @param value 值
+     * @return 如果成功写入了value值，返回true
+     * @see #applySaveString(String, String)
      * @see android.content.SharedPreferences.Editor#putString(String, String)
-     * Editor.putString(key, value)
+     * @see android.content.SharedPreferences.Editor#commit()
      */
-    public void saveString(String key, String value) {
-        mDefaultSharedPreferences.edit().putString(key, value).commit();
+    public boolean commitSaveString(String key, String value) {
+        return mDefaultSharedPreferences.edit().putString(key, value).commit();
+    }
+
+    /**
+     * 将value以String的形式存入
+     * {@link PreferenceManager#getDefaultSharedPreferences DefaultSharedPreferences}
+     *
+     * @param key   关键字
+     * @param value 值
+     * @see #commitSaveString(String, String)
+     * @see android.content.SharedPreferences.Editor#putString(String, String)
+     * @see android.content.SharedPreferences.Editor#apply()
+     */
+    public void applySaveString(String key, String value) {
+        mDefaultSharedPreferences.edit().putString(key, value).apply();
     }
 
     /**
