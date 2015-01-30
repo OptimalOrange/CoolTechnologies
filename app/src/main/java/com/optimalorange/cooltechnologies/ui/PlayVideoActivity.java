@@ -205,14 +205,12 @@ public class PlayVideoActivity extends LoginableBaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        mWebView.resumeTimers();
         mWebView.onResume();
     }
 
     @Override
     protected void onPause() {
         mWebView.onPause();
-        mWebView.pauseTimers();
         super.onPause();
     }
 
