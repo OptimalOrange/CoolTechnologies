@@ -10,13 +10,19 @@ import com.optimalorange.cooltechnologies.entity.Comment;
 import com.optimalorange.cooltechnologies.network.CommentsRequest;
 import com.optimalorange.cooltechnologies.network.NetworkChecker;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
+import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingleton;
+import com.optimalorange.cooltechnologies.ui.LoginActivity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.Fragment;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
@@ -30,6 +36,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -63,6 +70,8 @@ public class ListCommentsFragment extends SwipeRefreshFragment {
 
     private String mYoukuClientId;
 
+    private DefaultSharedPreferencesSingleton mDefaultSharedPreferencesSingleton;
+
     private NetworkChecker mNetworkChecker;
 
     /** 网络请求管理器 */
@@ -88,6 +97,8 @@ public class ListCommentsFragment extends SwipeRefreshFragment {
     private ItemsAdapter mItemsAdapter;
 
     private LinkedList<Comment> mListComments = new LinkedList<Comment>();
+
+    private String mContent;
 
     /**
      * 获取Comment（见entity包中Comment）
@@ -190,6 +201,8 @@ public class ListCommentsFragment extends SwipeRefreshFragment {
             mVideoID = getArguments().getString(ARGUMENT_KEY_VIDEO_ID);
         }
 
+        mDefaultSharedPreferencesSingleton =
+                DefaultSharedPreferencesSingleton.getInstance(getActivity());
         mYoukuClientId = getString(R.string.youku_client_id);
         mVolleySingleton = VolleySingleton.getInstance(getActivity());
         //检测网络是否连接
@@ -230,6 +243,53 @@ public class ListCommentsFragment extends SwipeRefreshFragment {
             setRefreshing(true);
             startLoad();
         }
+
+        mHeader.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String token = mDefaultSharedPreferencesSingleton.retrieveString("user_token", "");
+                if (token.isEmpty()) {
+                    if (!mNetworkChecker.isConnected()) {
+                        Toast.makeText(getActivity(), R.string.comment_no_connection,
+                                Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    ToLoginDialogFragment mDialog = new ToLoginDialogFragment();
+                    mDialog.show(getFragmentManager(), null);
+                } else {
+                    CreateCommentFragment mCreateCommentFragment = CreateCommentFragment
+                            .newInstance(mVideoID, token, mContent);
+                    mCreateCommentFragment.setOnSaveContentListener(
+                            new CreateCommentFragment.OnSaveContentListener() {
+                                @Override
+                                public void onSaveContent(String content) {
+                                    mContent = content;
+                                }
+                            });
+                    mCreateCommentFragment.setOnCreateCommentListener(
+                            new CreateCommentFragment.OnCreateCommentListener() {
+                                @Override
+                                public void onCreateComment(boolean isSuccess) {
+                                    if (isSuccess) {
+                                        Toast.makeText(getActivity(),
+                                                R.string.create_comment_success,
+                                                Toast.LENGTH_SHORT).show();
+                                        //发表成功后就清空评论输入框中的内容
+                                        mContent = null;
+                                        //发表成功后就刷新评论
+                                        restartLoad();
+                                    } else {
+                                        Toast.makeText(getActivity(),
+                                                R.string.create_comment_failure,
+                                                Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            });
+                    mCreateCommentFragment
+                            .show(getFragmentManager(), CreateCommentFragment.class.getName());
+                }
+            }
+        });
 
     }
 
@@ -310,6 +370,32 @@ public class ListCommentsFragment extends SwipeRefreshFragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {}
+
+    /**
+     * “提示需要登陆才能评论”对话框
+     */
+    public static class ToLoginDialogFragment extends DialogFragment {
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setTitle(R.string.comment_to_login_title)
+                    .setMessage(R.string.comment_to_login_message)
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            startActivity(new Intent(getActivity(), LoginActivity.class));
+                        }
+                    })
+                    .setNegativeButton(android.R.string.cancel,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                }
+                            });
+            return builder.create();
+        }
+    }
 
     /**
      * {@link com.android.volley.Request Requests}管理器。用于统计Requests状态。

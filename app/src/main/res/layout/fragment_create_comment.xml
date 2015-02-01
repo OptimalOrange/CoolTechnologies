@@ -4,24 +4,27 @@
                 android:layout_height="wrap_content"
         >
 
-    <TextView
+    <EditText
+            android:id="@+id/content"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
             android:layout_marginLeft="@dimen/comments_margin_10dp"
             android:layout_marginRight="@dimen/comments_edit_margin"
-            android:text="@string/comment_word_number"
+            android:maxEms="@integer/comment_word_number"
+            android:hint="@string/comment_word_number"
             android:textSize="@dimen/text_size_medium"
-            android:textColor="@color/text_disabled_or_hint_black"
+            android:textColorHint="@color/text_disabled_or_hint_black"
             />
 
     <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:id="@+id/send"
+            android:layout_width="@dimen/image_send_dimen"
+            android:layout_height="@dimen/image_send_dimen"
             android:layout_margin="@dimen/comments_margin_10dp"
+            android:scaleType="center"
             android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:background="@drawable/ic_send_grey600_24dp"
+            android:src="@drawable/ic_send_black_24dp"
             />
 </RelativeLayout>

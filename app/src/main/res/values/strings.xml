@@ -7,7 +7,6 @@
     <string name="favorites">收藏</string>
     <string name="history">历史</string>
     <string name="promotion">推荐</string>
-
     <string name="action_settings">设置</string>
     <string name="action_login">登录</string>
     <string name="action_logout">注销</string>
@@ -68,6 +67,11 @@
     <!-- fragment_list_comments -->
     <string name="comments_title">评论</string>
     <string name="comments_count">%1$s条评论</string>
-    <string name="comment_word_number">亲，评论的字数为300字</string>
+    <string name="comment_word_number">亲，评论的字数为300字以内</string>
+    <string name="comment_no_connection">无网络连接</string>
+    <string name="comment_to_login_title">未登录</string>
+    <string name="comment_to_login_message">亲，需要登录才能评论，请先登录</string>
+    <string name="create_comment_success">评论发表成功</string>
+    <string name="create_comment_failure">评论发表失败</string>
 
 </resources>
