@@ -155,11 +155,13 @@ public class ListCommentsFragment extends SwipeRefreshFragment {
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
+                                mRequestsManager.addRequestRespondeds();
                             }
                         }, new Response.ErrorListener() {
 
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        mRequestsManager.addRequestErrors();
                     }
                 });
         return totalRequest;
@@ -271,7 +273,7 @@ public class ListCommentsFragment extends SwipeRefreshFragment {
     private void startLoad() {
         if (mIsConnected) {
             mRequestsManager.addRequest(buildQueryCommentsRequest());
-            mVolleySingleton.addToRequestQueue(buildQueryTotalRequest());
+            mRequestsManager.addRequest(buildQueryTotalRequest());
         }
     }
 
