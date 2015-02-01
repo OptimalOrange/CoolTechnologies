@@ -35,7 +35,6 @@
     <dimen name="comments_padding_5dp">5dp</dimen>
     <dimen name="comments_margin_5dp">5dp</dimen>
     <dimen name="comments_edit_margin">48dp</dimen>
-    <dimen name="login_button_width">25dp</dimen>
-    <dimen name="login_button_height">25dp</dimen>
+    <dimen name="favorite_button_dimen">26dp</dimen>
 
 </resources>

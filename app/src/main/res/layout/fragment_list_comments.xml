@@ -41,8 +41,8 @@
                 </LinearLayout>
                 <Button
                         android:id="@+id/favorite"
-                        android:layout_width="@dimen/login_button_width"
-                        android:layout_height="@dimen/login_button_height"
+                        android:layout_width="@dimen/favorite_button_dimen"
+                        android:layout_height="@dimen/favorite_button_dimen"
                         android:layout_alignParentRight="true"
                         android:layout_centerVertical="true"
                         android:background="@drawable/login"
