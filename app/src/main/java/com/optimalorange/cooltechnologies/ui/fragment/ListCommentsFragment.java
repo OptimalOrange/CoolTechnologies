@@ -8,6 +8,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.entity.Comment;
 import com.optimalorange.cooltechnologies.network.CommentsRequest;
+import com.optimalorange.cooltechnologies.network.CreateFavorite;
 import com.optimalorange.cooltechnologies.network.NetworkChecker;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingleton;
@@ -34,6 +35,7 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -91,6 +93,8 @@ public class ListCommentsFragment extends SwipeRefreshFragment {
     private View mHeader;
 
     private TextView mCommentsCount;
+
+    private Button mFavoriteView;
 
     private ListView mListView;
 
@@ -178,6 +182,28 @@ public class ListCommentsFragment extends SwipeRefreshFragment {
         return totalRequest;
     }
 
+    /** 创建收藏的请求 */
+    private void buildCreateFavoriteRequest(String token) {
+        new CreateFavorite.Builder()
+                .setClient_id(mYoukuClientId)
+                .setVideo_id(mVideoID)
+                .setAccess_token(token)
+                .setOnCreateFavoriteListener(new CreateFavorite.OnCreateFavoriteListener() {
+                    @Override
+                    public void onCreateFavorite(boolean isCreated) {
+                        if (isCreated) {
+                            Toast.makeText(getActivity(),
+                                    R.string.create_favorite_success,
+                                    Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getActivity(),
+                                    R.string.create_favorite_failure,
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }).build();
+    }
+
     /**
      * 用于 创建设置有指定参数的新{@link ListCommentsFragment}实例的 工厂方法
      *
@@ -226,6 +252,7 @@ public class ListCommentsFragment extends SwipeRefreshFragment {
             Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_list_comments, container, false);
         mCommentsCount = (TextView) rootView.findViewById(R.id.comments_count);
+        mFavoriteView = (Button) rootView.findViewById(R.id.favorite);
         mListView = (ListView) rootView.findViewById(R.id.comments_list);
         mHeader = LayoutInflater.from(getActivity()).inflate(R.layout.list_comments_header, null);
         mListView.addHeaderView(mHeader);
@@ -244,6 +271,26 @@ public class ListCommentsFragment extends SwipeRefreshFragment {
             startLoad();
         }
 
+        /** 收藏 按钮的监听 */
+        mFavoriteView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String token = mDefaultSharedPreferencesSingleton.retrieveString("user_token", "");
+                if (token.isEmpty()) {
+                    if (!mNetworkChecker.isConnected()) {
+                        Toast.makeText(getActivity(), R.string.comment_no_connection,
+                                Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    ToLoginDialogFragment mDialog = ToLoginDialogFragment
+                            .newInstance(getString(R.string.create_favorite_to_login_message));
+                    mDialog.show(getFragmentManager(), null);
+                } else {
+                    buildCreateFavoriteRequest(token);
+                }
+            }
+        });
+
         mHeader.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -254,7 +301,8 @@ public class ListCommentsFragment extends SwipeRefreshFragment {
                                 Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    ToLoginDialogFragment mDialog = new ToLoginDialogFragment();
+                    ToLoginDialogFragment mDialog = ToLoginDialogFragment
+                            .newInstance(getString(R.string.comment_to_login_message));
                     mDialog.show(getFragmentManager(), null);
                 } else {
                     CreateCommentFragment mCreateCommentFragment = CreateCommentFragment
@@ -369,18 +417,40 @@ public class ListCommentsFragment extends SwipeRefreshFragment {
     }
 
     @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {}
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+    }
 
     /**
      * “提示需要登陆才能评论”对话框
      */
     public static class ToLoginDialogFragment extends DialogFragment {
 
+        private static final String ARGMENT_KEY_MESSAGE = ToLoginDialogFragment.class.getName()
+                + ".KEY_MESSAGE";
+
+        private String mMessage;
+
+        public static ToLoginDialogFragment newInstance(String message) {
+            ToLoginDialogFragment frag = new ToLoginDialogFragment();
+            Bundle bundle = new Bundle();
+            bundle.putString(ARGMENT_KEY_MESSAGE, message);
+            frag.setArguments(bundle);
+            return frag;
+        }
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            if (getArguments() != null) {
+                mMessage = getArguments().getString(ARGMENT_KEY_MESSAGE);
+            }
+        }
+
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            builder.setTitle(R.string.comment_to_login_title)
-                    .setMessage(R.string.comment_to_login_message)
+            builder.setTitle(R.string.not_login_title)
+                    .setMessage(mMessage)
                     .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {

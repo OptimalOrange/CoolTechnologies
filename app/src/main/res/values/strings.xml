@@ -69,9 +69,12 @@
     <string name="comments_count">%1$s条评论</string>
     <string name="comment_word_number">亲，评论的字数为300字以内</string>
     <string name="comment_no_connection">无网络连接</string>
-    <string name="comment_to_login_title">未登录</string>
+    <string name="not_login_title">未登录</string>
     <string name="comment_to_login_message">亲，需要登录才能评论，请先登录</string>
     <string name="create_comment_success">评论发表成功</string>
     <string name="create_comment_failure">评论发表失败</string>
+    <string name="create_favorite_to_login_message">亲，需要登录才能收藏，请先登录</string>
+    <string name="create_favorite_success">收藏成功</string>
+    <string name="create_favorite_failure">收藏失败</string>
 
 </resources>
