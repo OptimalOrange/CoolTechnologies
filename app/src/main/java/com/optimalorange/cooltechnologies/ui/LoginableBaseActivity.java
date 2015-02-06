@@ -57,10 +57,10 @@ public abstract class LoginableBaseActivity extends BaseActivity {
         super.onPrepareOptionsMenu(menu);
         MenuItem item = menu.findItem(R.id.action_login_or_logout);
         if (hasLoggedIn()) {
-            item.setIcon(R.drawable.logout);
+            item.setIcon(R.drawable.ic_perm_identity_fill_white_24dp);
             item.setTitle(R.string.action_logout);
         } else {
-            item.setIcon(R.drawable.login);
+            item.setIcon(R.drawable.ic_perm_identity_white_24dp);
             item.setTitle(R.string.action_login);
         }
         item.setEnabled(mShowLoginOrLogoutMenuItem);
