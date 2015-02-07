@@ -17,6 +17,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.view.ViewGroup;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -182,6 +183,13 @@ public class MainActivity extends LoginableBaseActivity {
         }
 
         /**
+         * {@inheritDoc}
+         * <p><b>Note</b>: the return value will be changed after Configuration Changes (updated in
+         * {@link #instantiateItem(android.view.ViewGroup, int)})</p>
+         * <p><b>Note</b>: after Configuration Changes and before
+         * {@link #instantiateItem(android.view.ViewGroup, int)} finished, the return value likely
+         * is <b>not</b> the one actually in {@link android.support.v4.view.ViewPager}</p>
+         *
          * @see #getItemById(int)
          */
         @NonNull
@@ -195,12 +203,31 @@ public class MainActivity extends LoginableBaseActivity {
             return mFragmentIdsOrderByPosition[position];
         }
 
+        @Override
+        public Object instantiateItem(ViewGroup container, int position) {
+            Fragment item = (Fragment) super.instantiateItem(container, position);
+            FragmentHolder fragmentHolder = getItemById((int) getItemId(position));
+            // after Configuration Changes, "item" is a fragment recreated by system and
+            // "fragmentHolder.fragment" is a new instance, so fragmentHolder.fragment != item
+            if (fragmentHolder.fragment != item) {
+                fragmentHolder.fragment = item;
+            }
+            return item;
+        }
+
         /**
          * 取得指定ID的{@link Fragment}和它的Title。
-         * <p>每次用相同的id调用此方法，都会返回相同的实例。</p>
+         * <p>一般情况下，每次用相同的id调用此方法，都会返回相同的实例。</p>
+         * <p><b>Note</b>：Configuration Changes会导致此方法（相同id）返回不同实例，
+         * 并且其内部的fragment会在{@link #instantiateItem(android.view.ViewGroup, int)}更新。</p>
+         * <p><b>Note</b>：在Configuration Changes之后，
+         * {@link #instantiateItem(android.view.ViewGroup, int)}完成之前，本方法返回的
+         * {@link FragmentHolder FragmentHolder}内的{@link FragmentHolder#fragment fragment}很可能与
+         * {@link ViewPager}中的不一致。</p>
          *
          * @see MyFragmentPagerAdapter
          */
+        @NonNull
         public FragmentHolder getItemById(int id) {
             if (!mIdFragmentMap.containsKey(id)) {
                 mIdFragmentMap.put(id, createItemById(id));
@@ -241,10 +268,10 @@ public class MainActivity extends LoginableBaseActivity {
         private static class FragmentHolder {
 
             @NonNull
-            public final Fragment fragment;
+            public Fragment fragment;
 
             @NonNull
-            public final String title;
+            public String title;
 
             private FragmentHolder(@NonNull Fragment fragment, @NonNull String title) {
                 this.fragment = fragment;
