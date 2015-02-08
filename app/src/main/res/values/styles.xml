@@ -1,7 +1,7 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="BaseAppTheme" parent="android:Theme.Holo.Light">
+    <style name="BaseAppTheme" parent="android:Theme.Holo.Light.DarkActionBar">
         <item name="android:actionBarStyle">@style/CustomActionBar</item>
     </style>
     <!-- Application theme. -->
