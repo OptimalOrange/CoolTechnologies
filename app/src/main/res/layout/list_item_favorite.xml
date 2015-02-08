@@ -14,7 +14,7 @@
             android:id="@+id/thumbnail"
             android:layout_width="@dimen/favorite_item_image_width"
             android:layout_height="match_parent"
-            android:src="@drawable/ic_launcher"
+            android:src="@mipmap/ic_launcher"
             android:adjustViewBounds="true"
             android:contentDescription="@android:string/no"
             />

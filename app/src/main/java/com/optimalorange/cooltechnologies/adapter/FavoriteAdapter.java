@@ -65,7 +65,7 @@ private ImageLoader mImageLoader;
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
-        mImageLoader.get(mFavoriteBeans.get(position).imageUrl, ImageLoader.getImageListener(viewHolder.ivImage, R.drawable.ic_launcher, R.drawable.ic_launcher));
+        mImageLoader.get(mFavoriteBeans.get(position).imageUrl, ImageLoader.getImageListener(viewHolder.ivImage, R.mipmap.ic_launcher, R.mipmap.ic_launcher));
         viewHolder.tvTitle.setText(mFavoriteBeans.get(position).title);
         viewHolder.tvDuration.setText(Utils.getDurationString((int) Float.parseFloat(mFavoriteBeans.get(position).duration)));
         return convertView;
