@@ -17,6 +17,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.ViewGroup;
 
 import java.util.Arrays;
@@ -25,6 +26,8 @@ import java.util.Map;
 
 
 public class MainActivity extends LoginableBaseActivity {
+
+    private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
     /**
      * The serialization (saved instance state) Bundle key representing the
@@ -47,6 +50,13 @@ public class MainActivity extends LoginableBaseActivity {
      * 默认Pager的位置
      */
     private static final int DEFAULT_POSITION = 1;
+
+    /**
+     * 状态属性：被重创建了
+     *
+     * @see #onRestoreInstanceState(android.os.Bundle)
+     */
+    private boolean mHasBeenReinitialized = false;
 
     private MyFragmentPagerAdapter mAdapter;
 
@@ -120,8 +130,9 @@ public class MainActivity extends LoginableBaseActivity {
     }
 
     @Override
-    public void onRestoreInstanceState(Bundle savedInstanceState) {
+    public void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
+        mHasBeenReinitialized = true;
         // Restore the previously serialized current dropdown position.
         if (savedInstanceState.containsKey(STATE_SELECTED_NAVIGATION_ITEM)) {
             mPager.setCurrentItem(savedInstanceState.getInt(STATE_SELECTED_NAVIGATION_ITEM));
@@ -129,7 +140,7 @@ public class MainActivity extends LoginableBaseActivity {
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         // Serialize the current dropdown position.
         outState.putInt(STATE_SELECTED_NAVIGATION_ITEM, mPager.getCurrentItem());
         super.onSaveInstanceState(outState);
@@ -150,13 +161,13 @@ public class MainActivity extends LoginableBaseActivity {
     /**
      * 本类不是线程安全的。请仅在主线程中使用。
      */
-    private static class MyFragmentPagerAdapter extends FragmentPagerAdapter {
+    private class MyFragmentPagerAdapter extends FragmentPagerAdapter {
 
         private final Context mContext;
 
         private final int[] mFragmentIdsOrderByPosition;
 
-        private final Map<Integer, FragmentHolder> mIdFragmentMap;
+        private final Map<Integer, ItemHolder> mIdFragmentMap;
 
         public MyFragmentPagerAdapter(
                 Context context, FragmentManager fm, int[] fragmentIdsOrderByPosition) {
@@ -195,7 +206,16 @@ public class MainActivity extends LoginableBaseActivity {
         @NonNull
         @Override
         public Fragment getItem(int position) {
-            return getItemById((int) getItemId(position)).fragment;
+            ItemHolder itemHolder = getItemById((int) getItemId(position));
+            if (mHasBeenReinitialized && !itemHolder.hasBeenInstantiated) {
+                Log.w(LOG_TAG, String.format("Activity has been re-initialized "
+                        + "but the result of getItem(%d) hasn't been instantiated", position));
+                Log.w(LOG_TAG, String.format(
+                        "getItem(%d) is called by %s",
+                        position,
+                        Thread.currentThread().getStackTrace()[3]));
+            }
+            return itemHolder.fragment;
         }
 
         @Override
@@ -206,12 +226,13 @@ public class MainActivity extends LoginableBaseActivity {
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
             Fragment item = (Fragment) super.instantiateItem(container, position);
-            FragmentHolder fragmentHolder = getItemById((int) getItemId(position));
+            ItemHolder itemHolder = getItemById((int) getItemId(position));
             // after Configuration Changes, "item" is a fragment recreated by system and
             // "fragmentHolder.fragment" is a new instance, so fragmentHolder.fragment != item
-            if (fragmentHolder.fragment != item) {
-                fragmentHolder.fragment = item;
+            if (itemHolder.fragment != item) {
+                itemHolder.fragment = item;
             }
+            itemHolder.hasBeenInstantiated = true;
             return item;
         }
 
@@ -222,20 +243,20 @@ public class MainActivity extends LoginableBaseActivity {
          * 并且其内部的fragment会在{@link #instantiateItem(android.view.ViewGroup, int)}更新。</p>
          * <p><b>Note</b>：在Configuration Changes之后，
          * {@link #instantiateItem(android.view.ViewGroup, int)}完成之前，本方法返回的
-         * {@link FragmentHolder FragmentHolder}内的{@link FragmentHolder#fragment fragment}很可能与
+         * {@link ItemHolder ItemHolder}内的{@link ItemHolder#fragment fragment}很可能与
          * {@link ViewPager}中的不一致。</p>
          *
          * @see MyFragmentPagerAdapter
          */
         @NonNull
-        public FragmentHolder getItemById(int id) {
+        public ItemHolder getItemById(int id) {
             if (!mIdFragmentMap.containsKey(id)) {
                 mIdFragmentMap.put(id, createItemById(id));
             }
             return mIdFragmentMap.get(id);
         }
 
-        private FragmentHolder createItemById(int id) {
+        private ItemHolder createItemById(int id) {
             Fragment fragment;
             String title;
             switch (id) {
@@ -262,10 +283,17 @@ public class MainActivity extends LoginableBaseActivity {
                 default:
                     throw new IllegalArgumentException("Unknown fragment id: " + id);
             }
-            return new FragmentHolder(fragment, title);
+
+            return new ItemHolder(fragment, title);
         }
 
-        private static class FragmentHolder {
+        private class ItemHolder {
+
+            /**
+             * 已经由{@link #instantiateItem(android.view.ViewGroup, int)}实例化过。
+             * {@link #fragment}与{@link ViewPager}中的{@link Fragment fragment}一致。
+             */
+            public boolean hasBeenInstantiated = false;
 
             @NonNull
             public Fragment fragment;
@@ -273,7 +301,7 @@ public class MainActivity extends LoginableBaseActivity {
             @NonNull
             public String title;
 
-            private FragmentHolder(@NonNull Fragment fragment, @NonNull String title) {
+            private ItemHolder(@NonNull Fragment fragment, @NonNull String title) {
                 this.fragment = fragment;
                 this.title = title;
             }
