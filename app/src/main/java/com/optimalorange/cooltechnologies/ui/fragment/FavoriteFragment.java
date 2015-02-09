@@ -33,7 +33,6 @@ import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -163,7 +162,6 @@ public class FavoriteFragment extends SwipeRefreshFragment {
         });
         favoriteListView.addFooterView(footer);
         favoriteListView.setAdapter(adapter);
-        Log.e("wzz fav", "is onCreated!!!");
         getNewData();
         mIsCreated = true;
         favoriteListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -260,7 +258,6 @@ public class FavoriteFragment extends SwipeRefreshFragment {
             }
             RequestQueue requestQueue = Volley.newRequestQueue(getActivity());
             String url = FAVORITE_BASE_URL + "?client_id=" + getString(R.string.youku_client_id) + "&access_token=" + token + "&page=" + page + "&count=10";
-            Log.e("wzz json", "url=" + url);
             JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject jsonObject) {
