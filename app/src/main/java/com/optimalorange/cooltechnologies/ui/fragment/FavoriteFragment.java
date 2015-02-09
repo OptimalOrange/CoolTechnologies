@@ -128,12 +128,6 @@ public class FavoriteFragment extends SwipeRefreshFragment {
     @Override
     public void onRefresh() {
         getNewData();
-        favoriteListView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                return true;
-            }
-        });
     }
 
     @Override
@@ -222,7 +216,9 @@ public class FavoriteFragment extends SwipeRefreshFragment {
                     }
                 }
 
-                if (event.getAction() == MotionEvent.ACTION_UP && deleteView != null && !mIsDelButtonCreate) {
+                if ((event.getAction() == MotionEvent.ACTION_UP
+                        || event.getAction() == MotionEvent.ACTION_MOVE) && deleteView != null
+                        && !mIsDelButtonCreate) {
                     removeWindowView();
                     return true;
                 }
@@ -297,7 +293,6 @@ public class FavoriteFragment extends SwipeRefreshFragment {
                         }
 
                         setRefreshing(false);
-                        favoriteListView.setOnTouchListener(null);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }

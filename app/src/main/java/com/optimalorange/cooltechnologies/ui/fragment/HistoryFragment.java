@@ -124,7 +124,9 @@ public class HistoryFragment extends Fragment {
                     }
                 }
 
-                if (event.getAction() == MotionEvent.ACTION_UP && deleteView != null && !mIsDelButtonCreate) {
+                if ((event.getAction() == MotionEvent.ACTION_UP
+                        || event.getAction() == MotionEvent.ACTION_MOVE) && deleteView != null
+                        && !mIsDelButtonCreate) {
                     removeWindowView();
                     return true;
                 }
