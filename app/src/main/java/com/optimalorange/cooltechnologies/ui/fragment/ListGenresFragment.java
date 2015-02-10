@@ -10,7 +10,6 @@ import com.optimalorange.cooltechnologies.entity.Video;
 import com.optimalorange.cooltechnologies.network.NetworkChecker;
 import com.optimalorange.cooltechnologies.network.VideosRequest;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
-import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingleton;
 import com.optimalorange.cooltechnologies.ui.ListVideosActivity;
 import com.optimalorange.cooltechnologies.ui.PlayVideoActivity;
 import com.optimalorange.cooltechnologies.ui.view.VideoCardViewBuilder;
@@ -58,8 +57,6 @@ public class ListGenresFragment extends SwipeRefreshFragment {
     private String mYoukuClientId;
 
     private VolleySingleton mVolleySingleton;
-
-    private DefaultSharedPreferencesSingleton mSharedPreferencesSingleton;
 
     private NetworkChecker mNetworkChecker;
 
@@ -197,7 +194,6 @@ public class ListGenresFragment extends SwipeRefreshFragment {
         super.onCreate(savedInstanceState);
         mYoukuClientId = getString(R.string.youku_client_id);
         mVolleySingleton = VolleySingleton.getInstance(getActivity());
-        mSharedPreferencesSingleton = DefaultSharedPreferencesSingleton.getInstance(getActivity());
         mNetworkChecker = NetworkChecker.newInstance(getActivity());
         // Register BroadcastReceiver to track connection changes.
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
@@ -516,8 +512,7 @@ public class ListGenresFragment extends SwipeRefreshFragment {
         }
 
         private boolean shouldShowImage() {
-            return !mSharedPreferencesSingleton.onlyShowImagesWhenUseWlan() ||
-                    mNetworkChecker.isWifiConnected();
+            return true;
         }
 
         private void bindVideoCardView(

@@ -7,13 +7,6 @@
             >
 
         <CheckBoxPreference
-                android:key="@string/pref_key_only_show_images_when_use_wlan"
-                android:title="@string/pref_title_only_show_images_when_use_wlan"
-                android:summary="@string/pref_summary_only_show_images_when_use_wlan"
-                android:defaultValue="@bool/pref_default_value_only_show_images_when_use_wlan"
-                />
-
-        <CheckBoxPreference
                 android:key="@string/pref_key_only_play_video_when_use_wlan"
                 android:title="@string/pref_title_only_play_video_when_use_wlan"
                 android:summary="@string/pref_summary_only_play_video_when_use_wlan"

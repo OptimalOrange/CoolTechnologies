@@ -83,18 +83,6 @@ public class DefaultSharedPreferencesSingleton {
     }
 
     /**
-     * 仅在WLAN下，显示图片
-     *
-     * @see R.string#pref_key_only_show_images_when_use_wlan
-     */
-    public boolean onlyShowImagesWhenUseWlan() {
-        return mDefaultSharedPreferences.getBoolean(
-                mResources.getString(R.string.pref_key_only_show_images_when_use_wlan),
-                mResources.getBoolean(R.bool.pref_default_value_only_show_images_when_use_wlan)
-        );
-    }
-
-    /**
      * 仅在WLAN下，播放视频
      *
      * @see R.string#pref_key_only_play_video_when_use_wlan

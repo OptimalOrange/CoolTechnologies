@@ -3,12 +3,6 @@
 
     <string name="pref_category_key_network" translatable="false">pref_category_key_network</string>
     <string name="pref_category_title_network">网络</string>
-    <string name="pref_key_only_show_images_when_use_wlan" translatable="false">
-        pref_key_only_show_images_when_use_wlan
-    </string>
-    <bool name="pref_default_value_only_show_images_when_use_wlan">false</bool>
-    <string name="pref_title_only_show_images_when_use_wlan">仅在WLAN下，显示图片</string>
-    <string name="pref_summary_only_show_images_when_use_wlan">使用移动网络时，不下载图片</string>
     <string name="pref_key_only_play_video_when_use_wlan" translatable="false">
         pref_key_only_play_video_when_use_wlan
     </string>
