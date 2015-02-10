@@ -54,6 +54,8 @@ import java.util.ArrayList;
  */
 public class FavoriteFragment extends SwipeRefreshFragment {
 
+    private static final String DEFAULT_CATEGORY_LABEL= "科技";
+
     private View v;
     private static final String FAVORITE_BASE_URL = "https://openapi.youku.com/v2/videos/favorite/by_me.json";
     private ListView favoriteListView;
@@ -277,8 +279,10 @@ public class FavoriteFragment extends SwipeRefreshFragment {
                             }
                             for (int i = 0; i < videoArray.length(); i++) {
                                 JSONObject itemObject = videoArray.getJSONObject(i);
-                                FavoriteBean bean = new FavoriteBean(itemObject);
-                                favoriteBeans.add(bean);
+                                if(itemObject.getString("category").equals(DEFAULT_CATEGORY_LABEL)){
+                                    FavoriteBean bean = new FavoriteBean(itemObject);
+                                    favoriteBeans.add(bean);
+                                }
                             }
                             adapter.notifyDataSetChanged();
                             favoriteListView.setVisibility(View.VISIBLE);
