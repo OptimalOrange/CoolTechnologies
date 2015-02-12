@@ -101,15 +101,6 @@ public class MainActivity extends LoginableBaseActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        Fragment fragment = getCurrentFragment();
-        if (fragment instanceof HistoryFragment) {
-            ((HistoryFragment) fragment).refreshData();
-        }
-    }
-
-    @Override
     protected void onDestroy() {
         mPager = null;
         mAdapter = null;

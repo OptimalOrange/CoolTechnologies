@@ -146,6 +146,7 @@ public class HistoryFragment extends Fragment {
     public void onResume() {
         super.onResume();
         MobclickAgent.onPageStart(getClass().getSimpleName());
+        refreshData();
     }
 
     @Override
