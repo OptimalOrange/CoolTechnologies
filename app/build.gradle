@@ -76,7 +76,7 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:21.0.2'
     compile 'com.android.support:support-v13:21.0.2'
     compile 'com.viewpagerindicator:library:2.4.1'
-    compile 'com.mcxiaoke.volley:library:1.0.9@aar'
+    compile 'com.mcxiaoke.volley:library:1.0.10@aar'
     compile 'com.etsy.android.grid:library:1.0.5'
     compile 'cpr.name.videoenabledwebview:library:1.0'
     compile 'com.umeng.update:library:2.5.0'
