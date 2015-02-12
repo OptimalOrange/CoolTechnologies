@@ -3,6 +3,7 @@ package com.optimalorange.cooltechnologies.ui;
 import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingleton;
 import com.optimalorange.cooltechnologies.util.Const;
+import com.umeng.analytics.MobclickAgent;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -82,6 +83,18 @@ public class LoginActivity extends BaseActivity implements Handler.Callback {
         loginWebView.loadUrl(BASE_AUTHORIZE_URL + "client_id=" + getString(R.string.youku_client_id)
                 + "&response_type=" + RESPONSE_TYPE + "&redirect_uri=" + MY_URL);
 
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        MobclickAgent.onPageStart(getClass().getSimpleName());
+    }
+
+    @Override
+    public void onPause() {
+        MobclickAgent.onPageEnd(getClass().getSimpleName());
+        super.onPause();
     }
 
     private void requestToken(String code) {

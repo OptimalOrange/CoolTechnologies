@@ -6,6 +6,8 @@ import com.optimalorange.cooltechnologies.ui.fragment.HistoryFragment;
 import com.optimalorange.cooltechnologies.ui.fragment.ListGenresFragment;
 import com.optimalorange.cooltechnologies.ui.fragment.ListVideosFragment;
 import com.optimalorange.cooltechnologies.ui.fragment.PromotionFragment;
+import com.umeng.analytics.AnalyticsConfig;
+import com.umeng.analytics.MobclickAgent;
 import com.umeng.update.UmengUpdateAgent;
 import com.viewpagerindicator.TitlePageIndicator;
 
@@ -69,10 +71,7 @@ public class MainActivity extends LoginableBaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //友盟自动更新
-        UmengUpdateAgent.update(this);
-        //set preferences' default values
-        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+        globalSetup();
 
         setContentView(R.layout.activity_main);
 
@@ -149,6 +148,19 @@ public class MainActivity extends LoginableBaseActivity {
     //--------------------------------------------------------------------------
     // 新声明方法
     //--------------------------------------------------------------------------
+
+    private void globalSetup() {
+        //有Fragment，禁止默认的页面统计方式，不自动统计Activity
+        MobclickAgent.openActivityDurationTrack(false);
+        //发送策略
+        MobclickAgent.updateOnlineConfig(this);
+        //日志加密设置
+        AnalyticsConfig.enableEncrypt(true);
+        //友盟自动更新
+        UmengUpdateAgent.update(this);
+        //set preferences' default values
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+    }
 
     private Fragment getCurrentFragment() {
         return mAdapter.getItem(mPager.getCurrentItem());

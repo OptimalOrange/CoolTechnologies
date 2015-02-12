@@ -1,6 +1,7 @@
 package com.optimalorange.cooltechnologies.ui;
 
 import com.optimalorange.cooltechnologies.R;
+import com.umeng.analytics.MobclickAgent;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -13,6 +14,18 @@ import android.view.MenuItem;
 public abstract class BaseActivity extends Activity {
 
     private boolean mShowSettingsMenuItem = true;
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MobclickAgent.onResume(this);
+    }
+
+    @Override
+    protected void onPause() {
+        MobclickAgent.onPause(this);
+        super.onPause();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

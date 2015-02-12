@@ -10,6 +10,7 @@ import com.optimalorange.cooltechnologies.entity.Video;
 import com.optimalorange.cooltechnologies.network.SearchRequest;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.optimalorange.cooltechnologies.util.Utils;
+import com.umeng.analytics.MobclickAgent;
 
 import android.app.SearchManager;
 import android.content.Context;
@@ -128,6 +129,18 @@ public class SearchActivity extends BaseActivity {
             mKeyWord = intent.getStringExtra(SearchManager.QUERY);
             mVolleySingleton.addToRequestQueue(buildSearchVideosRequest());
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        MobclickAgent.onPageStart(getClass().getSimpleName());
+    }
+
+    @Override
+    public void onPause() {
+        MobclickAgent.onPageEnd(getClass().getSimpleName());
+        super.onPause();
     }
 
     @Override

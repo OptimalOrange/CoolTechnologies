@@ -6,6 +6,7 @@ import com.optimalorange.cooltechnologies.network.NetworkChecker;
 import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingleton;
 import com.optimalorange.cooltechnologies.storage.sqlite.DBManager;
 import com.optimalorange.cooltechnologies.ui.fragment.ListCommentsFragment;
+import com.umeng.analytics.MobclickAgent;
 
 import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
@@ -205,12 +206,14 @@ public class PlayVideoActivity extends LoginableBaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        MobclickAgent.onPageStart(getClass().getSimpleName());
         mWebView.onResume();
     }
 
     @Override
     protected void onPause() {
         mWebView.onPause();
+        MobclickAgent.onPageEnd(getClass().getSimpleName());
         super.onPause();
     }
 

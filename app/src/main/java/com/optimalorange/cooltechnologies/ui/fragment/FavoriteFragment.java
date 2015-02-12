@@ -13,6 +13,7 @@ import com.optimalorange.cooltechnologies.network.NetworkChecker;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingleton;
 import com.optimalorange.cooltechnologies.ui.PlayVideoActivity;
+import com.umeng.analytics.MobclickAgent;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -225,6 +226,18 @@ public class FavoriteFragment extends SwipeRefreshFragment {
                 return false;
             }
         });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        MobclickAgent.onPageStart(getClass().getSimpleName());
+    }
+
+    @Override
+    public void onPause() {
+        MobclickAgent.onPageEnd(getClass().getSimpleName());
+        super.onPause();
     }
 
     @Override

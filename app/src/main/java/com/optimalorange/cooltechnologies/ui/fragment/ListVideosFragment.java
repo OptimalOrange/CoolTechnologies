@@ -13,6 +13,7 @@ import com.optimalorange.cooltechnologies.network.VideosRequest;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.optimalorange.cooltechnologies.ui.PlayVideoActivity;
 import com.optimalorange.cooltechnologies.util.Utils;
+import com.umeng.analytics.MobclickAgent;
 
 import android.app.SearchManager;
 import android.content.BroadcastReceiver;
@@ -219,6 +220,18 @@ public class ListVideosFragment extends SwipeRefreshFragment {
                 startActivity(mIntent);
             }
         });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        MobclickAgent.onPageStart(getClass().getSimpleName());
+    }
+
+    @Override
+    public void onPause() {
+        MobclickAgent.onPageEnd(getClass().getSimpleName());
+        super.onPause();
     }
 
     @Override

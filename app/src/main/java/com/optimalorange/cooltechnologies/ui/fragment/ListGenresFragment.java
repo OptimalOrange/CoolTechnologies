@@ -14,6 +14,7 @@ import com.optimalorange.cooltechnologies.ui.ListVideosActivity;
 import com.optimalorange.cooltechnologies.ui.PlayVideoActivity;
 import com.optimalorange.cooltechnologies.ui.view.VideoCardViewBuilder;
 import com.optimalorange.cooltechnologies.util.ItemsCountCalculater;
+import com.umeng.analytics.MobclickAgent;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -249,6 +250,18 @@ public class ListGenresFragment extends SwipeRefreshFragment {
             setRefreshing(true);
             startLoad(); // important! must do this later than calculateItemsCount
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        MobclickAgent.onPageStart(getClass().getSimpleName());
+    }
+
+    @Override
+    public void onPause() {
+        MobclickAgent.onPageEnd(getClass().getSimpleName());
+        super.onPause();
     }
 
     @Override

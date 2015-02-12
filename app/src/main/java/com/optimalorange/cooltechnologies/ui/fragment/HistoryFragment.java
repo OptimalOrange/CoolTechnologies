@@ -6,6 +6,7 @@ import com.optimalorange.cooltechnologies.entity.FavoriteBean;
 import com.optimalorange.cooltechnologies.storage.sqlite.DBManager;
 import com.optimalorange.cooltechnologies.ui.PlayVideoActivity;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
+import com.umeng.analytics.MobclickAgent;
 
 import android.app.Fragment;
 import android.content.Context;
@@ -139,6 +140,18 @@ public class HistoryFragment extends Fragment {
         favoriteListView.setVisibility(View.VISIBLE);
         mIsCreated = true;
         isNoHistory();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        MobclickAgent.onPageStart(getClass().getSimpleName());
+    }
+
+    @Override
+    public void onPause() {
+        MobclickAgent.onPageEnd(getClass().getSimpleName());
+        super.onPause();
     }
 
     public void refreshData() {

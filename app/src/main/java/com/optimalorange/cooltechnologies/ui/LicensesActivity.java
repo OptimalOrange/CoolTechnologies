@@ -1,5 +1,7 @@
 package com.optimalorange.cooltechnologies.ui;
 
+import com.umeng.analytics.MobclickAgent;
+
 import android.os.Bundle;
 import android.view.ViewGroup;
 import android.webkit.WebView;
@@ -18,6 +20,18 @@ public class LicensesActivity extends BaseActivity {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
         webView.loadUrl(PATH_LICENSES_HTML);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        MobclickAgent.onPageStart(getClass().getSimpleName());
+    }
+
+    @Override
+    public void onPause() {
+        MobclickAgent.onPageEnd(getClass().getSimpleName());
+        super.onPause();
     }
 
 }
