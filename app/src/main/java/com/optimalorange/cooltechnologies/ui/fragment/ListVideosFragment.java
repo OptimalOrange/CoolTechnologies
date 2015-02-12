@@ -205,7 +205,7 @@ public class ListVideosFragment extends SwipeRefreshFragment {
 
         applyVideos();
         applyIsConnected();
-        if (mIsConnected) {
+        if (mIsConnected && listVideosIsEmpty()) {
             setRefreshing(true);
             startLoad();
         }
@@ -311,6 +311,10 @@ public class ListVideosFragment extends SwipeRefreshFragment {
 
     public boolean videosIsEmpty() {
         return mListVideos == null || mListVideos.size() == 0;
+    }
+
+    public boolean listVideosIsEmpty() {
+        return mListVideos.size() == 0;
     }
 
     private void applyVideos() {
