@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_activated="true"
+          android:drawable="@drawable/ic_favorite_grey600_24dp"/>
+    <item android:drawable="@drawable/ic_favorite_outline_grey600_24dp"/> <!-- default should always be last -->
+</selector>

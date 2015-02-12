@@ -194,6 +194,9 @@ public class ListCommentsFragment extends SwipeRefreshFragment {
                         Toast.makeText(getActivity(),
                                 R.string.create_favorite_success,
                                 Toast.LENGTH_SHORT).show();
+                        if (mFavoriteView != null) {
+                            mFavoriteView.setActivated(true);
+                        }
                     }
                 })
                 .setErrorListener(new Response.ErrorListener() {
