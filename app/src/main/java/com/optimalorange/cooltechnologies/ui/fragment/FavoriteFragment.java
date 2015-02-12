@@ -12,6 +12,7 @@ import com.optimalorange.cooltechnologies.entity.FavoriteBean;
 import com.optimalorange.cooltechnologies.network.NetworkChecker;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingleton;
+import com.optimalorange.cooltechnologies.ui.LoginableBaseActivity;
 import com.optimalorange.cooltechnologies.ui.PlayVideoActivity;
 import com.umeng.analytics.MobclickAgent;
 
@@ -111,6 +112,16 @@ public class FavoriteFragment extends SwipeRefreshFragment {
         }
     };
 
+    private final LoginableBaseActivity.OnLoginStatusChangeListener mOnLoginStatusChangeListener =
+            new LoginableBaseActivity.OnLoginStatusChangeListener() {
+                @Override
+                public void onLoginStatusChanged(boolean hasLoggedIn) {
+                    if (hasLoggedIn) {
+                        onRefresh();
+                    }
+                }
+            };
+
     private boolean mIsDelButtonCreate;
 
     @Override
@@ -138,6 +149,8 @@ public class FavoriteFragment extends SwipeRefreshFragment {
         mVolleySingleton = VolleySingleton.getInstance(getActivity());
         mDefaultSharedPreferencesSingleton =
                 DefaultSharedPreferencesSingleton.getInstance(getActivity());
+        ((LoginableBaseActivity) getActivity())
+                .addLoginStatusChangeListener(mOnLoginStatusChangeListener);
         favoriteListView = (ListView) view.findViewById(R.id.favorite_list);
         favoriteListView.setVisibility(View.GONE);
         favoriteListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -238,6 +251,13 @@ public class FavoriteFragment extends SwipeRefreshFragment {
     public void onPause() {
         MobclickAgent.onPageEnd(getClass().getSimpleName());
         super.onPause();
+    }
+
+    @Override
+    public void onDestroyView() {
+        ((LoginableBaseActivity) getActivity())
+                .removeLoginStatusChangeListener(mOnLoginStatusChangeListener);
+        super.onDestroyView();
     }
 
     @Override

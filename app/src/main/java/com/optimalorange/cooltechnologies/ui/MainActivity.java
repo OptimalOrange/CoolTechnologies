@@ -98,18 +98,6 @@ public class MainActivity extends LoginableBaseActivity {
         });
         // goto default pager
         mPager.setCurrentItem(DEFAULT_POSITION);
-        // set OnLoginStatusChangeListener
-        addLoginStatusChangeListener(new OnLoginStatusChangeListener() {
-            @Override
-            public void onLoginStatusChanged(boolean hasLoggedIn) {
-                if (hasLoggedIn) {
-                    Fragment fragment = getCurrentFragment();
-                    if (fragment instanceof FavoriteFragment) {
-                        ((FavoriteFragment) fragment).getJsonData();
-                    }
-                }
-            }
-        });
     }
 
     @Override
