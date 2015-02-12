@@ -46,15 +46,15 @@ public abstract class LoginableBaseActivity extends BaseActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        super.onCreateOptionsMenu(menu);
+        boolean superResult = super.onCreateOptionsMenu(menu);
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_login_or_logout, menu);
-        return true;
+        return hasDeclaredMenuItem() || superResult;
     }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        super.onPrepareOptionsMenu(menu);
+        boolean superResult = super.onPrepareOptionsMenu(menu);
         MenuItem item = menu.findItem(R.id.action_login_or_logout);
         if (hasLoggedIn()) {
             item.setIcon(R.drawable.ic_perm_identity_fill_white_24dp);
@@ -65,7 +65,7 @@ public abstract class LoginableBaseActivity extends BaseActivity {
         }
         item.setEnabled(mShowLoginOrLogoutMenuItem);
         item.setVisible(mShowLoginOrLogoutMenuItem);
-        return true;
+        return hasDeclaredMenuItem() || superResult;
     }
 
     @Override
@@ -140,6 +140,13 @@ public abstract class LoginableBaseActivity extends BaseActivity {
 
     public void removeLoginStatusChangeListener(OnLoginStatusChangeListener listener) {
         mListeners.remove(listener);
+    }
+
+    /**
+     * 有新添加的菜单项
+     */
+    private boolean hasDeclaredMenuItem() {
+        return mShowLoginOrLogoutMenuItem;
     }
 
     /**

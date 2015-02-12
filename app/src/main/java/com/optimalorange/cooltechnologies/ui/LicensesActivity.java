@@ -1,11 +1,10 @@
 package com.optimalorange.cooltechnologies.ui;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 
-public class LicensesActivity extends Activity {
+public class LicensesActivity extends BaseActivity {
 
     /** {@link android.webkit.WebView WebView}要加载的网页的路径 */
     private static final String PATH_LICENSES_HTML = "file:///android_asset/licenses.html";
@@ -13,6 +12,7 @@ public class LicensesActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        showSettingsMenuItem(false);
         WebView webView = new WebView(this);
         setContentView(webView, new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
