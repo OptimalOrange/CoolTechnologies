@@ -8,7 +8,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.entity.Comment;
 import com.optimalorange.cooltechnologies.network.CommentsRequest;
-import com.optimalorange.cooltechnologies.network.CreateFavorite;
+import com.optimalorange.cooltechnologies.network.CreateFavoriteRequest;
 import com.optimalorange.cooltechnologies.network.NetworkChecker;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingleton;
@@ -183,25 +183,28 @@ public class ListCommentsFragment extends SwipeRefreshFragment {
     }
 
     /** 创建收藏的请求 */
-    private void buildCreateFavoriteRequest(String token) {
-        new CreateFavorite.Builder()
+    private CreateFavoriteRequest buildCreateFavoriteRequest(String token) {
+        return new CreateFavoriteRequest.Builder()
                 .setClient_id(mYoukuClientId)
                 .setVideo_id(mVideoID)
                 .setAccess_token(token)
-                .setOnCreateFavoriteListener(new CreateFavorite.OnCreateFavoriteListener() {
+                .setResponseListener(new Response.Listener<JSONObject>() {
                     @Override
-                    public void onCreateFavorite(boolean isCreated) {
-                        if (isCreated) {
-                            Toast.makeText(getActivity(),
-                                    R.string.create_favorite_success,
-                                    Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(getActivity(),
-                                    R.string.create_favorite_failure,
-                                    Toast.LENGTH_SHORT).show();
-                        }
+                    public void onResponse(JSONObject response) {
+                        Toast.makeText(getActivity(),
+                                R.string.create_favorite_success,
+                                Toast.LENGTH_SHORT).show();
                     }
-                }).build();
+                })
+                .setErrorListener(new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(getActivity(),
+                                R.string.create_favorite_failure,
+                                Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .build();
     }
 
     /**
@@ -286,7 +289,7 @@ public class ListCommentsFragment extends SwipeRefreshFragment {
                             .newInstance(getString(R.string.create_favorite_to_login_message));
                     mDialog.show(getFragmentManager(), null);
                 } else {
-                    buildCreateFavoriteRequest(token);
+                    mVolleySingleton.addToRequestQueue(buildCreateFavoriteRequest(token));
                 }
             }
         });
