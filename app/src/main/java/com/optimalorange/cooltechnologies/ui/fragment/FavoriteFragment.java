@@ -34,6 +34,7 @@ import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -48,6 +49,7 @@ import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 /**
@@ -82,35 +84,8 @@ public class FavoriteFragment extends SwipeRefreshFragment {
     private TextView tvViewMore;
     private View footer;
 
-    private Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case DELETE_FAVORITE_OK:
-                    favoriteBeans.remove(msg.arg1);
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            adapter.notifyDataSetChanged();
-                            removeWindowView();
-                            Toast.makeText(getActivity(), getString(R.string.favorite_delete_success), Toast.LENGTH_SHORT).show();
-                            if (favoriteBeans.size() == 0) {
-                                setHint(R.string.favorite_no_fav);
-                            }
-                        }
-                    });
-                    break;
-                case DELETE_FAVORITE_ERROR:
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            Toast.makeText(getActivity(), getString(R.string.favorite_delete_fail), Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                    break;
-            }
-        }
-    };
+    private Handler mUiThreadHandler =
+            new Handler(Looper.getMainLooper(), new HandlerCallback(new WeakReference<>(this)));
 
     private final LoginableBaseActivity.OnLoginStatusChangeListener mOnLoginStatusChangeListener =
             new LoginableBaseActivity.OnLoginStatusChangeListener() {
@@ -414,10 +389,10 @@ public class FavoriteFragment extends SwipeRefreshFragment {
                         msg.what = DELETE_FAVORITE_OK;
                         msg.arg1 = index;
                         msg.obj = EntityUtils.toString(response.getEntity());
-                        mHandler.handleMessage(msg);
+                        mUiThreadHandler.sendMessage(msg);
                     } else {
                         msg.what = DELETE_FAVORITE_ERROR;
-                        mHandler.handleMessage(msg);
+                        mUiThreadHandler.sendMessage(msg);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -425,4 +400,49 @@ public class FavoriteFragment extends SwipeRefreshFragment {
             }
         }).start();
     }
+
+    /**
+     * <b>Note</b>：<strong>必须</strong>在UI线程中调用此{@link HandlerCallback}。
+     */
+    private static class HandlerCallback implements Handler.Callback {
+
+        private final WeakReference<FavoriteFragment> mOuterClass;
+
+        private HandlerCallback(WeakReference<FavoriteFragment> outerClass) {
+            mOuterClass = outerClass;
+        }
+
+        @Override
+        public boolean handleMessage(Message msg) {
+            FavoriteFragment outerClass = mOuterClass.get();
+            if (outerClass == null) {
+                return msg.what == DELETE_FAVORITE_OK || msg.what == DELETE_FAVORITE_ERROR;
+            }
+            switch (msg.what) {
+                case DELETE_FAVORITE_OK:
+                    outerClass.favoriteBeans.remove(msg.arg1);
+                    outerClass.adapter.notifyDataSetChanged();
+                    outerClass.removeWindowView();
+                    Toast.makeText(
+                            outerClass.getActivity(),
+                            outerClass.getString(R.string.favorite_delete_success),
+                            Toast.LENGTH_SHORT)
+                            .show();
+                    if (outerClass.favoriteBeans.size() == 0) {
+                        outerClass.setHint(R.string.favorite_no_fav);
+                    }
+                    return true;
+                case DELETE_FAVORITE_ERROR:
+                    Toast.makeText(
+                            outerClass.getActivity(),
+                            outerClass.getString(R.string.favorite_delete_fail),
+                            Toast.LENGTH_SHORT)
+                            .show();
+                    return true;
+                default:
+                    return false;
+            }
+        }
+    }
+
 }
