@@ -9,6 +9,7 @@ import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.entity.Comment;
 import com.optimalorange.cooltechnologies.network.CommentsRequest;
 import com.optimalorange.cooltechnologies.network.CreateFavoriteRequest;
+import com.optimalorange.cooltechnologies.network.DestroyFavoriteRequest;
 import com.optimalorange.cooltechnologies.network.NetworkChecker;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingleton;
@@ -210,6 +211,34 @@ public class ListCommentsFragment extends SwipeRefreshFragment {
                 .build();
     }
 
+    /** 创建收藏的请求 */
+    private DestroyFavoriteRequest buildDestroyFavoriteRequest(String token) {
+        return new DestroyFavoriteRequest.Builder()
+                .setClient_id(mYoukuClientId)
+                .setVideo_id(mVideoID)
+                .setAccess_token(token)
+                .setResponseListener(new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Toast.makeText(getActivity(),
+                                R.string.destroy_favorite_success,
+                                Toast.LENGTH_SHORT).show();
+                        if (mFavoriteView != null) {
+                            mFavoriteView.setActivated(false);
+                        }
+                    }
+                })
+                .setErrorListener(new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(getActivity(),
+                                R.string.destroy_favorite_failure,
+                                Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .build();
+    }
+
     /**
      * 用于 创建设置有指定参数的新{@link ListCommentsFragment}实例的 工厂方法
      *
@@ -292,7 +321,11 @@ public class ListCommentsFragment extends SwipeRefreshFragment {
                             .newInstance(getString(R.string.create_favorite_to_login_message));
                     mDialog.show(getFragmentManager(), null);
                 } else {
-                    mVolleySingleton.addToRequestQueue(buildCreateFavoriteRequest(token));
+                    if(mFavoriteView.isActivated()){
+                        mVolleySingleton.addToRequestQueue(buildDestroyFavoriteRequest(token));
+                    }else{
+                        mVolleySingleton.addToRequestQueue(buildCreateFavoriteRequest(token));
+                    }
                 }
             }
         });

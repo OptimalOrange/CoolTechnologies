@@ -76,5 +76,7 @@
     <string name="create_favorite_to_login_message">亲，需要登录才能收藏，请先登录</string>
     <string name="create_favorite_success">收藏成功</string>
     <string name="create_favorite_failure">收藏失败</string>
+    <string name="destroy_favorite_success">取消收藏成功</string>
+    <string name="destroy_favorite_failure">取消收藏失败</string>
 
 </resources>
