@@ -311,20 +311,20 @@ public class ListCommentsFragment extends SwipeRefreshFragment {
             @Override
             public void onClick(View view) {
                 String token = mDefaultSharedPreferencesSingleton.retrieveString("user_token", "");
-                if (token.isEmpty()) {
-                    if (!mNetworkChecker.isConnected()) {
-                        Toast.makeText(getActivity(), R.string.comment_no_connection,
-                                Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    ToLoginDialogFragment mDialog = ToLoginDialogFragment
-                            .newInstance(getString(R.string.create_favorite_to_login_message));
-                    mDialog.show(getFragmentManager(), null);
+                if (!mNetworkChecker.isConnected()) {
+                    Toast.makeText(getActivity(), R.string.comment_no_connection,
+                            Toast.LENGTH_SHORT).show();
                 } else {
-                    if(mFavoriteView.isActivated()){
-                        mVolleySingleton.addToRequestQueue(buildDestroyFavoriteRequest(token));
-                    }else{
-                        mVolleySingleton.addToRequestQueue(buildCreateFavoriteRequest(token));
+                    if (token.isEmpty()) {
+                        ToLoginDialogFragment mDialog = ToLoginDialogFragment
+                                .newInstance(getString(R.string.create_favorite_to_login_message));
+                        mDialog.show(getFragmentManager(), null);
+                    } else {
+                        if (mFavoriteView.isActivated()) {
+                            mVolleySingleton.addToRequestQueue(buildDestroyFavoriteRequest(token));
+                        } else {
+                            mVolleySingleton.addToRequestQueue(buildCreateFavoriteRequest(token));
+                        }
                     }
                 }
             }
