@@ -34,7 +34,7 @@ public abstract class LoginableBaseActivity extends BaseActivity {
         mDefaultSharedPreferencesSingleton = DefaultSharedPreferencesSingleton.getInstance(this);
         mNetworkChecker = NetworkChecker.newInstance(this);
 
-        hasLoggedIn(!mDefaultSharedPreferencesSingleton.retrieveString("user_token", "").isEmpty());
+        hasLoggedIn(mDefaultSharedPreferencesSingleton.hasLoggedIn());
     }
 
     @Override

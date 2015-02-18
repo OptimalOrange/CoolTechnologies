@@ -260,8 +260,8 @@ public class FavoriteFragment extends SwipeRefreshFragment {
         if (favoriteListView.getVisibility() == View.GONE) {
             setHint(R.string.favorite_new_loading);
         }
-        String token = mDefaultSharedPreferencesSingleton.retrieveString("user_token", "");
-        if (!token.isEmpty()) {
+        String token = mDefaultSharedPreferencesSingleton.retrieveString("access_token", "");
+        if (mDefaultSharedPreferencesSingleton.hasLoggedIn()) {
             if (!mNetworkChecker.isConnected()) {
                 setHint(R.string.favorite_hint_no_net);
                 return;
@@ -358,8 +358,8 @@ public class FavoriteFragment extends SwipeRefreshFragment {
             Toast.makeText(getActivity(), R.string.favorite_delete_no_net, Toast.LENGTH_SHORT).show();
             return;
         }
-        String token = mDefaultSharedPreferencesSingleton.retrieveString("user_token", "");
-        if (token.isEmpty()) {
+        String token = mDefaultSharedPreferencesSingleton.retrieveString("access_token", "");
+        if (!mDefaultSharedPreferencesSingleton.hasLoggedIn()) {
             Toast.makeText(getActivity(), R.string.favorite_delete_no_login, Toast.LENGTH_SHORT).show();
             return;
         }

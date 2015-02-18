@@ -83,6 +83,28 @@ public class DefaultSharedPreferencesSingleton {
     }
 
     /**
+     * 判断当前的登录状态
+     *
+     * @return boolean
+     */
+    public boolean hasLoggedIn() {
+        if (mDefaultSharedPreferences.getString("access_token", "").isEmpty()) {
+            return false;
+        } else {
+            String mExpiresIn = mDefaultSharedPreferences.getString("expires_in", "0");
+            String mBeginTime = mDefaultSharedPreferences.getString("beginTime", "0");
+            long mEndTime = Long.valueOf(mBeginTime) + Long.valueOf(mExpiresIn);
+            long mCurrentTime = System.currentTimeMillis() / 1000;
+            if (mCurrentTime < mEndTime) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+    }
+
+    /**
      * 仅在WLAN下，播放视频
      *
      * @see R.string#pref_key_only_play_video_when_use_wlan

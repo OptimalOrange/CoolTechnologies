@@ -38,7 +38,6 @@ android {
     // set string resources according to local.properties
     try {
         addStringResSetInProperties('youku_client_id', localProperties, 'youku.clientId')
-        addStringResSetInProperties('youku_client_secret', localProperties, 'youku.clientSecret')
         addStringResSetInProperties('umeng_app_key', localProperties, 'umeng.appKey')
     } catch (ResourceException re) {
         String message = "Please set $re.propertyName in local.properties file at root project"
