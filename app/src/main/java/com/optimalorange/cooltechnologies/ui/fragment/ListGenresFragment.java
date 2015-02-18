@@ -486,8 +486,9 @@ public class ListGenresFragment extends SwipeRefreshFragment {
                                 .setWidth(mItemsCountAndDimension.getDimension())
                                 .build();
 
-                cardViewHolder.mImageView.setDefaultImageResId(R.mipmap.ic_launcher);
-                cardViewHolder.mImageView.setErrorImageResId(R.mipmap.ic_launcher);
+                cardViewHolder.mImageView
+                        .setDefaultImageResId(R.drawable.ic_image_view_placeholder);
+                cardViewHolder.mImageView.setErrorImageResId(R.drawable.ic_image_view_placeholder);
 
                 cardViews.add(cardViewHolder);
             }

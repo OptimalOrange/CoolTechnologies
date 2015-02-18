@@ -475,7 +475,8 @@ public class ListVideosFragment extends SwipeRefreshFragment {
             //加载图片
             mImageLoader.get(mVideos.get(position).getThumbnail_v2(),
                     ImageLoader.getImageListener(vh.thumbnail,
-                            R.mipmap.ic_launcher, R.mipmap.ic_launcher));
+                            R.drawable.ic_image_view_placeholder,
+                            R.drawable.ic_image_view_placeholder));
             //显示播放时长
             vh.duration.setText(Utils.getDurationString(mVideos.get(position).getDuration()));
             //显示视频标题
