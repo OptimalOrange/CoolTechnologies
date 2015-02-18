@@ -74,7 +74,7 @@ public abstract class LoginableBaseActivity extends BaseActivity {
             case R.id.action_login_or_logout:
                 if (hasLoggedIn()) {
                     int message;
-                    if (mDefaultSharedPreferencesSingleton.commitSaveString("user_token", "")) {
+                    if (mDefaultSharedPreferencesSingleton.commitSaveString("access_token", "")) {
                         hasLoggedIn(false);
                         message = R.string.action_logout_success;
                     } else {
