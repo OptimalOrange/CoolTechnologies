@@ -14,10 +14,9 @@ sdk.dir=Path of Android SDK
 # 必设配置
 #########################################
 
-# 优酷API使用的client ID和client secret
+# 优酷API使用的client ID
 # see http://open.youku.com/app
 youku.clientId=Youku client ID
-youku.clientSecret=Youku client secret
 
 # 友盟自动更新使用的APPKEY，用来定位该应用的唯一性。
 umeng.appKey=Your UMENG app key

@@ -27,6 +27,6 @@ android:
 
 before_script:
     # Set up local.properties
-    - printf "youku.clientId=Youku_client_ID\nyouku.clientSecret=Youku_client_secret\numeng.appKey=UMENG_app_key\n" > local.properties
+    - printf "youku.clientId=Youku_client_ID\numeng.appKey=UMENG_app_key\n" > local.properties
 script:
     - ./gradlew build
