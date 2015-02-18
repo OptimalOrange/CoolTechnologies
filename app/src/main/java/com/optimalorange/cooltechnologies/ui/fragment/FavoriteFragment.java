@@ -92,7 +92,10 @@ public class FavoriteFragment extends SwipeRefreshFragment {
                 @Override
                 public void onLoginStatusChanged(boolean hasLoggedIn) {
                     if (hasLoggedIn) {
+                        setRefreshable(true);
                         onRefresh();
+                    } else {
+                        setRefreshable(false);
                     }
                 }
             };
@@ -126,6 +129,11 @@ public class FavoriteFragment extends SwipeRefreshFragment {
                 DefaultSharedPreferencesSingleton.getInstance(getActivity());
         ((LoginableBaseActivity) getActivity())
                 .addLoginStatusChangeListener(mOnLoginStatusChangeListener);
+        if (((LoginableBaseActivity) getActivity()).hasLoggedIn()){
+            setRefreshable(true);
+        } else {
+            setRefreshable(false);
+        }
         favoriteListView = (ListView) view.findViewById(R.id.favorite_list);
         favoriteListView.setVisibility(View.GONE);
         favoriteListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
