@@ -26,7 +26,10 @@ import android.content.Context;
 
 public class VolleySingleton {
 
-    private static VolleySingleton mInstance;
+    /** 磁盘缓存大小（单位：字节） */
+    private static final int MAX_DISK_CACHE_BYTES = 50 * 1024 * 1024;
+
+    private static VolleySingleton sInstance;
 
     private final RequestQueue mRequestQueue;
 
@@ -37,16 +40,16 @@ public class VolleySingleton {
         // Activity or BroadcastReceiver if someone passes one in.
         context = context.getApplicationContext();
 
-        mRequestQueue = Volley.newRequestQueue(context);
+        mRequestQueue = Volley.newRequestQueue(context, MAX_DISK_CACHE_BYTES);
 
         mImageLoader = new ImageLoader(mRequestQueue, new LruBitmapCache(context));
     }
 
     public static synchronized VolleySingleton getInstance(Context context) {
-        if (mInstance == null) {
-            mInstance = new VolleySingleton(context);
+        if (sInstance == null) {
+            sInstance = new VolleySingleton(context);
         }
-        return mInstance;
+        return sInstance;
     }
 
     public RequestQueue getRequestQueue() {
