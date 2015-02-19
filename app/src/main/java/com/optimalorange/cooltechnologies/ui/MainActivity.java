@@ -41,7 +41,7 @@ public class MainActivity extends LoginableBaseActivity {
      * Pagers列表（有序）
      */
     private static final int[] FRAGMENT_IDS_ORDER_BY_POSITION = {
-            R.id.fragment_promotion,
+            /*R.id.fragment_promotion,*/
             R.id.fragment_videos,
             R.id.fragment_genres,
             R.id.fragment_favorite,
@@ -51,7 +51,7 @@ public class MainActivity extends LoginableBaseActivity {
     /**
      * 默认Pager的位置
      */
-    private static final int DEFAULT_POSITION = 1;
+    private static final int DEFAULT_POSITION = /*1*/ 0;
 
     /**
      * 状态属性：被重创建了
