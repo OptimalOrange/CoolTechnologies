@@ -261,6 +261,7 @@ public class FavoriteFragment extends SwipeRefreshFragment {
         total = 0;
         currentCount = 0;
         favoriteBeans.clear();
+        adapter.notifyDataSetChanged();
         getJsonData();
     }
 
