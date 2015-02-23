@@ -110,9 +110,11 @@ public class FavoriteFragment extends SwipeRefreshFragment {
 
     @Override
     protected View onCreateChildView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        if (v == null) {
-            v = inflater.inflate(R.layout.fragment_favorite, container, false);
-        }
+        v = inflater.inflate(R.layout.fragment_favorite, container, false);
+        favoriteListView = (ListView) v.findViewById(R.id.favorite_list);
+        mTvHint = (TextView) v.findViewById(R.id.favorite_hint);
+        footer = inflater.inflate(R.layout.ll_favorite_footer, favoriteListView, false);
+        tvViewMore = (TextView) footer.findViewById(R.id.tv_more);
         return v;
     }
 
@@ -134,7 +136,7 @@ public class FavoriteFragment extends SwipeRefreshFragment {
         } else {
             setRefreshable(false);
         }
-        favoriteListView = (ListView) view.findViewById(R.id.favorite_list);
+
         favoriteListView.setVisibility(View.GONE);
         favoriteListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -144,14 +146,10 @@ public class FavoriteFragment extends SwipeRefreshFragment {
                 startActivity(intent);
             }
         });
-        mTvHint = (TextView) v.findViewById(R.id.favorite_hint);
+
         favoriteBeans = new ArrayList<>();
         adapter = new FavoriteAdapter(getActivity(), favoriteBeans, mVolleySingleton.getImageLoader());
-        if (footer != null) {
-            favoriteListView.removeFooterView(footer);
-        }
-        footer = LayoutInflater.from(getActivity()).inflate(R.layout.ll_favorite_footer, null);
-        tvViewMore = (TextView) footer.findViewById(R.id.tv_more);
+
         tvViewMore.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -240,6 +238,12 @@ public class FavoriteFragment extends SwipeRefreshFragment {
     public void onDestroyView() {
         ((LoginableBaseActivity) getActivity())
                 .removeLoginStatusChangeListener(mOnLoginStatusChangeListener);
+        tvViewMore = null;
+        footer = null;
+        mTvHint = null;
+        favoriteListView.setAdapter(null);
+        favoriteListView = null;
+        v = null;
         super.onDestroyView();
     }
 

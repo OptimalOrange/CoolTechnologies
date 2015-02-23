@@ -19,10 +19,7 @@ public class PromotionFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        if (v == null) {
-            v = inflater.inflate(R.layout.fragment_promotion, container, false);
-        }
-
+        v = inflater.inflate(R.layout.fragment_promotion, container, false);
         return v;
     }
 
@@ -38,4 +35,9 @@ public class PromotionFragment extends Fragment {
         super.onPause();
     }
 
+    @Override
+    public void onDestroyView() {
+        v = null;
+        super.onDestroyView();
+    }
 }

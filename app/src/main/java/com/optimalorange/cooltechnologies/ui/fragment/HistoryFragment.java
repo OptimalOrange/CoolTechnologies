@@ -48,9 +48,9 @@ public class HistoryFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        if (v == null) {
-            v = inflater.inflate(R.layout.fragment_history, container, false);
-        }
+        v = inflater.inflate(R.layout.fragment_history, container, false);
+        favoriteListView = (ListView) v.findViewById(R.id.favorite_list);
+        mTvHint = (TextView) v.findViewById(R.id.favorite_hint);
         favoriteBeans = DBManager.getInstance(getActivity()).getAllHistory();
         return v;
     }
@@ -59,8 +59,7 @@ public class HistoryFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mVolleySingleton = VolleySingleton.getInstance(getActivity());
-        favoriteListView = (ListView) view.findViewById(R.id.favorite_list);
-        mTvHint = (TextView) v.findViewById(R.id.favorite_hint);
+
         favoriteListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -153,6 +152,15 @@ public class HistoryFragment extends Fragment {
     public void onPause() {
         MobclickAgent.onPageEnd(getClass().getSimpleName());
         super.onPause();
+    }
+
+    @Override
+    public void onDestroyView() {
+        mTvHint = null;
+        favoriteListView.setAdapter(null);
+        favoriteListView = null;
+        v = null;
+        super.onDestroyView();
     }
 
     public void refreshData() {
