@@ -62,7 +62,6 @@ public abstract class SwipeRefreshFragment
 
     @Override
     public void onDestroyView() {
-        //TODO circle progress view won't be detached?
         // 参考自 http://stackoverflow.com/questions/27411397/new-version-of-swiperefreshlayout-causes-wrong-draw-of-views#27934636
         mSwipeRefreshLayout.clearAnimation(); // hide circle progress view
         mSwipeRefreshLayout.setOnRefreshListener(null);
