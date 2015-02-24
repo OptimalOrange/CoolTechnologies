@@ -9,8 +9,8 @@ android {
         applicationId "com.optimalorange.cooltechnologies"
         minSdkVersion 15
         targetSdkVersion 21
-        versionCode VERSION_CODE.toInteger()
-        versionName version.thisVersion
+        versionCode version.versionCode
+        versionName version.versionName
     }
 
     signingConfigs {

@@ -31,19 +31,27 @@ allprojects {
 import java.text.SimpleDateFormat
 class Version {
     String originalVersion
-    String thisVersion
+    String versionName
+    int versionCode
     String status
     Date buildTime
     Version(String versionValue) {
+        if (versionValue =~ /\d{2,}/) {
+            throw new GradleException("versionValue(${versionValue}) contains number more than 9.")
+        }
         buildTime = new Date()
         originalVersion = versionValue
+        String originalVersionCodeString;
         if (originalVersion.endsWith('-SNAPSHOT')) {
             status = 'integration'
-            thisVersion = originalVersion.substring(0, originalVersion.length() - 'SNAPSHOT'.length()) + getTimestamp()
+            originalVersionCodeString = originalVersion.substring(0, originalVersion.length() - '-SNAPSHOT'.length())
+            versionName = originalVersionCodeString + '-' + getTimestamp()
         } else {
             status = 'release'
-            thisVersion = versionValue
+            versionName = versionValue
+            originalVersionCodeString = versionValue
         }
+        versionCode = originalVersionCodeString.replace('.', '').toInteger();
     }
     String getTimestamp() {
         // Convert local file timestamp to UTC
@@ -52,6 +60,6 @@ class Version {
         return format.format(buildTime)
     }
     String toString() {
-        thisVersion
+        versionName
     }
 }
