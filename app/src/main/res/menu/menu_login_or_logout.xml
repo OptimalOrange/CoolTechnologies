@@ -1,12 +1,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:tools="http://schemas.android.com/tools"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
       tools:context=".ui.MainActivity">
 
     <item
             android:id="@+id/action_login_or_logout"
             android:title="@string/action_login"
             android:icon="@drawable/ic_perm_identity_white_24dp"
-            android:showAsAction="ifRoom|withText"
+            app:showAsAction="ifRoom|withText"
             android:menuCategory="container"
             />
 

@@ -3,15 +3,15 @@ package com.optimalorange.cooltechnologies.ui;
 import com.optimalorange.cooltechnologies.R;
 import com.umeng.analytics.MobclickAgent;
 
-import android.app.Activity;
 import android.content.Intent;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
 /**
- * 本应用所有{@link Activity}的父类。
+ * 本应用所有{@link android.app.Activity Activity}的父类。
  */
-public abstract class BaseActivity extends Activity {
+public abstract class BaseActivity extends ActionBarActivity {
 
     private boolean mShowSettingsMenuItem = true;
 

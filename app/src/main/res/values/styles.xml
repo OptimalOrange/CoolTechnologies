@@ -1,19 +1,29 @@
 <resources>
 
-    <!-- Base application theme. -->
-    <style name="BaseAppTheme" parent="android:Theme.Holo.Light.DarkActionBar">
-        <item name="android:actionBarStyle">@style/CustomActionBar</item>
-    </style>
     <!-- Application theme. -->
-    <style name="AppTheme" parent="BaseAppTheme">
+    <style name="AppTheme" parent="Theme.AppCompat.Light">
         <!-- Customize your theme here. -->
+        <!-- colorPrimary is used for the default action bar background -->
+        <item name="colorPrimary">@color/primary</item>
+        <!-- colorPrimaryDark is used for the status bar -->
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <!-- colorAccent is used as the default value for colorControlActivated,
+             which is used to tint widgets -->
+        <item name="colorAccent">@color/accent</item>
+        <!-- You can also set colorControlNormal, colorControlActivated
+             colorControlHighlight, and colorSwitchThumbNormal. -->
+        <item name="actionBarTheme">@style/ActionBarThemeOverlay</item>
+        <item name="actionBarPopupTheme">@style/ActionBarPopupThemeOverlay</item>
         <item name="vpiTitlePageIndicatorStyle">@style/CustomTitlePageIndicator</item>
     </style>
 
-    <!-- ActionBar styles -->
-    <style name="CustomActionBar" parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
-        <item name="android:background">@color/primary</item>
+    <style name="ActionBarThemeOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+        <!--<item name="android:textColorPrimary">#fff</item>-->
+        <!--<item name="colorControlHighlight">#3fff</item>-->
     </style>
+
+    <style name="ActionBarPopupThemeOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
     <!-- Indicators styles -->
     <style name="CustomTitlePageIndicator">
         <item name="android:background">@color/primary</item>

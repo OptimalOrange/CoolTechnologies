@@ -20,8 +20,6 @@ import org.json.JSONObject;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
-import android.app.Fragment;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -30,6 +28,8 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -318,7 +318,7 @@ public class ListCommentsFragment extends SwipeRefreshFragment {
                     if (!mDefaultSharedPreferencesSingleton.hasLoggedIn()) {
                         ToLoginDialogFragment mDialog = ToLoginDialogFragment
                                 .newInstance(getString(R.string.create_favorite_to_login_message));
-                        mDialog.show(getFragmentManager(), null);
+                        mDialog.show(getChildFragmentManager(), null);
                     } else {
                         if (mFavoriteView.isActivated()) {
                             mVolleySingleton.addToRequestQueue(buildDestroyFavoriteRequest(token));
@@ -342,7 +342,7 @@ public class ListCommentsFragment extends SwipeRefreshFragment {
                     }
                     ToLoginDialogFragment mDialog = ToLoginDialogFragment
                             .newInstance(getString(R.string.comment_to_login_message));
-                    mDialog.show(getFragmentManager(), null);
+                    mDialog.show(getChildFragmentManager(), null);
                 } else {
                     CreateCommentFragment mCreateCommentFragment = CreateCommentFragment
                             .newInstance(mVideoID, token, mContent);
@@ -373,7 +373,7 @@ public class ListCommentsFragment extends SwipeRefreshFragment {
                                 }
                             });
                     mCreateCommentFragment
-                            .show(getFragmentManager(), CreateCommentFragment.class.getName());
+                            .show(getChildFragmentManager(), CreateCommentFragment.class.getName());
                 }
             }
         });
@@ -455,6 +455,7 @@ public class ListCommentsFragment extends SwipeRefreshFragment {
         }
     }
 
+    //TODO 为何禁止super.onCreateOptionsMenu运行?
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
     }

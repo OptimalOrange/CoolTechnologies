@@ -161,8 +161,8 @@ public class PlayVideoActivity extends LoginableBaseActivity {
                             //noinspection all
                             getWindow().getDecorView()
                                     .setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
-                            if (getActionBar() != null) {
-                                getActionBar().hide();
+                            if (getSupportActionBar() != null) {
+                                getSupportActionBar().hide();
                             }
                             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
                         } else {
@@ -173,8 +173,8 @@ public class PlayVideoActivity extends LoginableBaseActivity {
                             //noinspection all
                             getWindow().getDecorView()
                                     .setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
-                            if (getActionBar() != null) {
-                                getActionBar().show();
+                            if (getSupportActionBar() != null) {
+                                getSupportActionBar().show();
                             }
                             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                         }
@@ -289,7 +289,7 @@ public class PlayVideoActivity extends LoginableBaseActivity {
 
     private void addOthersToNonVideoLayout(Bundle savedInstanceState) {
         if (savedInstanceState == null) {
-            getFragmentManager().beginTransaction()
+            getSupportFragmentManager().beginTransaction()
                     .add(R.id.others_container, ListCommentsFragment.newInstance(getVideoId()))
                     .commit();
         }

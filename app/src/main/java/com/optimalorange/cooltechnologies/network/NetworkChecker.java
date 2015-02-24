@@ -4,14 +4,14 @@ import com.optimalorange.cooltechnologies.R;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
-import android.app.FragmentManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentManager;
 
 /**
  * 网络连接检查器。<br />可以用它判断能否建立网络连接，{@link ConnectivityManager#TYPE_WIFI WiFi}等网络是否可用。
@@ -22,7 +22,7 @@ public class NetworkChecker {
     private final ConnectivityManager mConnectivityManager;
 
     /**
-     * {@link #openNoConnectionDialog(android.app.FragmentManager)}打开的{@link DialogFragment}的tag
+     * {@link #openNoConnectionDialog(FragmentManager)}打开的{@link DialogFragment}的tag
      */
     public static final String FRAGMENT_TAG_NO_CONNECTION_DIALOG =
             NetworkChecker.class.getName() + ".fragment_tag_no_connection_dialog";
