@@ -7,7 +7,7 @@
             android:id="@+id/action_login_or_logout"
             android:title="@string/action_login"
             android:icon="@drawable/ic_perm_identity_white_24dp"
-            app:showAsAction="ifRoom|withText"
+            app:showAsAction="ifRoom"
             android:menuCategory="container"
             />
 
