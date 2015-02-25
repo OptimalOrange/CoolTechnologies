@@ -9,6 +9,8 @@
         tools:ignore="MergeRootFrame"
         >
 
+    <include layout="@layout/toolbar_actionbar"/>
+
     <com.viewpagerindicator.TitlePageIndicator
             android:id="@+id/indicator"
             android:layout_width="match_parent"

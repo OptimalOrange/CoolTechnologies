@@ -17,6 +17,10 @@
         <item name="vpiTitlePageIndicatorStyle">@style/CustomTitlePageIndicator</item>
     </style>
 
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+    </style>
+
     <style name="ActionBarThemeOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
         <!--<item name="android:textColorPrimary">#fff</item>-->
         <!--<item name="colorControlHighlight">#3fff</item>-->
