@@ -6,7 +6,7 @@
     <string name="pref_key_only_play_video_when_use_wlan" translatable="false">
         pref_key_only_play_video_when_use_wlan
     </string>
-    <bool name="pref_default_value_only_play_video_when_use_wlan">false</bool>
+    <bool name="pref_default_value_only_play_video_when_use_wlan">true</bool>
     <string name="pref_title_only_play_video_when_use_wlan">仅在WLAN下，播放视频</string>
     <string name="pref_summary_only_play_video_when_use_wlan">使用移动网络时，不允许播放视频</string>
 
