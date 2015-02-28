@@ -42,9 +42,14 @@ public class PlayVideoActivity extends LoginableBaseActivity {
     public static final String EXTRA_KEY_VIDEO =
             PlayVideoActivity.class.getName() + ".extra.KEY_VIDEO";
 
-    /** {@link android.webkit.WebView WebView}要加载的网页的路径 */
+    /** 正常情况下，{@link android.webkit.WebView WebView}要加载的网页的路径 */
     private static final String PATH_PLAY_VIDEO_HTML = "file:///android_asset/playvideo.html";
 
+    /** 由于某些原因不能播放视频时，{@link android.webkit.WebView WebView}要加载的网页的路径 */
+    private static final String URL_CANNOT_PLAY_VIDEO
+            = "file:///android_asset/cannotplayvideo.html";
+
+    /** 用于重置{@link android.webkit.WebView WebView}的空网页 */
     private static final String URL_BLANK = "about:blank";
 
     /** {@link #PATH_PLAY_VIDEO_HTML}中用到的{@link WebAppInterface WebAppInterface}实例名 */
@@ -301,7 +306,7 @@ public class PlayVideoActivity extends LoginableBaseActivity {
     }
 
     /**
-     * 如果条件允许的话，加载播放器；否则，加载{@link #URL_BLANK}
+     * 如果条件允许的话，加载播放器；否则，加载{@link #URL_CANNOT_PLAY_VIDEO}
      *
      * @return {@link #mPlayerIsLoaded}
      */
@@ -312,9 +317,7 @@ public class PlayVideoActivity extends LoginableBaseActivity {
                 loadUrlAndClearHistory(PATH_PLAY_VIDEO_HTML);
             }
         } else {
-            if (mPlayerIsLoaded) {
-                loadUrlAndClearHistory(URL_BLANK);
-            }
+            loadUrlAndClearHistory(URL_CANNOT_PLAY_VIDEO);
         }
         mPlayerIsLoaded = loadPlayer;
         return loadPlayer;
