@@ -18,6 +18,7 @@ import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
@@ -65,6 +66,13 @@ public class PlayVideoActivity extends LoginableBaseActivity {
      */
     private static final String JAVASCRIPT_INTERFACE_FULLSCREEN_TOGGLE_SWITCH =
             "webAppFullscreenToggleSwitch";
+
+    /**
+     * {@link #URL_CANNOT_PLAY_VIDEO}中用到的
+     * {@link OnClickSettingsListener OnClickSettingsListener}实例名
+     */
+    private static final String JAVASCRIPT_INTERFACE_ON_CLICK_SETTINGS_LISTENER =
+            "onClickSettingsListener";
 
     private FavoriteBean mFavoriteBean;
 
@@ -198,6 +206,8 @@ public class PlayVideoActivity extends LoginableBaseActivity {
         mWebView.addJavascriptInterface(
                 new OnPlayStartListener(DBManager.getInstance(this), mFavoriteBean),
                 JAVASCRIPT_INTERFACE_ON_PLAY_START_LISTENER);
+        mWebView.addJavascriptInterface(
+                new OnClickSettingsListener(this), JAVASCRIPT_INTERFACE_ON_CLICK_SETTINGS_LISTENER);
     }
 
     @Override
@@ -519,6 +529,28 @@ public class PlayVideoActivity extends LoginableBaseActivity {
                     }
                 }
             });
+        }
+    }
+
+    /**
+     * 点击{@link WebView}中的“修改系统配置”、“修改应用配置”等时被调用。
+     */
+    private static class OnClickSettingsListener {
+
+        private final Context mContext;
+
+        private OnClickSettingsListener(Context context) {
+            mContext = context;
+        }
+
+        @JavascriptInterface
+        public void onClickAppSettings() {
+            mContext.startActivity(new Intent(mContext, SettingsActivity.class));
+        }
+
+        @JavascriptInterface
+        public void onClickSystemSettings() {
+            mContext.startActivity(new Intent(Settings.ACTION_SETTINGS));
         }
     }
 
