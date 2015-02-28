@@ -43,7 +43,7 @@ public class PlayVideoActivity extends LoginableBaseActivity {
             PlayVideoActivity.class.getName() + ".extra.KEY_VIDEO";
 
     /** 正常情况下，{@link android.webkit.WebView WebView}要加载的网页的路径 */
-    private static final String PATH_PLAY_VIDEO_HTML = "file:///android_asset/playvideo.html";
+    private static final String URL_PLAY_VIDEO = "file:///android_asset/playvideo.html";
 
     /** 由于某些原因不能播放视频时，{@link android.webkit.WebView WebView}要加载的网页的路径 */
     private static final String URL_CANNOT_PLAY_VIDEO
@@ -52,15 +52,15 @@ public class PlayVideoActivity extends LoginableBaseActivity {
     /** 用于重置{@link android.webkit.WebView WebView}的空网页 */
     private static final String URL_BLANK = "about:blank";
 
-    /** {@link #PATH_PLAY_VIDEO_HTML}中用到的{@link WebAppInterface WebAppInterface}实例名 */
+    /** {@link #URL_PLAY_VIDEO}中用到的{@link WebAppInterface WebAppInterface}实例名 */
     private static final String JAVASCRIPT_INTERFACE_GENERIC = "webAppInterface";
 
-    /** {@link #PATH_PLAY_VIDEO_HTML}中用到的{@link OnPlayStartListener OnPlayStartListener}实例名 */
+    /** {@link #URL_PLAY_VIDEO}中用到的{@link OnPlayStartListener OnPlayStartListener}实例名 */
     private static final String JAVASCRIPT_INTERFACE_ON_PLAY_START_LISTENER =
             "webAppOnPlayStartListener";
 
     /**
-     * {@link #PATH_PLAY_VIDEO_HTML}中用到的
+     * {@link #URL_PLAY_VIDEO}中用到的
      * {@link WebAppFullscreenToggleSwitch WebAppFullscreenToggleSwitch}实例名
      */
     private static final String JAVASCRIPT_INTERFACE_FULLSCREEN_TOGGLE_SWITCH =
@@ -314,7 +314,7 @@ public class PlayVideoActivity extends LoginableBaseActivity {
         boolean loadPlayer = canPlayNow();
         if (loadPlayer) {
             if (!mPlayerIsLoaded) {
-                loadUrlAndClearHistory(PATH_PLAY_VIDEO_HTML);
+                loadUrlAndClearHistory(URL_PLAY_VIDEO);
             }
         } else {
             loadUrlAndClearHistory(URL_CANNOT_PLAY_VIDEO);
@@ -474,7 +474,7 @@ public class PlayVideoActivity extends LoginableBaseActivity {
     }
 
     /**
-     * 在{@link Build.VERSION_CODES#KITKAT}以上版本，点击{@link #PATH_PLAY_VIDEO_HTML}中视屏全屏按钮时，
+     * 在{@link Build.VERSION_CODES#KITKAT}以上版本，点击{@link #URL_PLAY_VIDEO}中视屏全屏按钮时，
      * 触发本类的实例的{@link PlayVideoActivity.WebAppFullscreenToggleSwitch#toggleFullscreen()}方法。
      */
     @TargetApi(Build.VERSION_CODES.KITKAT)
