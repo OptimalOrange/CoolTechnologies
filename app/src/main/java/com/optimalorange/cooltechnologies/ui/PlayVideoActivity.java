@@ -18,6 +18,7 @@ import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
@@ -42,24 +43,36 @@ public class PlayVideoActivity extends LoginableBaseActivity {
     public static final String EXTRA_KEY_VIDEO =
             PlayVideoActivity.class.getName() + ".extra.KEY_VIDEO";
 
-    /** {@link android.webkit.WebView WebView}要加载的网页的路径 */
-    private static final String PATH_PLAY_VIDEO_HTML = "file:///android_asset/playvideo.html";
+    /** 正常情况下，{@link android.webkit.WebView WebView}要加载的网页的路径 */
+    private static final String URL_PLAY_VIDEO = "file:///android_asset/playvideo.html";
 
+    /** 由于某些原因不能播放视频时，{@link android.webkit.WebView WebView}要加载的网页的路径 */
+    private static final String URL_CANNOT_PLAY_VIDEO
+            = "file:///android_asset/cannotplayvideo.html";
+
+    /** 用于重置{@link android.webkit.WebView WebView}的空网页 */
     private static final String URL_BLANK = "about:blank";
 
-    /** {@link #PATH_PLAY_VIDEO_HTML}中用到的{@link WebAppInterface WebAppInterface}实例名 */
+    /** {@link #URL_PLAY_VIDEO}中用到的{@link WebAppInterface WebAppInterface}实例名 */
     private static final String JAVASCRIPT_INTERFACE_GENERIC = "webAppInterface";
 
-    /** {@link #PATH_PLAY_VIDEO_HTML}中用到的{@link OnPlayStartListener OnPlayStartListener}实例名 */
+    /** {@link #URL_PLAY_VIDEO}中用到的{@link OnPlayStartListener OnPlayStartListener}实例名 */
     private static final String JAVASCRIPT_INTERFACE_ON_PLAY_START_LISTENER =
             "webAppOnPlayStartListener";
 
     /**
-     * {@link #PATH_PLAY_VIDEO_HTML}中用到的
+     * {@link #URL_PLAY_VIDEO}中用到的
      * {@link WebAppFullscreenToggleSwitch WebAppFullscreenToggleSwitch}实例名
      */
     private static final String JAVASCRIPT_INTERFACE_FULLSCREEN_TOGGLE_SWITCH =
             "webAppFullscreenToggleSwitch";
+
+    /**
+     * {@link #URL_CANNOT_PLAY_VIDEO}中用到的
+     * {@link OnClickSettingsListener OnClickSettingsListener}实例名
+     */
+    private static final String JAVASCRIPT_INTERFACE_ON_CLICK_SETTINGS_LISTENER =
+            "onClickSettingsListener";
 
     private FavoriteBean mFavoriteBean;
 
@@ -193,6 +206,8 @@ public class PlayVideoActivity extends LoginableBaseActivity {
         mWebView.addJavascriptInterface(
                 new OnPlayStartListener(DBManager.getInstance(this), mFavoriteBean),
                 JAVASCRIPT_INTERFACE_ON_PLAY_START_LISTENER);
+        mWebView.addJavascriptInterface(
+                new OnClickSettingsListener(this), JAVASCRIPT_INTERFACE_ON_CLICK_SETTINGS_LISTENER);
     }
 
     @Override
@@ -301,7 +316,7 @@ public class PlayVideoActivity extends LoginableBaseActivity {
     }
 
     /**
-     * 如果条件允许的话，加载播放器；否则，加载{@link #URL_BLANK}
+     * 如果条件允许的话，加载播放器；否则，加载{@link #URL_CANNOT_PLAY_VIDEO}
      *
      * @return {@link #mPlayerIsLoaded}
      */
@@ -309,12 +324,10 @@ public class PlayVideoActivity extends LoginableBaseActivity {
         boolean loadPlayer = canPlayNow();
         if (loadPlayer) {
             if (!mPlayerIsLoaded) {
-                loadUrlAndClearHistory(PATH_PLAY_VIDEO_HTML);
+                loadUrlAndClearHistory(URL_PLAY_VIDEO);
             }
         } else {
-            if (mPlayerIsLoaded) {
-                loadUrlAndClearHistory(URL_BLANK);
-            }
+            loadUrlAndClearHistory(URL_CANNOT_PLAY_VIDEO);
         }
         mPlayerIsLoaded = loadPlayer;
         return loadPlayer;
@@ -471,7 +484,7 @@ public class PlayVideoActivity extends LoginableBaseActivity {
     }
 
     /**
-     * 在{@link Build.VERSION_CODES#KITKAT}以上版本，点击{@link #PATH_PLAY_VIDEO_HTML}中视屏全屏按钮时，
+     * 在{@link Build.VERSION_CODES#KITKAT}以上版本，点击{@link #URL_PLAY_VIDEO}中视屏全屏按钮时，
      * 触发本类的实例的{@link PlayVideoActivity.WebAppFullscreenToggleSwitch#toggleFullscreen()}方法。
      */
     @TargetApi(Build.VERSION_CODES.KITKAT)
@@ -516,6 +529,28 @@ public class PlayVideoActivity extends LoginableBaseActivity {
                     }
                 }
             });
+        }
+    }
+
+    /**
+     * 点击{@link WebView}中的“修改系统配置”、“修改应用配置”等时被调用。
+     */
+    private static class OnClickSettingsListener {
+
+        private final Context mContext;
+
+        private OnClickSettingsListener(Context context) {
+            mContext = context;
+        }
+
+        @JavascriptInterface
+        public void onClickAppSettings() {
+            mContext.startActivity(new Intent(mContext, SettingsActivity.class));
+        }
+
+        @JavascriptInterface
+        public void onClickSystemSettings() {
+            mContext.startActivity(new Intent(Settings.ACTION_SETTINGS));
         }
     }
 
