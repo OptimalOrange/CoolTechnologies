@@ -521,12 +521,17 @@ public class ListGenresFragment extends SwipeRefreshFragment {
                 }
             }
             for (; cardViewsIndex < holder.mCardViews.size(); cardViewsIndex++) {
-                holder.mCardViews.get(cardViewsIndex).clearAllViewsContent();
+                clearVideoCardView(holder.mCardViews.get(cardViewsIndex));
             }
         }
 
         private boolean shouldShowImage() {
             return true;
+        }
+
+        private void clearVideoCardView(VideoCardViewBuilder.VideoCardViewHolder videoCardView) {
+            videoCardView.clearAllViewsContent();
+            videoCardView.mRootCardView.setOnClickListener(null);
         }
 
         private void bindVideoCardView(
