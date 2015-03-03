@@ -11,6 +11,7 @@ import com.optimalorange.cooltechnologies.entity.Video;
 import com.optimalorange.cooltechnologies.network.NetworkChecker;
 import com.optimalorange.cooltechnologies.network.VideosRequest;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
+import com.optimalorange.cooltechnologies.ui.BaseActivity;
 import com.optimalorange.cooltechnologies.ui.PlayVideoActivity;
 import com.optimalorange.cooltechnologies.util.Utils;
 import com.umeng.analytics.MobclickAgent;
@@ -196,6 +197,11 @@ public class ListVideosFragment extends SwipeRefreshFragment {
         mItemsAdapter = new ItemsAdapter(mListVideos, mVolleySingleton.getImageLoader());
         mGridView.setAdapter(mItemsAdapter);
 
+        if (getActivity() instanceof BaseActivity) {
+            mGridView.setOnScrollListener(
+                    ((BaseActivity) getActivity()).getOnScrollListenerForAbsListView());
+        }
+
         /* 点击设置网络 */
         mNoConnectionView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -239,6 +245,7 @@ public class ListVideosFragment extends SwipeRefreshFragment {
     public void onDestroyView() {
         mNoConnectionView = null;
         mEmptyView = null;
+        mGridView.setOnScrollListener(null);
         mGridView.setAdapter(null);
         mGridView = null;
         mMainContentView = null;

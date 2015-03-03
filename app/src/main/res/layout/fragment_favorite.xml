@@ -10,6 +10,7 @@
             android:id="@+id/favorite_hint"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:paddingTop="@dimen/main_activity_header_height"
             android:gravity="center"
             android:textColor="@color/text_black"
             android:visibility="gone"
@@ -19,6 +20,8 @@
             android:id="@+id/favorite_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:paddingTop="@dimen/main_activity_header_height"
+            android:clipToPadding="false"
             android:visibility="gone"
             />
 

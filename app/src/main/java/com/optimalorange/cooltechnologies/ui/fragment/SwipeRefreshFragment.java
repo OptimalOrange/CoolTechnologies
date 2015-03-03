@@ -1,6 +1,7 @@
 package com.optimalorange.cooltechnologies.ui.fragment;
 
 import com.optimalorange.cooltechnologies.R;
+import com.optimalorange.cooltechnologies.ui.BaseActivity;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -47,6 +48,9 @@ public abstract class SwipeRefreshFragment
                 return SwipeRefreshFragment.this.canChildScrollUp();
             }
         };
+        if (getActivity() instanceof BaseActivity) {
+            ((BaseActivity) getActivity()).registerSwipeRefreshLayout(mSwipeRefreshLayout);
+        }
         mSwipeRefreshLayout.addView(
                 mChildView,
                 SwipeRefreshLayout.LayoutParams.MATCH_PARENT,
@@ -66,6 +70,9 @@ public abstract class SwipeRefreshFragment
         mSwipeRefreshLayout.clearAnimation(); // hide circle progress view
         mSwipeRefreshLayout.setOnRefreshListener(null);
         mSwipeRefreshLayout.removeView(mChildView);
+        if (getActivity() instanceof BaseActivity) {
+            ((BaseActivity) getActivity()).deregisterSwipeRefreshLayout(mSwipeRefreshLayout);
+        }
         mSwipeRefreshLayout = null;
         mChildView = null;
         super.onDestroyView();

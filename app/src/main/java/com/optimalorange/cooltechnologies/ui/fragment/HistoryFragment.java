@@ -4,6 +4,7 @@ import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.adapter.FavoriteAdapter;
 import com.optimalorange.cooltechnologies.entity.FavoriteBean;
 import com.optimalorange.cooltechnologies.storage.sqlite.DBManager;
+import com.optimalorange.cooltechnologies.ui.BaseActivity;
 import com.optimalorange.cooltechnologies.ui.PlayVideoActivity;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.umeng.analytics.MobclickAgent;
@@ -136,6 +137,12 @@ public class HistoryFragment extends Fragment {
 
         adapter = new FavoriteAdapter(getActivity(), favoriteBeans, mVolleySingleton.getImageLoader());
         favoriteListView.setAdapter(adapter);
+
+        if (getActivity() instanceof BaseActivity) {
+            favoriteListView.setOnScrollListener(
+                    ((BaseActivity) getActivity()).getOnScrollListenerForAbsListView());
+        }
+
         favoriteListView.setVisibility(View.VISIBLE);
         mIsCreated = true;
         isNoHistory();
@@ -157,6 +164,7 @@ public class HistoryFragment extends Fragment {
     @Override
     public void onDestroyView() {
         mTvHint = null;
+        favoriteListView.setOnScrollListener(null);
         favoriteListView.setAdapter(null);
         favoriteListView = null;
         v = null;

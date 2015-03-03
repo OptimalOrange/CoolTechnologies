@@ -12,6 +12,7 @@ import com.optimalorange.cooltechnologies.entity.FavoriteBean;
 import com.optimalorange.cooltechnologies.network.NetworkChecker;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingleton;
+import com.optimalorange.cooltechnologies.ui.BaseActivity;
 import com.optimalorange.cooltechnologies.ui.LoginableBaseActivity;
 import com.optimalorange.cooltechnologies.ui.PlayVideoActivity;
 import com.umeng.analytics.MobclickAgent;
@@ -159,6 +160,12 @@ public class FavoriteFragment extends SwipeRefreshFragment {
         });
         favoriteListView.addFooterView(footer);
         favoriteListView.setAdapter(adapter);
+
+        if (getActivity() instanceof BaseActivity) {
+            favoriteListView.setOnScrollListener(
+                    ((BaseActivity) getActivity()).getOnScrollListenerForAbsListView());
+        }
+
         getNewData();
         mIsCreated = true;
         favoriteListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -241,6 +248,7 @@ public class FavoriteFragment extends SwipeRefreshFragment {
         tvViewMore = null;
         footer = null;
         mTvHint = null;
+        favoriteListView.setOnScrollListener(null);
         favoriteListView.setAdapter(null);
         favoriteListView = null;
         v = null;

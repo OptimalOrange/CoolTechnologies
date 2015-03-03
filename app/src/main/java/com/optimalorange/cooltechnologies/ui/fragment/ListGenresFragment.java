@@ -10,6 +10,7 @@ import com.optimalorange.cooltechnologies.entity.Video;
 import com.optimalorange.cooltechnologies.network.NetworkChecker;
 import com.optimalorange.cooltechnologies.network.VideosRequest;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
+import com.optimalorange.cooltechnologies.ui.BaseActivity;
 import com.optimalorange.cooltechnologies.ui.ListVideosActivity;
 import com.optimalorange.cooltechnologies.ui.PlayVideoActivity;
 import com.optimalorange.cooltechnologies.ui.view.VideoCardViewBuilder;
@@ -243,6 +244,11 @@ public class ListGenresFragment extends SwipeRefreshFragment {
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mRecyclerView.setAdapter(mAdapter);
 
+        if (getActivity() instanceof BaseActivity) {
+            mRecyclerView.setOnScrollListener(
+                    ((BaseActivity) getActivity()).getOnScrollListenerForRecyclerView());
+        }
+
         applyGenres();
         applyIsConnected();
 
@@ -268,6 +274,7 @@ public class ListGenresFragment extends SwipeRefreshFragment {
     public void onDestroyView() {
         mNoConnectionView = null;
         mEmptyView = null;
+        mRecyclerView.setOnScrollListener(null);
         mRecyclerView.setAdapter(null);
         mRecyclerView = null;
         mMainContentView = null;
