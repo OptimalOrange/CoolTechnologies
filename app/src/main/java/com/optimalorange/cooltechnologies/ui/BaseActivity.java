@@ -223,7 +223,7 @@ public abstract class BaseActivity extends ActionBarActivity {
         }
 
         boolean shouldShow = currentY < mActionBarAutoHideMinY ||
-                (mActionBarAutoHideSignal <= -mActionBarAutoHideSensivity);
+                mActionBarAutoHideSignal <= -mActionBarAutoHideSensivity;
         autoShowOrHideActionBar(shouldShow);
     }
 
