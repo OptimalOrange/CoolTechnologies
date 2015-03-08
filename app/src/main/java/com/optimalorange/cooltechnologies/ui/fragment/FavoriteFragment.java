@@ -14,7 +14,9 @@ import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingleton;
 import com.optimalorange.cooltechnologies.ui.BaseActivity;
 import com.optimalorange.cooltechnologies.ui.LoginableBaseActivity;
+import com.optimalorange.cooltechnologies.ui.MainActivity;
 import com.optimalorange.cooltechnologies.ui.PlayVideoActivity;
+import com.optimalorange.cooltechnologies.util.Utils;
 import com.umeng.analytics.MobclickAgent;
 
 import org.apache.http.HttpResponse;
@@ -30,6 +32,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
@@ -60,6 +63,10 @@ import java.util.ArrayList;
 public class FavoriteFragment extends SwipeRefreshFragment {
 
     private static final String DEFAULT_CATEGORY_LABEL= "科技";
+
+    private int mActionBarHeight = -1;
+
+    private int mPageIndicatorHeight = -1;
 
     private View v;
     private static final String FAVORITE_BASE_URL = "https://openapi.youku.com/v2/videos/favorite/by_me.json";
@@ -104,6 +111,13 @@ public class FavoriteFragment extends SwipeRefreshFragment {
     private boolean mIsDelButtonCreate;
 
     @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        mActionBarHeight = getResources().getDimensionPixelSize(R.dimen.action_bar_height);
+        mPageIndicatorHeight = getResources().getDimensionPixelSize(R.dimen.page_indicator_height);
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mNetworkChecker = NetworkChecker.newInstance(getActivity());
@@ -116,6 +130,13 @@ public class FavoriteFragment extends SwipeRefreshFragment {
         mTvHint = (TextView) v.findViewById(R.id.favorite_hint);
         footer = inflater.inflate(R.layout.ll_favorite_footer, favoriteListView, false);
         tvViewMore = (TextView) footer.findViewById(R.id.tv_more);
+        // set layout
+        if (getActivity() instanceof MainActivity) {
+            favoriteListView.setClipToPadding(false);
+            int paddingTop = mActionBarHeight + mPageIndicatorHeight;
+            Utils.setPaddingTop(favoriteListView, paddingTop);
+            Utils.setPaddingTop(mTvHint, paddingTop);
+        }
         return v;
     }
 

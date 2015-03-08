@@ -1,6 +1,7 @@
 package com.optimalorange.cooltechnologies.util;
 
 import android.content.Context;
+import android.view.View;
 
 import java.text.NumberFormat;
 import java.util.Locale;
@@ -96,4 +97,9 @@ public class Utils {
             return hoursStr + ":" + minutesStr + ":" + secondsStr;
         }
     }
+
+    public static void setPaddingTop(View v, int paddingTop) {
+        v.setPadding(v.getPaddingLeft(), paddingTop, v.getPaddingRight(), v.getPaddingBottom());
+    }
+
 }

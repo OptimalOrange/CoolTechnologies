@@ -12,10 +12,12 @@ import com.optimalorange.cooltechnologies.network.NetworkChecker;
 import com.optimalorange.cooltechnologies.network.VideosRequest;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.optimalorange.cooltechnologies.ui.BaseActivity;
+import com.optimalorange.cooltechnologies.ui.MainActivity;
 import com.optimalorange.cooltechnologies.ui.PlayVideoActivity;
 import com.optimalorange.cooltechnologies.util.Utils;
 import com.umeng.analytics.MobclickAgent;
 
+import android.app.Activity;
 import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -71,6 +73,10 @@ public class ListVideosFragment extends SwipeRefreshFragment {
     private boolean mIsConnected = false;
 
     private BroadcastReceiver mNetworkReceiver;
+
+    private int mActionBarHeight = -1;
+
+    private int mPageIndicatorHeight = -1;
 
     private View mNoConnectionView;
 
@@ -152,6 +158,13 @@ public class ListVideosFragment extends SwipeRefreshFragment {
     }
 
     @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        mActionBarHeight = getResources().getDimensionPixelSize(R.dimen.action_bar_height);
+        mPageIndicatorHeight = getResources().getDimensionPixelSize(R.dimen.page_indicator_height);
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // 如果设置过Arguments，应用之
@@ -187,6 +200,14 @@ public class ListVideosFragment extends SwipeRefreshFragment {
         mGridView = (StaggeredGridView) rootView.findViewById(R.id.grid_view);
         mEmptyView = rootView.findViewById(android.R.id.empty);
         mNoConnectionView = rootView.findViewById(R.id.no_connection);
+        // set layout
+        if (getActivity() instanceof MainActivity) {
+            mGridView.setClipToPadding(false);
+            int paddingTop = mActionBarHeight + mPageIndicatorHeight;
+            Utils.setPaddingTop(mGridView, paddingTop);
+            Utils.setPaddingTop(mEmptyView, paddingTop);
+            Utils.setPaddingTop(mNoConnectionView, paddingTop);
+        }
         return rootView;
     }
 

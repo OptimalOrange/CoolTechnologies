@@ -18,9 +18,6 @@
     <dimen name="page_indicator_footer_line_height">0dp</dimen>
     <dimen name="page_indicator_footer_indicator_height">5dp</dimen>
 
-    <!-- action_bar_height + page_indicator_height -->
-    <dimen name="main_activity_header_height">86dp</dimen>
-
     <!-- 实际上values-v21中的margin才是真值，API Level 21以下，因为CardView有padding，card_margin缩小了 -->
     <dimen name="card_margin">0dp</dimen>
     <dimen name="card_margin_half">0dp</dimen>

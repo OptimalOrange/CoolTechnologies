@@ -20,8 +20,10 @@ import java.util.List;
  * 本应用所有{@link android.app.Activity Activity}的父类。
  */
 public abstract class BaseActivity extends ActionBarActivity {
+
     // Durations for certain animations we use:
     protected static final int HEADER_HIDE_ANIM_DURATION = 300;
+
     /**
      * THRESHOLD for calculate approximate currentY and deltaY of {@link #onMainContentScrolled}
      */
@@ -33,12 +35,17 @@ public abstract class BaseActivity extends ActionBarActivity {
 
     // variables that control the Action Bar auto hide behavior (aka "quick recall")
     private boolean mActionBarAutoHideEnabled = false;
+
     private int mActionBarAutoHideSensivity = 0;
+
     private int mActionBarAutoHideMinY = 0;
+
     private int mActionBarAutoHideSignal = 0;
+
     private boolean mActionBarShown = true;
 
     private int mProgressBarTopWhenActionBarShown;
+
     private int mProgressBarTopWhenActionBarHidden = 0;
 
     private List<SwipeRefreshLayout> mSwipeRefreshLayouts = new LinkedList<>();
@@ -60,12 +67,13 @@ public abstract class BaseActivity extends ActionBarActivity {
                     lastFvi = firstVisibleItem;
                 }
             };
+
     private final RecyclerView.OnScrollListener mOnScrollListenerForRecyclerView =
             new RecyclerView.OnScrollListener() {
                 @Override
                 public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                     super.onScrolled(recyclerView, dx, dy);
-                    int firstVisibleItem = ((LinearLayoutManager)recyclerView.getLayoutManager()).findFirstVisibleItemPosition();
+                    int firstVisibleItem = ((LinearLayoutManager) recyclerView.getLayoutManager()).findFirstVisibleItemPosition();
                     onMainContentScrolled(firstVisibleItem <= ITEMS_THRESHOLD ? 0 : Integer.MAX_VALUE, dy);
                 }
             };
