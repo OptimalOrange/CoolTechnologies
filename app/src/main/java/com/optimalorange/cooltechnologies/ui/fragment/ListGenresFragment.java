@@ -10,20 +10,16 @@ import com.optimalorange.cooltechnologies.entity.Video;
 import com.optimalorange.cooltechnologies.network.NetworkChecker;
 import com.optimalorange.cooltechnologies.network.VideosRequest;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
-import com.optimalorange.cooltechnologies.ui.BaseActivity;
 import com.optimalorange.cooltechnologies.ui.ListVideosActivity;
-import com.optimalorange.cooltechnologies.ui.MainActivity;
 import com.optimalorange.cooltechnologies.ui.PlayVideoActivity;
 import com.optimalorange.cooltechnologies.ui.view.VideoCardViewBuilder;
 import com.optimalorange.cooltechnologies.util.ItemsCountCalculater;
-import com.optimalorange.cooltechnologies.util.Utils;
 import com.umeng.analytics.MobclickAgent;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -79,10 +75,6 @@ public class ListGenresFragment extends SwipeRefreshFragment {
 
     private BroadcastReceiver mNetworkReceiver;
 
-
-    private int mActionBarHeight = -1;
-
-    private int mPageIndicatorHeight = -1;
 
     private View mMainContentView;
 
@@ -199,13 +191,6 @@ public class ListGenresFragment extends SwipeRefreshFragment {
     //--------------------------------------------------------------------------
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        mActionBarHeight = getResources().getDimensionPixelSize(R.dimen.action_bar_height);
-        mPageIndicatorHeight = getResources().getDimensionPixelSize(R.dimen.page_indicator_height);
-    }
-
-    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mYoukuClientId = getString(R.string.youku_client_id);
@@ -236,14 +221,6 @@ public class ListGenresFragment extends SwipeRefreshFragment {
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
         mEmptyView = rootView.findViewById(android.R.id.empty);
         mNoConnectionView = rootView.findViewById(R.id.no_connection);
-        // set layout
-        if (getActivity() instanceof MainActivity) {
-            mRecyclerView.setClipToPadding(false);
-            int paddingTop = mActionBarHeight + mPageIndicatorHeight;
-            Utils.setPaddingTop(mRecyclerView, paddingTop);
-            Utils.setPaddingTop(mEmptyView, paddingTop);
-            Utils.setPaddingTop(mNoConnectionView, paddingTop);
-        }
         return rootView;
     }
 
@@ -265,11 +242,6 @@ public class ListGenresFragment extends SwipeRefreshFragment {
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mRecyclerView.setAdapter(mAdapter);
-
-        if (getActivity() instanceof BaseActivity) {
-            mRecyclerView.setOnScrollListener(
-                    ((BaseActivity) getActivity()).getOnScrollListenerForRecyclerView());
-        }
 
         applyGenres();
         applyIsConnected();
@@ -296,7 +268,6 @@ public class ListGenresFragment extends SwipeRefreshFragment {
     public void onDestroyView() {
         mNoConnectionView = null;
         mEmptyView = null;
-        mRecyclerView.setOnScrollListener(null);
         mRecyclerView.setAdapter(null);
         mRecyclerView = null;
         mMainContentView = null;
