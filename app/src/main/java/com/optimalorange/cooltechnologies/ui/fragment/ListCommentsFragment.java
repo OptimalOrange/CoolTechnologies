@@ -302,7 +302,10 @@ public class ListCommentsFragment extends SwipeRefreshFragment {
 
         applyIsConnected();
         if (mIsConnected) {
-            setRefreshing(true);
+            //为了降低PlayVideoActivity crash崩溃BUG的触发率，暂时不在启动时显示加载中动画。
+            //TODO 找到BUG的真正原因并修复。目前在播放时，点刷新，有可能触发类似BUG。
+            //日志：A/libc﹕ Fatal signal 11 (SIGSEGV) at 0x0000658a (code=0), thread 25994 (ooltechnologies)
+            //setRefreshing(true);
             startLoad();
         }
 

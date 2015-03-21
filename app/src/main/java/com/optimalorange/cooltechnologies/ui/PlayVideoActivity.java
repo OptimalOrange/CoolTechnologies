@@ -397,7 +397,7 @@ public class PlayVideoActivity extends LoginableBaseActivity {
         /** Video ID */
         private volatile String mVid;
 
-        private volatile boolean mAutoplay = true;
+        private volatile boolean mAutoplay = false;
 
         private volatile boolean mShowRelated = false;
 
