@@ -8,8 +8,6 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.entity.Comment;
 import com.optimalorange.cooltechnologies.network.CommentsRequest;
-import com.optimalorange.cooltechnologies.network.CreateFavoriteRequest;
-import com.optimalorange.cooltechnologies.network.DestroyFavoriteRequest;
 import com.optimalorange.cooltechnologies.network.NetworkChecker;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingleton;
@@ -28,15 +26,14 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -94,8 +91,6 @@ public class ListCommentsFragment extends SwipeRefreshFragment {
     private View mHeader;
 
     private TextView mCommentsCount;
-
-    private Button mFavoriteView;
 
     private ListView mListView;
 
@@ -183,62 +178,6 @@ public class ListCommentsFragment extends SwipeRefreshFragment {
         return totalRequest;
     }
 
-    /** 创建收藏的请求 */
-    private CreateFavoriteRequest buildCreateFavoriteRequest(String token) {
-        return new CreateFavoriteRequest.Builder()
-                .setClient_id(mYoukuClientId)
-                .setVideo_id(mVideoID)
-                .setAccess_token(token)
-                .setResponseListener(new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        Toast.makeText(getActivity(),
-                                R.string.create_favorite_success,
-                                Toast.LENGTH_SHORT).show();
-                        if (mFavoriteView != null) {
-                            mFavoriteView.setActivated(true);
-                        }
-                    }
-                })
-                .setErrorListener(new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(getActivity(),
-                                R.string.create_favorite_failure,
-                                Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .build();
-    }
-
-    /** 创建收藏的请求 */
-    private DestroyFavoriteRequest buildDestroyFavoriteRequest(String token) {
-        return new DestroyFavoriteRequest.Builder()
-                .setClient_id(mYoukuClientId)
-                .setVideo_id(mVideoID)
-                .setAccess_token(token)
-                .setResponseListener(new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject response) {
-                        Toast.makeText(getActivity(),
-                                R.string.destroy_favorite_success,
-                                Toast.LENGTH_SHORT).show();
-                        if (mFavoriteView != null) {
-                            mFavoriteView.setActivated(false);
-                        }
-                    }
-                })
-                .setErrorListener(new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(getActivity(),
-                                R.string.destroy_favorite_failure,
-                                Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .build();
-    }
-
     /**
      * 用于 创建设置有指定参数的新{@link ListCommentsFragment}实例的 工厂方法
      *
@@ -287,7 +226,6 @@ public class ListCommentsFragment extends SwipeRefreshFragment {
             Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_list_comments, container, false);
         mCommentsCount = (TextView) rootView.findViewById(R.id.comments_count);
-        mFavoriteView = (Button) rootView.findViewById(R.id.favorite);
         mListView = (ListView) rootView.findViewById(R.id.comments_list);
         mHeader = LayoutInflater.from(getActivity()).inflate(R.layout.list_comments_header, null);
         mListView.addHeaderView(mHeader);
@@ -308,30 +246,6 @@ public class ListCommentsFragment extends SwipeRefreshFragment {
             //setRefreshing(true);
             startLoad();
         }
-
-        /** 收藏 按钮的监听 */
-        mFavoriteView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String token = mDefaultSharedPreferencesSingleton.retrieveString("access_token", "");
-                if (!mNetworkChecker.isConnected()) {
-                    Toast.makeText(getActivity(), R.string.comment_no_connection,
-                            Toast.LENGTH_SHORT).show();
-                } else {
-                    if (!mDefaultSharedPreferencesSingleton.hasLoggedIn()) {
-                        ToLoginDialogFragment mDialog = ToLoginDialogFragment
-                                .newInstance(getString(R.string.create_favorite_to_login_message));
-                        mDialog.show(getChildFragmentManager(), null);
-                    } else {
-                        if (mFavoriteView.isActivated()) {
-                            mVolleySingleton.addToRequestQueue(buildDestroyFavoriteRequest(token));
-                        } else {
-                            mVolleySingleton.addToRequestQueue(buildCreateFavoriteRequest(token));
-                        }
-                    }
-                }
-            }
-        });
 
         mHeader.setOnClickListener(new View.OnClickListener() {
             @Override

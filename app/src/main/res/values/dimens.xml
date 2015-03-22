@@ -50,7 +50,6 @@
     <dimen name="comments_padding_5dp">5dp</dimen>
     <dimen name="comments_margin_5dp">5dp</dimen>
     <dimen name="comments_edit_margin">48dp</dimen>
-    <dimen name="favorite_button_dimen">26dp</dimen>
 
     <!-- fragment_create_comment -->
     <dimen name="image_send_dimen">48dp</dimen>
