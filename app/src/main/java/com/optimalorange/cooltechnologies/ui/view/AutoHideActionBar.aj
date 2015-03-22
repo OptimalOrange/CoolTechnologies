@@ -50,7 +50,7 @@ public aspect AutoHideActionBar {
     }
 
     after(SupportAutoHideActionBarEnable fragment) returning(View view): inFragmentPackage() &&
-            this(fragment) && execution(View onCreateChildView(LayoutInflater, ViewGroup, Bundle)) {
+            this(fragment) && execution(View onCreate*View(LayoutInflater, ViewGroup, Bundle)) {
         if (fragment.mMainActivity == null) {
             return;
         }
