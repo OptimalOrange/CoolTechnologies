@@ -9,6 +9,7 @@ import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.entity.Comment;
 import com.optimalorange.cooltechnologies.network.CommentsRequest;
 import com.optimalorange.cooltechnologies.network.NetworkChecker;
+import com.optimalorange.cooltechnologies.network.RequestsManager;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingleton;
 import com.optimalorange.cooltechnologies.ui.LoginActivity;
@@ -75,7 +76,7 @@ public class ListCommentsFragment extends SwipeRefreshFragment {
     private NetworkChecker mNetworkChecker;
 
     /** 网络请求管理器 */
-    private final RequestsManager mRequestsManager = new RequestsManager();
+    private RequestsManager mRequestsManager;
 
     /**
      * 状态属性：网络联通性。true表示已连接网络；false表示网络已断开。
@@ -83,8 +84,6 @@ public class ListCommentsFragment extends SwipeRefreshFragment {
     private boolean mIsConnected = false;
 
     private BroadcastReceiver mNetworkReceiver;
-
-    private VolleySingleton mVolleySingleton;
 
     private int mPage = 1;
 
@@ -204,7 +203,14 @@ public class ListCommentsFragment extends SwipeRefreshFragment {
         mDefaultSharedPreferencesSingleton =
                 DefaultSharedPreferencesSingleton.getInstance(getActivity());
         mYoukuClientId = getString(R.string.youku_client_id);
-        mVolleySingleton = VolleySingleton.getInstance(getActivity());
+        mRequestsManager = new RequestsManager(VolleySingleton.getInstance(getActivity()));
+        mRequestsManager.setOnAllRequestsFinishedListener(
+                new RequestsManager.OnAllRequestsFinishedListener() {
+                    @Override
+                    public void onAllRequestsFinished(RequestsManager requestsManager) {
+                        onLoadFinished();
+                    }
+                });
         //检测网络是否连接
         mNetworkChecker = NetworkChecker.newInstance(getActivity());
         /* 注册网络监听 */
@@ -347,7 +353,6 @@ public class ListCommentsFragment extends SwipeRefreshFragment {
     }
 
     private void cancelLoad() {
-        mVolleySingleton.getRequestQueue().cancelAll(this);
         mRequestsManager.reset();
     }
 
@@ -425,84 +430,6 @@ public class ListCommentsFragment extends SwipeRefreshFragment {
     }
 
     /**
-     * {@link com.android.volley.Request Requests}管理器。用于统计Requests状态。
-     */
-    private class RequestsManager {
-
-        private int mRequests = 0;
-
-        private int mRequestRespondeds = 0;
-
-        private int mRequestErrors = 0;
-
-        private int mRequestCancelleds = 0;
-
-        /**
-         * 初始化总{@link com.android.volley.Request}数为0
-         */
-        private void reset() {
-            mRequests = mRequestRespondeds = mRequestErrors = mRequestCancelleds = 0;
-        }
-
-        /**
-         * 添加{@link com.android.volley.Request}数
-         *
-         * @return 添加后，总Request数
-         */
-        public int addRequest(Request request) {
-            mVolleySingleton.addToRequestQueue(request);
-            return mRequests++;
-        }
-
-        /**
-         * 添加收到响应的{@link Request}数
-         *
-         * @return 添加后，总收到响应的Request数
-         */
-        public int addRequestRespondeds() {
-            int result = mRequestRespondeds++;
-            checkIsAllRequestsFinished();
-            return result;
-        }
-
-        /**
-         * 添加失败的{@link Request}数
-         *
-         * @return 添加后，总失败的Request数
-         */
-        public int addRequestErrors() {
-            int result = mRequestErrors++;
-            checkIsAllRequestsFinished();
-            return result;
-        }
-
-        /**
-         * 添加取消的{@link Request}数
-         *
-         * @return 添加后，总取消的Request数
-         */
-        public int addRequestCancelleds() {
-            int result = mRequestCancelleds++;
-            checkIsAllRequestsFinished();
-            return result;
-        }
-
-        public int getRequestFinisheds() {
-            return mRequestRespondeds + mRequestErrors;
-        }
-
-        public boolean isAllRequestsFinished() {
-            return mRequests == getRequestFinisheds() + mRequestCancelleds;
-        }
-
-        private void checkIsAllRequestsFinished() {
-            if (isAllRequestsFinished()) {
-                onLoadFinished();
-            }
-        }
-    }
-
-    /**
      *
      */
     private class ItemsAdapter extends BaseAdapter {
@@ -550,7 +477,7 @@ public class ListCommentsFragment extends SwipeRefreshFragment {
 
             //当滑到末尾的位置时加载更多Video
             if (position == mListComments.size() - 1) {
-                mVolleySingleton.addToRequestQueue(buildQueryCommentsRequest());
+                mRequestsManager.addRequest(buildQueryCommentsRequest());
             }
 
             return convertView;
