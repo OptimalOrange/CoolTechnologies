@@ -47,6 +47,10 @@
                 android:label="@string/play_video"/>
 
         <activity
+                android:name=".ui.ListCommentsActivity"
+                android:label="@string/comments_title"/>
+
+        <activity
                 android:name=".ui.SearchActivity"
                 android:label="@string/search"
                 android:launchMode="singleTop">

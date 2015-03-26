@@ -1,0 +1,38 @@
+<LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        tools:context=".ui.fragment.SimpleListCommentsFragment"
+        >
+
+    <include
+            android:id="@+id/comment0"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            layout="@layout/list_item_comment"
+            />
+
+    <include
+            android:id="@+id/comment1"
+            layout="@layout/list_item_comment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
+
+    <include
+            android:id="@+id/comment2"
+            layout="@layout/list_item_comment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
+
+    <TextView
+            android:id="@+id/total_comments_number"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            />
+
+</LinearLayout>

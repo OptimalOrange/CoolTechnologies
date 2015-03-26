@@ -10,7 +10,7 @@ import com.optimalorange.cooltechnologies.network.NetworkChecker;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingleton;
 import com.optimalorange.cooltechnologies.storage.sqlite.DBManager;
-import com.optimalorange.cooltechnologies.ui.fragment.ListCommentsFragment;
+import com.optimalorange.cooltechnologies.ui.fragment.SimpleListCommentsFragment;
 import com.umeng.analytics.MobclickAgent;
 
 import org.json.JSONObject;
@@ -389,7 +389,8 @@ public class PlayVideoActivity extends LoginableBaseActivity {
     private void addOthersToNonVideoLayout(Bundle savedInstanceState) {
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.others_container, ListCommentsFragment.newInstance(getVideoId()))
+                    .add(R.id.others_container,
+                            SimpleListCommentsFragment.newInstance(getVideoId()))
                     .commit();
         }
     }

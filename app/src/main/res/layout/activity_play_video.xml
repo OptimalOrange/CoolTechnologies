@@ -6,23 +6,29 @@
         tools:context="com.optimalorange.cooltechnologies.ui.PlayVideoActivity"
         >
 
-    <LinearLayout
-            android:id="@+id/nonVideoLayout"
+    <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
+            android:layout_height="wrap_content"
             >
 
-        <!-- add WebView in code -->
-
-        <FrameLayout
-                android:id="@+id/others_container"
+        <LinearLayout
+                android:id="@+id/nonVideoLayout"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                />
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                >
 
-    </LinearLayout>
+            <!-- add WebView in code -->
+
+            <FrameLayout
+                    android:id="@+id/others_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    />
+
+        </LinearLayout>
+
+    </ScrollView>
 
     <FrameLayout
             android:id="@+id/videoLayout"

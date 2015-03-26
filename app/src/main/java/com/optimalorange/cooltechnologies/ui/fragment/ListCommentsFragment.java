@@ -13,6 +13,7 @@ import com.optimalorange.cooltechnologies.network.RequestsManager;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingleton;
 import com.optimalorange.cooltechnologies.ui.LoginActivity;
+import com.optimalorange.cooltechnologies.ui.view.CommentView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -458,22 +459,16 @@ public class ListCommentsFragment extends SwipeRefreshFragment {
 
         @Override
         public View getView(final int position, View convertView, ViewGroup parent) {
-            ViewHolder vh;
+            CommentView.Holder commentViewHolder;
             if (convertView == null) {
                 convertView = LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.list_item_comment, parent, false);
-                vh = new ViewHolder();
-                vh.mUserName = (TextView) convertView.findViewById(R.id.user_name);
-                vh.mContent = (TextView) convertView.findViewById(R.id.content);
-                vh.mDate = (TextView) convertView.findViewById(R.id.date);
-                convertView.setTag(vh);
+                commentViewHolder = new CommentView.Holder(convertView);
+                convertView.setTag(commentViewHolder);
             } else {
-                vh = (ViewHolder) convertView.getTag();
+                commentViewHolder = (CommentView.Holder) convertView.getTag();
             }
-
-            vh.mUserName.setText(mComments.get(position).getUser().getName());
-            vh.mContent.setText(mComments.get(position).getContent());
-            vh.mDate.setText(mComments.get(position).getPublished());
+            commentViewHolder.updateData(mComments.get(position));
 
             //当滑到末尾的位置时加载更多Video
             if (position == mListComments.size() - 1) {
@@ -481,15 +476,6 @@ public class ListCommentsFragment extends SwipeRefreshFragment {
             }
 
             return convertView;
-        }
-
-        private class ViewHolder {
-
-            TextView mUserName;
-
-            TextView mContent;
-
-            TextView mDate;
         }
 
     }
