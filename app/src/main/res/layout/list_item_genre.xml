@@ -17,7 +17,7 @@
             android:textColor="@color/text_black"
             android:drawableRight="@drawable/ic_chevron_right_black_36dp"
             android:clickable="true"
-            android:background="@drawable/text_view_background_genre_title"
+            android:background="@drawable/clickable_text_view_background"
             />
 
     <LinearLayout

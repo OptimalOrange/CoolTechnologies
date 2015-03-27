@@ -64,6 +64,9 @@
     <string name="check_for_update">检查更新</string>
     <string name="version">当前版本：%s</string>
 
+    <!-- SimpleListCommentsFragment -->
+    <string name="more_comments">所有评论</string>
+
     <!-- fragment_list_comments -->
     <string name="comments_title">评论</string>
     <string name="comments_count">%1$s条评论</string>

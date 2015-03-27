@@ -16,7 +16,6 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import java.beans.IndexedPropertyChangeEvent;
 import java.beans.PropertyChangeEvent;
@@ -41,15 +40,25 @@ public class SimpleListCommentsFragment extends Fragment {
             SimpleListCommentsFragment.class.getName() + ".argument.KEY_VIDEO_ID";
 
 
-    private final Comments mComments = new Comments();
+    private final Comments mComments;
 
-    private final ViewAdapter mViewAdapter = new ViewAdapter(mComments);
+    private final ViewAdapter mViewAdapter;
 
     private String mVideoID;
 
     private String mYoukuClientId;
 
     private RequestsManager mRequestsManager;
+
+    //--------------------------------------------------------------------------
+    // 初始化属性
+    //--------------------------------------------------------------------------
+
+    {
+        mComments = new Comments();
+        mViewAdapter = new ViewAdapter();
+        mComments.addPropertyChangeListener(mViewAdapter);
+    }
 
     /**
      * 用于 创建设置有指定参数的新{@link ListCommentsFragment}实例的 工厂方法
@@ -176,18 +185,6 @@ public class SimpleListCommentsFragment extends Fragment {
             return this;
         }
 
-        public int getTotalCommentsNumber() {
-            return mTotalCommentsNumber;
-        }
-
-        public Comments setTotalCommentsNumber(int totalCommentsNumber) {
-            int oldValue = mTotalCommentsNumber;
-            mTotalCommentsNumber = totalCommentsNumber;
-            mPropertyChangeSupport.firePropertyChange(
-                    "totalCommentsNumber", oldValue, totalCommentsNumber);
-            return this;
-        }
-
         public void addPropertyChangeListener(PropertyChangeListener listener) {
             mPropertyChangeSupport.addPropertyChangeListener(listener);
         }
@@ -203,31 +200,17 @@ public class SimpleListCommentsFragment extends Fragment {
 
         final CommentView.Holder[] mComments = new CommentView.Holder[3];
 
-        TextView mTotalCommentsNumber;
-
         public ViewHolder(final View rootView) {
             mRootView = rootView;
             mComments[0] = new CommentView.Holder(rootView.findViewById(R.id.comment0));
             mComments[1] = new CommentView.Holder(rootView.findViewById(R.id.comment1));
             mComments[2] = new CommentView.Holder(rootView.findViewById(R.id.comment2));
-            mTotalCommentsNumber = (TextView) rootView.findViewById(R.id.total_comments_number);
         }
     }
 
     private static class ViewAdapter implements PropertyChangeListener {
 
         private ViewHolder mViewHolder;
-
-        /**
-         * 创建用于绑定comments中数据的视图适配器。<br/>
-         * <strong>注意</strong>：可{@link #setViewHolder(ViewHolder) set ViewHolder}，但comments不可变。
-         * 若comments变化，请创建本类的新实例。
-         *
-         * @param comments 要绑定到视图中的数据
-         */
-        public ViewAdapter(final Comments comments) {
-            comments.addPropertyChangeListener(this);
-        }
 
         public ViewHolder getViewHolder() {
             return mViewHolder;
@@ -253,9 +236,6 @@ public class SimpleListCommentsFragment extends Fragment {
                     Object newValue = indexedEvent.getNewValue();
                     commentVH.updateData((Comment) newValue);
                     commentVH.mRootView.setVisibility(newValue != null ? View.VISIBLE : View.GONE);
-                    break;
-                case "totalCommentsNumber":
-                    mViewHolder.mTotalCommentsNumber.setText(event.getNewValue().toString());
                     break;
                 default:
                     throw new IllegalArgumentException(

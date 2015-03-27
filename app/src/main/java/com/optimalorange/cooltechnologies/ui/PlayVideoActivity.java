@@ -219,7 +219,7 @@ public class PlayVideoActivity extends LoginableBaseActivity {
                             if (getSupportActionBar() != null) {
                                 getSupportActionBar().show();
                             }
-                            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
                         }
 
                     }

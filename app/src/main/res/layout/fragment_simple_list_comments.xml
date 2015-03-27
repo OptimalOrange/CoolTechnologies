@@ -4,6 +4,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:background="@drawable/clickable_text_view_background"
         tools:context=".ui.fragment.SimpleListCommentsFragment"
         >
 
@@ -29,10 +32,12 @@
             />
 
     <TextView
-            android:id="@+id/total_comments_number"
+            android:id="@+id/more_comments"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:gravity="center"
+            android:textColor="@color/primary"
+            android:text="@string/more_comments"
             />
 
 </LinearLayout>
