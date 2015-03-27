@@ -13,7 +13,7 @@
             android:paddingLeft="@dimen/activity_horizontal_margin"
             android:paddingRight="@dimen/activity_horizontal_margin"
             android:gravity="center_vertical"
-            android:textSize="@dimen/text_size_medium"
+            android:textSize="@dimen/text_size_headline"
             android:textColor="@color/text_black"
             android:drawableRight="@drawable/ic_chevron_right_black_36dp"
             android:clickable="true"

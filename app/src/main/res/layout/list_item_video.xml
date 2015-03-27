@@ -31,7 +31,7 @@
                 android:padding="@dimen/space_3dp"
                 android:singleLine="true"
                 android:ellipsize="end"
-                android:textSize="@dimen/text_size_small"
+                android:textSize="@dimen/text_size_body_dense"
                 android:textColor="@color/text_black"
                 />
 
@@ -43,7 +43,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="@dimen/space_3dp"
-                    android:textSize="@dimen/text_size_micro"
+                    android:textSize="@dimen/text_size_caption_dense"
                     android:textColor="@color/text_black"
                     />
             <TextView
@@ -52,7 +52,7 @@
                     android:layout_height="wrap_content"
                     android:padding="@dimen/space_3dp"
                     android:layout_alignParentRight="true"
-                    android:textSize="@dimen/text_size_micro"
+                    android:textSize="@dimen/text_size_caption_dense"
                     android:textColor="@color/text_black"
                     />
         </RelativeLayout>

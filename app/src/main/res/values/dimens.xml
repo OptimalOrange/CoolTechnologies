@@ -24,11 +24,24 @@
     <dimen name="card_width_min">120dp</dimen>
     <dimen name="card_width_max">200dp</dimen>
 
-    <!-- from http://developer.android.com/design/style/typography.html -->
-    <dimen name="text_size_micro">12sp</dimen>
-    <dimen name="text_size_small">14sp</dimen>
-    <dimen name="text_size_medium">18sp</dimen>
-    <dimen name="text_size_large">22sp</dimen>
+    <!-- from http://www.google.com/design/spec/style/typography.html#typography-standard-styles -->
+    <!-- 注：CJK（中日韩）使用Dense变体 -->
+    <dimen name="text_size_button">14sp</dimen>
+    <dimen name="text_size_caption">12sp</dimen>
+    <dimen name="text_size_caption_dense">11sp</dimen>
+    <dimen name="text_size_body">14sp</dimen>
+    <dimen name="text_size_body_dense">13sp</dimen>
+    <dimen name="text_size_subhead">16sp</dimen>
+    <dimen name="text_size_subhead_dense">15sp</dimen>
+    <dimen name="text_size_input">16sp</dimen>
+    <dimen name="text_size_input_dense">15sp</dimen>
+    <dimen name="text_size_title">20sp</dimen>
+    <dimen name="text_size_title_dense">19sp</dimen>
+    <dimen name="text_size_headline">24sp</dimen>
+    <dimen name="text_size_display1">34sp</dimen>
+    <dimen name="text_size_display2">45sp</dimen>
+    <dimen name="text_size_display3">56sp</dimen>
+    <dimen name="text_size_display4">112sp</dimen>
 
     <dimen name="favorite_item_padding_left_right">15dp</dimen>
     <dimen name="favorite_item_padding_top_bottom">10dp</dimen>

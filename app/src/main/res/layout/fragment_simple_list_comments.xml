@@ -37,6 +37,7 @@
             android:layout_height="48dp"
             android:gravity="center"
             android:textColor="@color/primary"
+            android:textSize="@dimen/text_size_caption_dense"
             android:text="@string/more_comments"
             />
 
