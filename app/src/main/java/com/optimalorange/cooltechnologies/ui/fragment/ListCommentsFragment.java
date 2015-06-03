@@ -152,7 +152,7 @@ public class ListCommentsFragment extends SwipeRefreshFragment {
     /** 请求评论，是用来获取评论的total */
     private JsonObjectRequest buildQueryTotalRequest() {
         JsonObjectRequest totalRequest = new JsonObjectRequest
-                (Request.Method.GET, buildUrl(), null,
+                (Request.Method.GET, buildUrl(),
                         new Response.Listener<JSONObject>() {
 
                             @Override

@@ -5,7 +5,7 @@ import com.umeng.analytics.MobclickAgent;
 
 import android.content.Intent;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * 本应用所有{@link android.app.Activity Activity}的父类。
  */
-public abstract class BaseActivity extends ActionBarActivity {
+public abstract class BaseActivity extends AppCompatActivity {
 
     // Durations for certain animations we use:
     protected static final int HEADER_HIDE_ANIM_DURATION = 300;

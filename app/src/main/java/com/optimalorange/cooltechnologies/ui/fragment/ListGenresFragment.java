@@ -94,7 +94,6 @@ public class ListGenresFragment extends SwipeRefreshFragment {
     private final Request mVideoCategorySchemaRequest = new JsonObjectRequest(
             Request.Method.GET,
             YOUKU_API_SCHEMAS_VIDEO_CATEGORY,
-            null,
             new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject jsonObject) {
