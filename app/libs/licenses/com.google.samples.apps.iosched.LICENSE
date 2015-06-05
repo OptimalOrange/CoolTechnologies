@@ -1,10 +1,6 @@
-Some code is taken from Google's iosched(https://github.com/google/iosched)
-Such as  :
+Notice for :
     BaseActivity.setContentView(int layoutResID)
     BaseActivity.sgetActionBarToolbar()
-    BaseActivity.updateSwipeRefreshProgressBarTop()
-    BaseActivity.onMainContentScrolled(int currentY, int deltaY)
-    BaseActivity.autoShowOrHideActionBar(boolean show)
 ------------------------------------------------------------
 
 

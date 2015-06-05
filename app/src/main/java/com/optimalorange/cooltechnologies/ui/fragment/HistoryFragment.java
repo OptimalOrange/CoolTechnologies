@@ -32,42 +32,33 @@ import java.util.ArrayList;
  */
 public class HistoryFragment extends Fragment {
 
-    private ArrayList<FavoriteBean> favoriteBeans;
-    private FavoriteAdapter adapter;
-
-    private WindowManager windowManager = null;
-
     private View v;
     private ListView favoriteListView;
+    private ArrayList<FavoriteBean> favoriteBeans;
+    private FavoriteAdapter adapter;
+    private VolleySingleton mVolleySingleton;
     private TextView mTvHint;
 
+    private WindowManager windowManager = null;
+    private WindowManager.LayoutParams windowParams = null;
     private View deleteView = null;
+
     private boolean mIsDelButtonCreate;
     private boolean mIsCreated;
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        favoriteBeans = new ArrayList<>(20);
-        adapter = new FavoriteAdapter(
-                getActivity(), favoriteBeans,
-                VolleySingleton.getInstance(getActivity()).getImageLoader());
-
-        windowManager = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         v = inflater.inflate(R.layout.fragment_history, container, false);
         favoriteListView = (ListView) v.findViewById(R.id.favorite_list);
         mTvHint = (TextView) v.findViewById(R.id.favorite_hint);
+        favoriteBeans = DBManager.getInstance(getActivity()).getAllHistory();
         return v;
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mVolleySingleton = VolleySingleton.getInstance(getActivity());
 
         favoriteListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -83,7 +74,7 @@ public class HistoryFragment extends Fragment {
             public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
                 int[] locationInWindow = new int[2];
                 view.getLocationInWindow(locationInWindow);
-                WindowManager.LayoutParams windowParams = new WindowManager.LayoutParams();
+                windowParams = new WindowManager.LayoutParams();
                 windowParams.gravity = Gravity.TOP | Gravity.LEFT;
                 windowParams.x = locationInWindow[0] + view.getWidth() / 2;
                 windowParams.width = WindowManager.LayoutParams.WRAP_CONTENT;
@@ -95,6 +86,7 @@ public class HistoryFragment extends Fragment {
                         | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
                 windowParams.format = PixelFormat.TRANSLUCENT;
                 windowParams.windowAnimations = 0;
+                windowManager = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
                 if (deleteView != null) {
                     windowManager.removeViewImmediate(deleteView);
                 }
@@ -142,6 +134,7 @@ public class HistoryFragment extends Fragment {
             }
         });
 
+        adapter = new FavoriteAdapter(getActivity(), favoriteBeans, mVolleySingleton.getImageLoader());
         favoriteListView.setAdapter(adapter);
         favoriteListView.setVisibility(View.VISIBLE);
         mIsCreated = true;
@@ -165,9 +158,6 @@ public class HistoryFragment extends Fragment {
     public void onDestroyView() {
         mTvHint = null;
         favoriteListView.setAdapter(null);
-        favoriteListView.setOnTouchListener(null);
-        favoriteListView.setOnItemLongClickListener(null);
-        favoriteListView.setOnItemClickListener(null);
         favoriteListView = null;
         v = null;
         super.onDestroyView();

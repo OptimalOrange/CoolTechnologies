@@ -12,7 +12,6 @@
         <item name="colorAccent">@color/accent</item>
         <!-- You can also set colorControlNormal, colorControlActivated
              colorControlHighlight, and colorSwitchThumbNormal. -->
-        <item name="actionBarSize">@dimen/action_bar_height</item>
         <item name="vpiTitlePageIndicatorStyle">@style/CustomTitlePageIndicator</item>
     </style>
 
@@ -33,11 +32,11 @@
     <!-- Indicators styles -->
     <style name="CustomTitlePageIndicator">
         <item name="android:background">@color/primary</item>
-        <item name="topPadding">@dimen/page_indicator_top_padding</item>
-        <item name="footerPadding">@dimen/page_indicator_footer_padding</item>
+        <item name="topPadding">4dp</item>
+        <item name="footerPadding">4dp</item>
         <item name="footerColor">@color/text_white</item>
-        <item name="footerLineHeight">@dimen/page_indicator_footer_line_height</item>
-        <item name="footerIndicatorHeight">@dimen/page_indicator_footer_indicator_height</item>
+        <item name="footerLineHeight">0dp</item>
+        <item name="footerIndicatorHeight">5dp</item>
         <item name="footerIndicatorStyle">triangle</item>
         <item name="android:textColor">@color/text_secondary_white</item>
         <item name="selectedColor">@color/text_white</item>

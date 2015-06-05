@@ -20,9 +20,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.DecelerateInterpolator;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -66,8 +64,6 @@ public class MainActivity extends LoginableBaseActivity {
 
     private ViewPager mPager;
 
-    private int mActionbarHeight;
-
     //--------------------------------------------------------------------------
     // 覆写Activity的生命周期方法
     //--------------------------------------------------------------------------
@@ -102,11 +98,6 @@ public class MainActivity extends LoginableBaseActivity {
         });
         // goto default pager
         mPager.setCurrentItem(DEFAULT_POSITION);
-
-        mActionbarHeight = getResources().getDimensionPixelSize(R.dimen.action_bar_height);
-        int pageIndicatorHeight =
-                getResources().getDimensionPixelSize(R.dimen.page_indicator_height);
-        setProgressBarTop(mActionbarHeight + pageIndicatorHeight, pageIndicatorHeight);
     }
 
     @Override
@@ -131,24 +122,6 @@ public class MainActivity extends LoginableBaseActivity {
         // Serialize the current dropdown position.
         outState.putInt(STATE_SELECTED_NAVIGATION_ITEM, mPager.getCurrentItem());
         super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    protected void onActionBarAutoShowOrHide(boolean shown) {
-        View header = findViewById(R.id.header);
-        if (header != null) {
-            if (shown) {
-                header.animate()
-                        .translationY(0)
-                        .setDuration(HEADER_HIDE_ANIM_DURATION)
-                        .setInterpolator(new DecelerateInterpolator());
-            } else {
-                header.animate()
-                        .translationY(-mActionbarHeight)
-                        .setDuration(HEADER_HIDE_ANIM_DURATION)
-                        .setInterpolator(new DecelerateInterpolator());
-            }
-        }
     }
 
     //--------------------------------------------------------------------------
