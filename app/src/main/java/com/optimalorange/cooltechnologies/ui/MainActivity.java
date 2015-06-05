@@ -9,7 +9,6 @@ import com.optimalorange.cooltechnologies.ui.fragment.PromotionFragment;
 import com.umeng.analytics.AnalyticsConfig;
 import com.umeng.analytics.MobclickAgent;
 import com.umeng.update.UmengUpdateAgent;
-import com.viewpagerindicator.TitlePageIndicator;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -82,20 +81,6 @@ public class MainActivity extends LoginableBaseActivity {
         );
         mPager = (ViewPager) findViewById(R.id.pager);
         mPager.setAdapter(mAdapter);
-        // Bind the indicators to the ViewPager
-        TitlePageIndicator mIndicator = (TitlePageIndicator) findViewById(R.id.indicator);
-        mIndicator.setViewPager(mPager);
-        // setOnPageChangeListener
-        mIndicator.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-            @Override
-            public void onPageSelected(int position) {
-                if (FRAGMENT_IDS_ORDER_BY_POSITION[position] == R.id.fragment_promotion) {
-                    showLoginOrLogoutMenuItem(false);
-                } else {
-                    showLoginOrLogoutMenuItem(true);
-                }
-            }
-        });
         // goto default pager
         mPager.setCurrentItem(DEFAULT_POSITION);
     }
