@@ -9,6 +9,7 @@ import com.android.volley.toolbox.Volley;
 import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.adapter.FavoriteAdapter;
 import com.optimalorange.cooltechnologies.entity.FavoriteBean;
+import com.optimalorange.cooltechnologies.network.DestroyFavoriteRequest;
 import com.optimalorange.cooltechnologies.network.NetworkChecker;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingleton;
@@ -16,15 +17,6 @@ import com.optimalorange.cooltechnologies.ui.LoginableBaseActivity;
 import com.optimalorange.cooltechnologies.ui.PlayVideoActivity;
 import com.umeng.analytics.MobclickAgent;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HTTP;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,9 +25,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -47,8 +36,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
@@ -59,6 +46,8 @@ import java.util.ArrayList;
 public class FavoriteFragment extends SwipeRefreshFragment {
 
     private static final String DEFAULT_CATEGORY_LABEL= "科技";
+
+    private String mYoukuClientId;
 
     private View v;
     private static final String FAVORITE_BASE_URL = "https://openapi.youku.com/v2/videos/favorite/by_me.json";
@@ -75,17 +64,11 @@ public class FavoriteFragment extends SwipeRefreshFragment {
     private ArrayList<FavoriteBean> favoriteBeans;
     private FavoriteAdapter adapter;
 
-    private static final String BASE_FAVORITE_DELETE_URL = "https://openapi.youku.com/v2/videos/favorite/destroy.json";
-    private static final int DELETE_FAVORITE_OK = 0;
-    private static final int DELETE_FAVORITE_ERROR = 1;
     private int page = 1;
     private int total = 0;
     private int currentCount = 0;
     private TextView tvViewMore;
     private View footer;
-
-    private Handler mUiThreadHandler =
-            new Handler(Looper.getMainLooper(), new HandlerCallback(new WeakReference<>(this)));
 
     private final LoginableBaseActivity.OnLoginStatusChangeListener mOnLoginStatusChangeListener =
             new LoginableBaseActivity.OnLoginStatusChangeListener() {
@@ -101,6 +84,14 @@ public class FavoriteFragment extends SwipeRefreshFragment {
             };
 
     private boolean mIsDelButtonCreate;
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        mVolleySingleton = VolleySingleton.getInstance(getActivity());
+        mYoukuClientId = getString(R.string.youku_client_id);
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -126,7 +117,6 @@ public class FavoriteFragment extends SwipeRefreshFragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mVolleySingleton = VolleySingleton.getInstance(getActivity());
         mDefaultSharedPreferencesSingleton =
                 DefaultSharedPreferencesSingleton.getInstance(getActivity());
         ((LoginableBaseActivity) getActivity())
@@ -376,86 +366,70 @@ public class FavoriteFragment extends SwipeRefreshFragment {
             Toast.makeText(getActivity(), R.string.favorite_delete_no_login, Toast.LENGTH_SHORT).show();
             return;
         }
-        final HttpPost request = new HttpPost(BASE_FAVORITE_DELETE_URL);
-        ArrayList<NameValuePair> paramList = new ArrayList<NameValuePair>();
-        BasicNameValuePair param;
-        param = new BasicNameValuePair("client_id", getString(R.string.youku_client_id));
-        paramList.add(param);
-        param = new BasicNameValuePair("access_token", token);
-        paramList.add(param);
-        param = new BasicNameValuePair("video_id", id);
-        paramList.add(param);
-        try {
-            request.setEntity(new UrlEncodedFormEntity(paramList, HTTP.UTF_8));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                HttpClient client = new DefaultHttpClient();
-                try {
-                    HttpResponse response = client.execute(request);
-                    Message msg = new Message();
-                    if (response.getStatusLine().getStatusCode() == 200) {
-                        msg.what = DELETE_FAVORITE_OK;
-                        msg.arg1 = index;
-                        msg.obj = EntityUtils.toString(response.getEntity());
-                        mUiThreadHandler.sendMessage(msg);
-                    } else {
-                        msg.what = DELETE_FAVORITE_ERROR;
-                        mUiThreadHandler.sendMessage(msg);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
+        mVolleySingleton.addToRequestQueue(buildDestroyFavoriteRequest(token, id, index));
     }
 
-    /**
-     * <b>Note</b>：<strong>必须</strong>在UI线程中调用此{@link HandlerCallback}。
-     */
-    private static class HandlerCallback implements Handler.Callback {
+    /** 创建取消收藏的请求 */
+    private DestroyFavoriteRequest buildDestroyFavoriteRequest(
+            String token, String videoId, int videoIndexInListView) {
+        final DestroyFavoriteRequestHandler handler = new DestroyFavoriteRequestHandler(
+                videoIndexInListView, new WeakReference<>(getContext()), new WeakReference<>(this));
+        return new DestroyFavoriteRequest.Builder()
+                .setClient_id(mYoukuClientId)
+                .setVideo_id(videoId)
+                .setAccess_token(token)
+                .setResponseListener(handler)
+                .setErrorListener(handler)
+                .build();
+    }
 
-        private final WeakReference<FavoriteFragment> mOuterClass;
+    private static class DestroyFavoriteRequestHandler
+            implements Response.Listener<JSONObject>, Response.ErrorListener {
 
-        private HandlerCallback(WeakReference<FavoriteFragment> outerClass) {
-            mOuterClass = outerClass;
+        private final int mVideoIndexInListView;
+
+        private final WeakReference<Context> mContextWeakReference;
+
+        private final WeakReference<FavoriteFragment> mOwner;
+
+        private DestroyFavoriteRequestHandler(
+                int videoIndexInListView,
+                WeakReference<Context> contextWeakReference,
+                WeakReference<FavoriteFragment> owner) {
+            mVideoIndexInListView = videoIndexInListView;
+            mContextWeakReference = contextWeakReference;
+            mOwner = owner;
         }
 
         @Override
-        public boolean handleMessage(Message msg) {
-            FavoriteFragment outerClass = mOuterClass.get();
-            if (outerClass == null) {
-                return msg.what == DELETE_FAVORITE_OK || msg.what == DELETE_FAVORITE_ERROR;
-            }
-            switch (msg.what) {
-                case DELETE_FAVORITE_OK:
-                    outerClass.favoriteBeans.remove(msg.arg1);
-                    outerClass.adapter.notifyDataSetChanged();
-                    outerClass.removeWindowView();
-                    Toast.makeText(
-                            outerClass.getActivity(),
-                            outerClass.getString(R.string.favorite_delete_success),
-                            Toast.LENGTH_SHORT)
-                            .show();
-                    if (outerClass.favoriteBeans.size() == 0) {
-                        outerClass.setHint(R.string.favorite_no_fav);
-                    }
-                    return true;
-                case DELETE_FAVORITE_ERROR:
-                    Toast.makeText(
-                            outerClass.getActivity(),
-                            outerClass.getString(R.string.favorite_delete_fail),
-                            Toast.LENGTH_SHORT)
-                            .show();
-                    return true;
-                default:
-                    return false;
+        public void onErrorResponse(VolleyError error) {
+            final Context context = mContextWeakReference.get();
+            if (context != null) {
+                final String message = context.getString(R.string.favorite_delete_fail);
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
             }
         }
+
+        @Override
+        public void onResponse(JSONObject response) {
+            final Context context = mContextWeakReference.get();
+            final FavoriteFragment owner = mOwner.get();
+            if (owner != null) {
+                //TODO add remove video method?
+                owner.favoriteBeans.remove(mVideoIndexInListView);
+                owner.adapter.notifyDataSetChanged();
+                owner.removeWindowView();
+                if (owner.favoriteBeans.size() == 0) {
+                    owner.setHint(R.string.favorite_no_fav);
+                }
+            }
+            if (context != null) {
+                final String message = context.getString(R.string.favorite_delete_success);
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+            }
+        }
+
     }
 
 }
