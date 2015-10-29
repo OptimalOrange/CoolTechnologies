@@ -1,15 +1,13 @@
 package com.optimalorange.cooltechnologies.ui.fragment;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
+import com.optimalorange.cooltechnologies.BuildConfig;
 import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.adapter.FavoriteAdapter;
 import com.optimalorange.cooltechnologies.entity.FavoriteBean;
 import com.optimalorange.cooltechnologies.network.DestroyFavoriteRequest;
+import com.optimalorange.cooltechnologies.network.GetMyFavoriteRequest;
 import com.optimalorange.cooltechnologies.network.NetworkChecker;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingleton;
@@ -38,6 +36,8 @@ import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Created by WANGZHENGZE on 2014/11/20.
@@ -50,7 +50,6 @@ public class FavoriteFragment extends SwipeRefreshFragment {
     private String mYoukuClientId;
 
     private View v;
-    private static final String FAVORITE_BASE_URL = "https://openapi.youku.com/v2/videos/favorite/by_me.json";
     private ListView favoriteListView;
     private VolleySingleton mVolleySingleton;
     private DefaultSharedPreferencesSingleton mDefaultSharedPreferencesSingleton;
@@ -263,59 +262,13 @@ public class FavoriteFragment extends SwipeRefreshFragment {
         if (favoriteListView.getVisibility() == View.GONE) {
             setHint(R.string.favorite_new_loading);
         }
-        String token = mDefaultSharedPreferencesSingleton.retrieveString("access_token", "");
         if (mDefaultSharedPreferencesSingleton.hasLoggedIn()) {
             if (!mNetworkChecker.isConnected()) {
                 setHint(R.string.favorite_hint_no_net);
                 return;
             }
-            RequestQueue requestQueue = Volley.newRequestQueue(getActivity());
-            String url = FAVORITE_BASE_URL + "?client_id=" + getString(R.string.youku_client_id) + "&access_token=" + token + "&page=" + page + "&count=10";
-            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject jsonObject) {
-                    try {
-                        total = jsonObject.getInt("total");
-                        if (total != 0) {
-                            JSONArray videoArray = jsonObject.getJSONArray("videos");
-                            int pageCount = videoArray.length();
-                            currentCount += pageCount;
-                            if (currentCount == total) {
-                                tvViewMore.setEnabled(false);
-                                tvViewMore.setText(getString(R.string.favorite_view_more_last));
-                            } else {
-                                tvViewMore.setEnabled(true);
-                                tvViewMore.setText(getString(R.string.favorite_view_more));
-                                page++;
-                            }
-                            for (int i = 0; i < videoArray.length(); i++) {
-                                JSONObject itemObject = videoArray.getJSONObject(i);
-                                if(itemObject.getString("category").equals(DEFAULT_CATEGORY_LABEL)){
-                                    FavoriteBean bean = new FavoriteBean(itemObject);
-                                    favoriteBeans.add(bean);
-                                }
-                            }
-                            adapter.notifyDataSetChanged();
-                            favoriteListView.setVisibility(View.VISIBLE);
-                            if (mTvHint.getVisibility() == View.VISIBLE) {
-                                mTvHint.setVisibility(View.GONE);
-                            }
-                        } else {
-                            setHint(R.string.favorite_no_fav);
-                        }
-
-                        setRefreshing(false);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError volleyError) {
-                    volleyError.printStackTrace();
-                }
-            });
-            requestQueue.add(jsonObjectRequest);
+            String token = mDefaultSharedPreferencesSingleton.retrieveString("access_token", "");
+            mVolleySingleton.addToRequestQueue(buildGetMyFavoriteRequest(token, page, 10));
         } else {
             setHint(R.string.favorite_hint_no_login);
         }
@@ -370,6 +323,19 @@ public class FavoriteFragment extends SwipeRefreshFragment {
         mVolleySingleton.addToRequestQueue(buildDestroyFavoriteRequest(token, id, index));
     }
 
+    private GetMyFavoriteRequest buildGetMyFavoriteRequest(String token, int page, int count) {
+        final GetMyFavoriteRequestHandler handler =
+                new GetMyFavoriteRequestHandler(new WeakReference<>(this));
+        return new GetMyFavoriteRequest.Builder()
+                .setClient_id(mYoukuClientId)
+                .setAccess_token(token)
+                .setPage(page)
+                .setCount(count)
+                .setResponseListener(handler)
+                .setErrorListener(handler)
+                .build();
+    }
+
     /** 创建取消收藏的请求 */
     private DestroyFavoriteRequest buildDestroyFavoriteRequest(
             String token, String videoId, int videoIndexInListView) {
@@ -382,6 +348,93 @@ public class FavoriteFragment extends SwipeRefreshFragment {
                 .setResponseListener(handler)
                 .setErrorListener(handler)
                 .build();
+    }
+
+    private static class GetMyFavoriteRequestHandler
+            implements Response.Listener<JSONObject>, Response.ErrorListener {
+
+        private final WeakReference<FavoriteFragment> mOwner;
+
+        private GetMyFavoriteRequestHandler(WeakReference<FavoriteFragment> owner) {
+            mOwner = owner;
+        }
+
+        @Override
+        public void onErrorResponse(VolleyError error) {
+            new RuntimeException(error).printStackTrace();
+
+            //TODO stop refreshing & change hint
+        }
+
+        @Override
+        public void onResponse(JSONObject response) {
+            final FavoriteFragment owner = mOwner.get();
+            if (owner != null) {
+                try {
+                    doHandle(response, owner);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        private static void doHandle(JSONObject response, FavoriteFragment owner)
+                throws JSONException {
+            FavoriteInfo newFavoriteInfo = convertToFavoriteInfo(response);
+
+            //TODO add addFavoriteInfo method?
+            owner.total = newFavoriteInfo.total;
+            if (newFavoriteInfo.total != 0) {
+                owner.currentCount += newFavoriteInfo.currentReadCountIncludingUnneeded;
+                if (owner.currentCount == owner.total) {
+                    owner.tvViewMore.setEnabled(false);
+                    owner.tvViewMore.setText(owner.getString(R.string.favorite_view_more_last));
+                } else {
+                    if (BuildConfig.DEBUG && owner.currentCount >= owner.total) {
+                        throw new AssertionError("owner.currentCount < owner.total");
+                    }
+                    owner.tvViewMore.setEnabled(true);
+                    owner.tvViewMore.setText(owner.getString(R.string.favorite_view_more));
+                    owner.page++;//TODO check newFavoriteInfo.currentPage?
+                }
+
+                owner.favoriteBeans.addAll(newFavoriteInfo.hasRead);
+                owner.adapter.notifyDataSetChanged();
+                owner.favoriteListView.setVisibility(View.VISIBLE);
+                if (owner.mTvHint.getVisibility() == View.VISIBLE) {
+                    owner.mTvHint.setVisibility(View.GONE);
+                }
+            } else {
+                owner.setHint(R.string.favorite_no_fav);
+            }
+
+            owner.setRefreshing(false);
+        }
+
+        private static FavoriteInfo convertToFavoriteInfo(JSONObject jsonObject)
+                throws JSONException {
+            FavoriteInfo favoriteInfo = new FavoriteInfo();
+            favoriteInfo.total = jsonObject.getInt("total");
+            favoriteInfo.currentPage = jsonObject.getInt("page");
+            JSONArray videoArray = jsonObject.getJSONArray("videos");
+            favoriteInfo.currentReadCountIncludingUnneeded = videoArray.length();
+            favoriteInfo.hasRead = convertNeededVideos(videoArray);
+            return favoriteInfo;
+        }
+
+        private static List<FavoriteBean> convertNeededVideos(JSONArray videoArray)
+                throws JSONException {
+            List<FavoriteBean> result = new LinkedList<>();
+            for (int i = 0; i < videoArray.length(); i++) {
+                JSONObject itemObject = videoArray.getJSONObject(i);
+                if (itemObject.getString("category").equals(DEFAULT_CATEGORY_LABEL)) {
+                    FavoriteBean bean = new FavoriteBean(itemObject);
+                    result.add(bean);
+                }
+            }
+            return result;
+        }
+
     }
 
     private static class DestroyFavoriteRequestHandler
@@ -430,6 +483,17 @@ public class FavoriteFragment extends SwipeRefreshFragment {
             }
         }
 
+    }
+
+    private static class FavoriteInfo {
+
+        int total;
+
+        int currentPage;
+
+        int currentReadCountIncludingUnneeded;
+
+        List<FavoriteBean> hasRead;
     }
 
 }
