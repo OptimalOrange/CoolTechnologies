@@ -21,14 +21,10 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.PixelFormat;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -57,9 +53,6 @@ public class FavoriteFragment extends SwipeRefreshFragment {
     private TextView mTvHint;
     private boolean mIsCreated = false;
 
-    private WindowManager windowManager = null;
-    private WindowManager.LayoutParams windowParams = null;
-    private View deleteView = null;
     private ArrayList<FavoriteBean> favoriteBeans;
     private FavoriteAdapter adapter;
 
@@ -81,8 +74,6 @@ public class FavoriteFragment extends SwipeRefreshFragment {
                     }
                 }
             };
-
-    private boolean mIsDelButtonCreate;
 
     @Override
     public void onAttach(Context context) {
@@ -150,65 +141,6 @@ public class FavoriteFragment extends SwipeRefreshFragment {
         favoriteListView.setAdapter(adapter);
         getNewData();
         mIsCreated = true;
-        favoriteListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
-                int[] locationInWindow = new int[2];
-                view.getLocationInWindow(locationInWindow);
-                windowParams = new WindowManager.LayoutParams();
-                windowParams.gravity = Gravity.TOP | Gravity.LEFT;
-                windowParams.x = locationInWindow[0] + view.getWidth() / 2;
-                windowParams.width = WindowManager.LayoutParams.WRAP_CONTENT;
-                windowParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
-                //添加属性FLAG_WATCH_OUTSIDE_TOUCH，用于监听窗口外Touch事件
-                windowParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                        | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                        | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                        | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
-                windowParams.format = PixelFormat.TRANSLUCENT;
-                windowParams.windowAnimations = 0;
-                windowManager = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
-                if (deleteView != null) {
-                    windowManager.removeViewImmediate(deleteView);
-                }
-                deleteView = LayoutInflater.from(getActivity()).inflate(R.layout.ll_favorite_delete, null);
-                deleteView.measure(0, 0);
-                int deleteViewHeight = deleteView.getMeasuredHeight();
-                windowParams.y = locationInWindow[1] - deleteViewHeight;
-                deleteView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        sendDeleteRequest(favoriteBeans.get(position).videoId, position);
-                    }
-                });
-                windowManager.addView(deleteView, windowParams);
-                return true;
-            }
-        });
-
-        favoriteListView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-
-
-                if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    if (deleteView == null) {
-                        mIsDelButtonCreate = true;
-                    } else {
-                        mIsDelButtonCreate = false;
-                        return true;
-                    }
-                }
-
-                if ((event.getAction() == MotionEvent.ACTION_UP
-                        || event.getAction() == MotionEvent.ACTION_MOVE) && deleteView != null
-                        && !mIsDelButtonCreate) {
-                    removeWindowView();
-                    return true;
-                }
-                return false;
-            }
-        });
     }
 
     @Override
@@ -240,13 +172,6 @@ public class FavoriteFragment extends SwipeRefreshFragment {
     public void onDestroy() {
         mNetworkChecker = null;
         super.onDestroy();
-    }
-
-    private void removeWindowView() {
-        if (windowManager != null && deleteView != null) {
-            windowManager.removeViewImmediate(deleteView);
-            deleteView = null;
-        }
     }
 
     private void getNewData() {
@@ -309,6 +234,7 @@ public class FavoriteFragment extends SwipeRefreshFragment {
         }
     }
 
+    //TODO add delete feathure on UI
     private void sendDeleteRequest(String id, final int index) {
         if (!mNetworkChecker.isConnected()) {
             Toast.makeText(getActivity(), R.string.favorite_delete_no_net, Toast.LENGTH_SHORT).show();
@@ -472,7 +398,6 @@ public class FavoriteFragment extends SwipeRefreshFragment {
                 //TODO add remove video method?
                 owner.favoriteBeans.remove(mVideoIndexInListView);
                 owner.adapter.notifyDataSetChanged();
-                owner.removeWindowView();
                 if (owner.favoriteBeans.size() == 0) {
                     owner.setHint(R.string.favorite_no_fav);
                 }

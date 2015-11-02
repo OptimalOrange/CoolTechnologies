@@ -29,7 +29,6 @@
     <string name="favorite_delete_no_login">没有登录不能删除收藏哦~~</string>
     <string name="favorite_hint_no_net">没有网络看不到收藏的啦~~点我可以刷新</string>
     <string name="favorite_delete_no_net">没有网络不能删除收藏的啦~~</string>
-    <string name="favorite_delete">删除</string>
     <string name="favorite_delete_success">删除收藏成功</string>
     <string name="history_delete_success">删除历史记录成功</string>
     <string name="favorite_delete_fail">删除收藏失败</string>
