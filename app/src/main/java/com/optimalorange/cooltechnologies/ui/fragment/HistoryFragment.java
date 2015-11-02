@@ -48,8 +48,8 @@ public class HistoryFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         v = inflater.inflate(R.layout.fragment_history, container, false);
-        favoriteListView = (ListView) v.findViewById(R.id.favorite_list);
-        mTvHint = (TextView) v.findViewById(R.id.favorite_hint);
+        favoriteListView = (ListView) v.findViewById(R.id.favorites);
+        mTvHint = (TextView) v.findViewById(R.id.main_hint);
         return v;
     }
 
