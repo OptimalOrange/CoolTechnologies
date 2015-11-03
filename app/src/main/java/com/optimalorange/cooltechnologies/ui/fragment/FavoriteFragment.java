@@ -2,9 +2,7 @@ package com.optimalorange.cooltechnologies.ui.fragment;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.optimalorange.cooltechnologies.BuildConfig;
 import com.optimalorange.cooltechnologies.R;
-import com.optimalorange.cooltechnologies.adapter.FavoriteAdapter;
 import com.optimalorange.cooltechnologies.entity.FavoriteBean;
 import com.optimalorange.cooltechnologies.network.DestroyFavoriteRequest;
 import com.optimalorange.cooltechnologies.network.GetMyFavoriteRequest;
@@ -12,7 +10,7 @@ import com.optimalorange.cooltechnologies.network.NetworkChecker;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingleton;
 import com.optimalorange.cooltechnologies.ui.LoginableBaseActivity;
-import com.optimalorange.cooltechnologies.ui.PlayVideoActivity;
+import com.optimalorange.cooltechnologies.ui.adapter.FavoritesAdapter;
 import com.umeng.analytics.MobclickAgent;
 
 import org.json.JSONArray;
@@ -20,18 +18,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -53,21 +49,10 @@ public class FavoriteFragment extends SwipeRefreshFragment {
 
     private boolean mIsCreated = false;
 
-    private ArrayList<FavoriteBean> favoriteBeans;
-
-    private FavoriteAdapter adapter;
-
-    private int page = 1;
-
-    private int total = 0;
-
-    private int currentCount = 0;
+    private final FavoritesAdapter adapter = new FavoritesAdapter();
 
     private ViewHolder vh;
 
-    View footer;
-
-    TextView moreHint;
 
     private final LoginableBaseActivity.OnLoginStatusChangeListener mOnLoginStatusChangeListener =
             new LoginableBaseActivity.OnLoginStatusChangeListener() {
@@ -101,8 +86,6 @@ public class FavoriteFragment extends SwipeRefreshFragment {
             LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_favorite, container, false);
         vh = new ViewHolder(rootView);
-        footer = inflater.inflate(R.layout.list_item_favorite_footer, vh.favorites, false);
-        moreHint = (TextView) footer.findViewById(R.id.more_hint);
         return rootView;
     }
 
@@ -125,27 +108,7 @@ public class FavoriteFragment extends SwipeRefreshFragment {
         }
 
         vh.favorites.setVisibility(View.GONE);
-        vh.favorites.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(getActivity(), PlayVideoActivity.class);
-                intent.putExtra(PlayVideoActivity.EXTRA_KEY_VIDEO, favoriteBeans.get(position));
-                startActivity(intent);
-            }
-        });
-
-        favoriteBeans = new ArrayList<>();
-        adapter = new FavoriteAdapter(
-                getActivity(), favoriteBeans, mVolleySingleton.getImageLoader());
-
-        moreHint.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ((TextView) v).setText(getString(R.string.favorite_view_more_loading));
-                getJsonData();
-            }
-        });
-        vh.favorites.addFooterView(footer);
+        vh.favorites.setLayoutManager(new LinearLayoutManager(vh.favorites.getContext()));
         vh.favorites.setAdapter(adapter);
         getNewData();
         mIsCreated = true;
@@ -167,8 +130,6 @@ public class FavoriteFragment extends SwipeRefreshFragment {
     public void onDestroyView() {
         ((LoginableBaseActivity) getActivity())
                 .removeLoginStatusChangeListener(mOnLoginStatusChangeListener);
-        moreHint = null;
-        footer = null;
         vh.favorites.setAdapter(null);
         vh = null;
         super.onDestroyView();
@@ -181,11 +142,8 @@ public class FavoriteFragment extends SwipeRefreshFragment {
     }
 
     private void getNewData() {
-        page = 1;
-        total = 0;
-        currentCount = 0;
-        favoriteBeans.clear();
-        adapter.notifyDataSetChanged();
+        adapter.getDataset().reset();
+
         getJsonData();
     }
 
@@ -199,7 +157,13 @@ public class FavoriteFragment extends SwipeRefreshFragment {
                 return;
             }
             String token = mDefaultSharedPreferencesSingleton.retrieveString("access_token", "");
-            mVolleySingleton.addToRequestQueue(buildGetMyFavoriteRequest(token, page, 10));
+            int nextPage;
+            if (adapter.getDataset().getState() == FavoritesAdapter.Dataset.State.UNINITIALIZED) {
+                nextPage = 1;
+            } else {
+                nextPage = adapter.getDataset().getCurrentPage() + 1;
+            }
+            mVolleySingleton.addToRequestQueue(buildGetMyFavoriteRequest(token, nextPage, 10));
         } else {
             setHint(R.string.favorite_hint_no_login);
         }
@@ -215,6 +179,11 @@ public class FavoriteFragment extends SwipeRefreshFragment {
                 getNewData();
             }
         });
+    }
+
+    private void hideHint() {
+        vh.mainHint.setVisibility(View.GONE);
+        vh.favorites.setVisibility(View.VISIBLE);
     }
 
 
@@ -312,51 +281,25 @@ public class FavoriteFragment extends SwipeRefreshFragment {
                     e.printStackTrace();
                 }
                 //TODO stop refreshing & change hint
+                owner.setRefreshing(false);
             }
         }
 
         private static void doHandle(JSONObject response, FavoriteFragment owner)
                 throws JSONException {
-            FavoriteInfo newFavoriteInfo = convertToFavoriteInfo(response);
-
-            //TODO add addFavoriteInfo method?
-            owner.total = newFavoriteInfo.total;
-            if (newFavoriteInfo.total != 0) {
-                owner.currentCount += newFavoriteInfo.currentReadCountIncludingUnneeded;
-                if (owner.currentCount == owner.total) {
-                    owner.moreHint.setEnabled(false);
-                    owner.moreHint.setText(owner.getString(R.string.favorite_view_more_last));
-                } else {
-                    if (BuildConfig.DEBUG && owner.currentCount >= owner.total) {
-                        throw new AssertionError("owner.currentCount < owner.total");
-                    }
-                    owner.moreHint.setEnabled(true);
-                    owner.moreHint.setText(owner.getString(R.string.favorite_view_more));
-                    owner.page++;//TODO check newFavoriteInfo.currentPage?
-                }
-
-                owner.favoriteBeans.addAll(newFavoriteInfo.hasRead);
-                owner.adapter.notifyDataSetChanged();
-                owner.vh.favorites.setVisibility(View.VISIBLE);
-                if (owner.vh.mainHint.getVisibility() == View.VISIBLE) {
-                    owner.vh.mainHint.setVisibility(View.GONE);
-                }
-            } else {
-                owner.setHint(R.string.favorite_no_fav);
-            }
-
-            owner.setRefreshing(false);
+            owner.hideHint();
+            owner.adapter.getDataset().add(convertToFavoriteInfo(response));
         }
 
-        private static FavoriteInfo convertToFavoriteInfo(JSONObject jsonObject)
+        private static FavoritesAdapter.Favorites convertToFavoriteInfo(JSONObject jsonObject)
                 throws JSONException {
-            FavoriteInfo favoriteInfo = new FavoriteInfo();
-            favoriteInfo.total = jsonObject.getInt("total");
-            favoriteInfo.currentPage = jsonObject.getInt("page");
+            FavoritesAdapter.Favorites favorites = new FavoritesAdapter.Favorites();
+            favorites.setTotal(jsonObject.getInt("total"));
+            favorites.setCurrentPage(jsonObject.getInt("page"));
             JSONArray videoArray = jsonObject.getJSONArray("videos");
-            favoriteInfo.currentReadCountIncludingUnneeded = videoArray.length();
-            favoriteInfo.hasRead = convertNeededVideos(videoArray);
-            return favoriteInfo;
+            favorites.setCurrentReadCountIncludingUnneeded(videoArray.length());
+            favorites.setInterestingFavorites(convertNeededVideos(videoArray));
+            return favorites;
         }
 
         private static List<FavoriteBean> convertNeededVideos(JSONArray videoArray)
@@ -406,12 +349,7 @@ public class FavoriteFragment extends SwipeRefreshFragment {
             final Context context = mContextWeakReference.get();
             final FavoriteFragment owner = mOwner.get();
             if (owner != null) {
-                //TODO add remove video method?
-                owner.favoriteBeans.remove(mVideoIndexInListView);
-                owner.adapter.notifyDataSetChanged();
-                if (owner.favoriteBeans.size() == 0) {
-                    owner.setHint(R.string.favorite_no_fav);
-                }
+                owner.adapter.getDataset().remove(mVideoIndexInListView);
             }
             if (context != null) {
                 final String message = context.getString(R.string.favorite_delete_success);
@@ -421,25 +359,14 @@ public class FavoriteFragment extends SwipeRefreshFragment {
 
     }
 
-    private static class FavoriteInfo {
-
-        int total;
-
-        int currentPage;
-
-        int currentReadCountIncludingUnneeded;
-
-        List<FavoriteBean> hasRead;
-    }
-
     static class ViewHolder {
 
-        ListView favorites;
+        RecyclerView favorites;
 
         TextView mainHint;
 
         private ViewHolder(View root) {
-            favorites = (ListView) root.findViewById(R.id.favorites);
+            favorites = (RecyclerView) root.findViewById(R.id.favorites);
             mainHint = (TextView) root.findViewById(R.id.main_hint);
         }
     }
