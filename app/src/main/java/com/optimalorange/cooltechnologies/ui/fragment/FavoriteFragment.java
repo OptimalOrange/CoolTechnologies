@@ -51,7 +51,6 @@ import gq.baijie.classbasedviewadapter.android.adapter.ViewHolderFactoryRegister
  * 收藏
  */
 //TODO set click listener
-//TODO set image
 public class FavoriteFragment extends SwipeRefreshFragment {
 
     private static final String DEFAULT_CATEGORY_LABEL = "科技";
@@ -398,10 +397,10 @@ public class FavoriteFragment extends SwipeRefreshFragment {
         private static Favorite convertToFavorite(JSONObject jsonObject) throws JSONException {
             Favorite result = new Favorite();
             result.title = jsonObject.getString("title");
-//            link = jsonObject.getString("link");
-//            imageUrl = jsonObject.getString("thumbnail");
+            result.link = jsonObject.getString("link");
+            result.thumbnail = jsonObject.getString("thumbnail");
             result.duration = jsonObject.getString("duration");
-//            videoId = jsonObject.getString("id");
+            result.videoId = jsonObject.getString("id");
             return result;
         }
 

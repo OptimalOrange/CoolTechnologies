@@ -1,6 +1,8 @@
 package com.optimalorange.cooltechnologies.ui.viewholder;
 
+import com.android.volley.toolbox.ImageLoader;
 import com.optimalorange.cooltechnologies.R;
+import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.optimalorange.cooltechnologies.ui.entity.Favorite;
 
 import android.support.v7.widget.RecyclerView;
@@ -43,7 +45,14 @@ public class RecyclerFavoriteViewHolder extends RecyclerView.ViewHolder {
         public void bindViewHolder(RecyclerFavoriteViewHolder holder, Favorite value) {
             holder.title.setText(value.title);
             holder.duration.setText(value.duration);
-            //TODO image
+
+            final ImageLoader.ImageListener imageListener = ImageLoader.getImageListener(
+                    holder.thumbnail,
+                    R.drawable.ic_image_view_placeholder,
+                    R.drawable.ic_image_view_placeholder
+            );
+            VolleySingleton.getInstance(holder.itemView.getContext()).getImageLoader()
+                    .get(value.thumbnail, imageListener);
         }
 
     }
