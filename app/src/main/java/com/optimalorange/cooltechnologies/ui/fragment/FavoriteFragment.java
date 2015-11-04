@@ -491,7 +491,8 @@ public class FavoriteFragment extends SwipeRefreshFragment {
 
         private FavoriteFooter getFavoriteFooter(int position) {
             if (BuildConfig.DEBUG) {
-                if (position != getNonNullFavorites().getInterestingFavorites().size()) {
+                // This if block will be auto deleted when release
+                if (position != getNonNullFavorites().getInterestingFavorites().size()) { //NOPMD
                     throw new IllegalStateException();
                 }
             }
@@ -556,7 +557,8 @@ public class FavoriteFragment extends SwipeRefreshFragment {
                 return true;
             } else {
                 if (BuildConfig.DEBUG) {
-                    if (total < 0) {
+                    // This if block will be auto deleted when release
+                    if (total < 0) { //NOPMD
                         throw new AssertionError("total < 0");
                     }
                 }
