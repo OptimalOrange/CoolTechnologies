@@ -98,6 +98,12 @@ public class FavoriteFragment extends SwipeRefreshFragment {
         empty.hint = getString(R.string.favorite_no_fav);
         haveMoreFooter.hint = getString(R.string.favorite_view_more);
         noMoreFooter.hint = getString(R.string.favorite_view_more_last);
+        haveMoreFooter.listener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getJsonData();
+            }
+        };
         mLoadingDataSet = Collections.singletonList(loading);
         mFavoritesDataSet = new FavoritesDataSet();
         mFavoritesDataSet.empty = empty;
@@ -222,6 +228,7 @@ public class FavoriteFragment extends SwipeRefreshFragment {
         getJsonData();
     }
 
+    //TODO 避免重复发送
     public void getJsonData() {
         if (vh.favorites.getVisibility() == View.GONE) {
             setHint(R.string.favorite_new_loading);

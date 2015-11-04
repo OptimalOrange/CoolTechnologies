@@ -36,6 +36,7 @@ public class RecyclerFavoriteFooterViewHolder extends RecyclerView.ViewHolder {
         @Override
         public void bindViewHolder(RecyclerFavoriteFooterViewHolder holder, FavoriteFooter value) {
             holder.hint.setText(value.hint);
+            holder.hint.setOnClickListener(value.listener);
         }
 
     }
