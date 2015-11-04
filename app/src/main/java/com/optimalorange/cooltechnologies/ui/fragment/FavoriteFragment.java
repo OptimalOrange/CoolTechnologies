@@ -553,7 +553,13 @@ public class FavoriteFragment extends SwipeRefreshFragment {
 
 
         public boolean allRead() {
-            return currentReadCountIncludingUnneeded == total;
+            if (BuildConfig.DEBUG) {
+                // This if block will be auto deleted when release
+                if (currentReadCountIncludingUnneeded > total) { //NOPMD
+                    throw new AssertionError("currentReadCountIncludingUnneeded > total");
+                }
+            }
+            return currentReadCountIncludingUnneeded >= total;
         }
 
         public boolean isEmpty() {
