@@ -471,9 +471,11 @@ public class FavoriteFragment extends SwipeRefreshFragment {
 
         @Override
         public int size() {
+            // getNonNullFavorites().isEmpty() 时，get(0)为empty；否则，最后有某种footer
             return getNonNullFavorites().getInterestingFavorites().size() + 1;
         }
 
+        //TODO 改善
         @Override
         public Object get(int position) {
             final List<Favorite> interestingFavorites =
@@ -551,7 +553,6 @@ public class FavoriteFragment extends SwipeRefreshFragment {
             this.interestingFavorites = interestingFavorites;
         }
 
-
         public boolean allRead() {
             if (BuildConfig.DEBUG) {
                 // This if block will be auto deleted when release
@@ -572,7 +573,7 @@ public class FavoriteFragment extends SwipeRefreshFragment {
                         throw new AssertionError("total < 0");
                     }
                 }
-                // ------------------------- test this trick -----------------------
+                //TODO ------------------------- test this trick -----------------------
                 return allRead() && getInterestingFavorites().isEmpty();
             }
         }
@@ -590,21 +591,31 @@ public class FavoriteFragment extends SwipeRefreshFragment {
             this.currentPage = currentPage;
         }
 
+        /**
+         * 危险：不安全地影响状态
+         */
         public void setCurrentReadCountIncludingUnneeded(int currentReadCountIncludingUnneeded) {
             this.currentReadCountIncludingUnneeded = currentReadCountIncludingUnneeded;
         }
 
+        /**
+         * 危险：不安全地影响状态
+         */
         public void setTotal(int total) {
             this.total = total;
         }
 
-        //TODO check currentPage + 1 != added.currentPage?
-        //TODO check total != added.total?
         //TODO check illegal argument
         //TODO check state
         public void add(Favorites added) {
+            //TODO check total != added.total?
             total = added.total;
+
+            //TODO check currentPage + 1 != added.currentPage?
+            //TODO 处理 多请求并发条件下的 乱序问题
             currentPage = added.currentPage;
+
+            //TODO 重复response？
             currentReadCountIncludingUnneeded += added.currentReadCountIncludingUnneeded;
             interestingFavorites.addAll(added.getInterestingFavorites());
         }
@@ -629,6 +640,7 @@ public class FavoriteFragment extends SwipeRefreshFragment {
             favorites = (RecyclerView) root.findViewById(R.id.favorites);
             mainHint = (TextView) root.findViewById(R.id.main_hint);
         }
+
     }
 
 }
