@@ -2,15 +2,22 @@ package com.optimalorange.cooltechnologies.ui.fragment;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.optimalorange.cooltechnologies.BuildConfig;
 import com.optimalorange.cooltechnologies.R;
-import com.optimalorange.cooltechnologies.entity.FavoriteBean;
 import com.optimalorange.cooltechnologies.network.DestroyFavoriteRequest;
 import com.optimalorange.cooltechnologies.network.GetMyFavoriteRequest;
 import com.optimalorange.cooltechnologies.network.NetworkChecker;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingleton;
 import com.optimalorange.cooltechnologies.ui.LoginableBaseActivity;
-import com.optimalorange.cooltechnologies.ui.adapter.FavoritesAdapter;
+import com.optimalorange.cooltechnologies.ui.entity.Empty;
+import com.optimalorange.cooltechnologies.ui.entity.Favorite;
+import com.optimalorange.cooltechnologies.ui.entity.FavoriteFooter;
+import com.optimalorange.cooltechnologies.ui.entity.Loading;
+import com.optimalorange.cooltechnologies.ui.viewholder.RecyclerEmptyViewHolder;
+import com.optimalorange.cooltechnologies.ui.viewholder.RecyclerFavoriteFooterViewHolder;
+import com.optimalorange.cooltechnologies.ui.viewholder.RecyclerFavoriteViewHolder;
+import com.optimalorange.cooltechnologies.ui.viewholder.RecyclerLoadingViewHolder;
 import com.umeng.analytics.MobclickAgent;
 
 import org.json.JSONArray;
@@ -19,6 +26,8 @@ import org.json.JSONObject;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -28,13 +37,21 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+
+import gq.baijie.classbasedviewadapter.android.adapter.ClassBasedRecyclerViewAdapter;
+import gq.baijie.classbasedviewadapter.android.adapter.DataSet;
+import gq.baijie.classbasedviewadapter.android.adapter.ViewHolderFactoryRegister;
 
 /**
  * Created by WANGZHENGZE on 2014/11/20.
  * 收藏
  */
+//TODO set click listener
+//TODO set image
 public class FavoriteFragment extends SwipeRefreshFragment {
 
     private static final String DEFAULT_CATEGORY_LABEL = "科技";
@@ -49,7 +66,11 @@ public class FavoriteFragment extends SwipeRefreshFragment {
 
     private boolean mIsCreated = false;
 
-    private final FavoritesAdapter adapter = new FavoritesAdapter();
+    private List<Loading> mLoadingDataSet;
+
+    private FavoritesDataSet mFavoritesDataSet;
+
+    private final ClassBasedRecyclerViewAdapter adapter = new ClassBasedRecyclerViewAdapter();
 
     private ViewHolder vh;
 
@@ -67,6 +88,58 @@ public class FavoriteFragment extends SwipeRefreshFragment {
                 }
             };
 
+
+    private void initState() {
+        Loading loading = new Loading();
+        Empty empty = new Empty();
+        FavoriteFooter haveMoreFooter = new FavoriteFooter();
+        FavoriteFooter noMoreFooter = new FavoriteFooter();
+        loading.hint = getString(R.string.favorite_new_loading);
+        empty.hint = getString(R.string.favorite_no_fav);
+        haveMoreFooter.hint = getString(R.string.favorite_view_more);
+        noMoreFooter.hint = getString(R.string.favorite_view_more_last);
+        mLoadingDataSet = Collections.singletonList(loading);
+        mFavoritesDataSet = new FavoritesDataSet();
+        mFavoritesDataSet.empty = empty;
+        mFavoritesDataSet.haveMoreFooter = haveMoreFooter;
+        mFavoritesDataSet.noMoreFooter = noMoreFooter;
+
+        final ViewHolderFactoryRegister register = adapter.getRegister();
+        register.registerViewHolderFactory(new RecyclerLoadingViewHolder.Factory());
+        register.registerViewHolderFactory(new RecyclerEmptyViewHolder.Factory());
+        register.registerViewHolderFactory(new RecyclerFavoriteViewHolder.Factory());
+        register.registerViewHolderFactory(new RecyclerFavoriteFooterViewHolder.Factory());
+
+        adapter.setDataSet(mLoadingDataSet);
+        adapter.notifyDataSetChanged();
+    }
+
+    public void resetState() {
+        adapter.setDataSet(mLoadingDataSet);
+        adapter.notifyDataSetChanged();
+        mFavoritesDataSet.unsetFavorites();
+    }
+
+    public void addFavorites(Favorites added) {
+        if (mFavoritesDataSet.favorites != null) {
+            mFavoritesDataSet.addFavorites(added, adapter);
+        } else {
+            final Favorites newFavorites = new Favorites(new ArrayList<Favorite>());
+            newFavorites.add(added);
+            mFavoritesDataSet.favorites = newFavorites;
+            adapter.setDataSet(mFavoritesDataSet);
+            adapter.notifyDataSetChanged();
+        }
+    }
+
+    public void removeFavorites(int position) {
+        if (mFavoritesDataSet.favorites == null) {
+            throw new IllegalStateException("");
+        }
+        mFavoritesDataSet.remove(position, adapter);
+    }
+
+
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -79,6 +152,8 @@ public class FavoriteFragment extends SwipeRefreshFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mNetworkChecker = NetworkChecker.newInstance(getActivity());
+
+        initState();
     }
 
     @Override
@@ -142,7 +217,7 @@ public class FavoriteFragment extends SwipeRefreshFragment {
     }
 
     private void getNewData() {
-        adapter.getDataset().reset();
+        resetState();
 
         getJsonData();
     }
@@ -158,10 +233,10 @@ public class FavoriteFragment extends SwipeRefreshFragment {
             }
             String token = mDefaultSharedPreferencesSingleton.retrieveString("access_token", "");
             int nextPage;
-            if (adapter.getDataset().getState() == FavoritesAdapter.Dataset.State.UNINITIALIZED) {
+            if (mFavoritesDataSet.favorites == null) {
                 nextPage = 1;
             } else {
-                nextPage = adapter.getDataset().getCurrentPage() + 1;
+                nextPage = mFavoritesDataSet.favorites.getCurrentPage() + 1;
             }
             mVolleySingleton.addToRequestQueue(buildGetMyFavoriteRequest(token, nextPage, 10));
         } else {
@@ -288,30 +363,38 @@ public class FavoriteFragment extends SwipeRefreshFragment {
         private static void doHandle(JSONObject response, FavoriteFragment owner)
                 throws JSONException {
             owner.hideHint();
-            owner.adapter.getDataset().add(convertToFavoriteInfo(response));
+            owner.addFavorites(convertToFavoriteInfo(response));
         }
 
-        private static FavoritesAdapter.Favorites convertToFavoriteInfo(JSONObject jsonObject)
+        private static Favorites convertToFavoriteInfo(JSONObject jsonObject)
                 throws JSONException {
-            FavoritesAdapter.Favorites favorites = new FavoritesAdapter.Favorites();
+            JSONArray videoArray = jsonObject.getJSONArray("videos");
+            Favorites favorites = new Favorites(convertNeededVideos(videoArray));
+            favorites.setCurrentReadCountIncludingUnneeded(videoArray.length());
             favorites.setTotal(jsonObject.getInt("total"));
             favorites.setCurrentPage(jsonObject.getInt("page"));
-            JSONArray videoArray = jsonObject.getJSONArray("videos");
-            favorites.setCurrentReadCountIncludingUnneeded(videoArray.length());
-            favorites.setInterestingFavorites(convertNeededVideos(videoArray));
             return favorites;
         }
 
-        private static List<FavoriteBean> convertNeededVideos(JSONArray videoArray)
+        private static List<Favorite> convertNeededVideos(JSONArray videoArray)
                 throws JSONException {
-            List<FavoriteBean> result = new LinkedList<>();
+            List<Favorite> result = new LinkedList<>();
             for (int i = 0; i < videoArray.length(); i++) {
                 JSONObject itemObject = videoArray.getJSONObject(i);
                 if (itemObject.getString("category").equals(DEFAULT_CATEGORY_LABEL)) {
-                    FavoriteBean bean = new FavoriteBean(itemObject);
-                    result.add(bean);
+                    result.add(convertToFavorite(itemObject));
                 }
             }
+            return result;
+        }
+
+        private static Favorite convertToFavorite(JSONObject jsonObject) throws JSONException {
+            Favorite result = new Favorite();
+            result.title = jsonObject.getString("title");
+//            link = jsonObject.getString("link");
+//            imageUrl = jsonObject.getString("thumbnail");
+            result.duration = jsonObject.getString("duration");
+//            videoId = jsonObject.getString("id");
             return result;
         }
 
@@ -349,12 +432,171 @@ public class FavoriteFragment extends SwipeRefreshFragment {
             final Context context = mContextWeakReference.get();
             final FavoriteFragment owner = mOwner.get();
             if (owner != null) {
-                owner.adapter.getDataset().remove(mVideoIndexInListView);
+                owner.removeFavorites(mVideoIndexInListView);
             }
             if (context != null) {
                 final String message = context.getString(R.string.favorite_delete_success);
                 Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
             }
+        }
+
+    }
+
+    private static class FavoritesDataSet implements DataSet {
+
+        @Nullable
+        private Favorites favorites;
+
+        private Empty empty;
+
+        private FavoriteFooter haveMoreFooter;
+
+        private FavoriteFooter noMoreFooter;
+
+
+        @NonNull
+        private Favorites getNonNullFavorites() {
+            if (favorites != null) {
+                return favorites;
+            } else {
+                throw new IllegalStateException("haven't init FavoritesDataSet");
+            }
+        }
+
+        @Override
+        public int size() {
+            return getNonNullFavorites().getInterestingFavorites().size() + 1;
+        }
+
+        @Override
+        public Object get(int position) {
+            final List<Favorite> interestingFavorites =
+                    getNonNullFavorites().getInterestingFavorites();
+            if (position < interestingFavorites.size()) {
+                return interestingFavorites.get(position);
+            } else {
+                if (!getNonNullFavorites().isEmpty()) {
+                    return getFavoriteFooter(position);
+                } else {
+                    return empty;
+                }
+            }
+        }
+
+        private FavoriteFooter getFavoriteFooter(int position) {
+            if (BuildConfig.DEBUG) {
+                if (position != getNonNullFavorites().getInterestingFavorites().size()) {
+                    throw new IllegalStateException();
+                }
+            }
+            if (!getNonNullFavorites().allRead()) {
+                return haveMoreFooter;
+            } else {
+                return noMoreFooter;
+            }
+        }
+
+        public void unsetFavorites() {
+            favorites = null;
+        }
+
+        public void addFavorites(Favorites added, RecyclerView.Adapter adapter) {
+            Favorites nonNullFavorites = getNonNullFavorites();
+            if (nonNullFavorites.isEmpty()) {
+                nonNullFavorites.add(added);
+                adapter.notifyDataSetChanged();
+            } else {
+                final int sizeBeforeAdd = nonNullFavorites.interestingFavorites.size();
+                nonNullFavorites.add(added);
+                adapter.notifyItemRangeInserted(sizeBeforeAdd, added.interestingFavorites.size());
+                if (nonNullFavorites.allRead()) {
+                    adapter.notifyItemChanged(nonNullFavorites.interestingFavorites.size());
+                }
+            }
+        }
+
+        public void remove(int position, RecyclerView.Adapter adapter) {
+            Favorites nonNullFavorites = getNonNullFavorites();
+            nonNullFavorites.remove(position);
+            if (nonNullFavorites.isEmpty()) {
+                adapter.notifyDataSetChanged();
+            }
+        }
+
+    }
+
+    private static class Favorites {
+
+        private int total;
+
+        private int currentPage;
+
+        private int currentReadCountIncludingUnneeded;
+
+        @NonNull
+        private final List<Favorite> interestingFavorites;
+
+        public Favorites(@NonNull List<Favorite> interestingFavorites) {
+            this.interestingFavorites = interestingFavorites;
+        }
+
+
+        public boolean allRead() {
+            return currentReadCountIncludingUnneeded == total;
+        }
+
+        public boolean isEmpty() {
+            if (total == 0) {
+                return true;
+            } else {
+                if (BuildConfig.DEBUG) {
+                    if (total < 0) {
+                        throw new AssertionError("total < 0");
+                    }
+                }
+                // ------------------------- test this trick -----------------------
+                return allRead() && getInterestingFavorites().isEmpty();
+            }
+        }
+
+        @NonNull
+        public List<Favorite> getInterestingFavorites() {
+            return Collections.unmodifiableList(interestingFavorites);
+        }
+
+        public int getCurrentPage() {
+            return currentPage;
+        }
+
+        public void setCurrentPage(int currentPage) {
+            this.currentPage = currentPage;
+        }
+
+        public void setCurrentReadCountIncludingUnneeded(int currentReadCountIncludingUnneeded) {
+            this.currentReadCountIncludingUnneeded = currentReadCountIncludingUnneeded;
+        }
+
+        public void setTotal(int total) {
+            this.total = total;
+        }
+
+        //TODO check currentPage + 1 != added.currentPage?
+        //TODO check total != added.total?
+        //TODO check illegal argument
+        //TODO check state
+        public void add(Favorites added) {
+            total = added.total;
+            currentPage = added.currentPage;
+            currentReadCountIncludingUnneeded += added.currentReadCountIncludingUnneeded;
+            interestingFavorites.addAll(added.getInterestingFavorites());
+        }
+
+        //TODO check illegal argument
+        //TODO check state
+        public void remove(int index) {
+            total--;
+            currentReadCountIncludingUnneeded--;
+            interestingFavorites.remove(index);
         }
 
     }
