@@ -46,14 +46,14 @@ public class FavoritesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
         switch (viewType) {
             case R.id.type_main_content:
                 return new MainCotentViewHolder(
-                        inflater.inflate(R.layout.list_item_favorite, parent, false));
+                        inflater.inflate(R.layout.recycler_favorite, parent, false));
             case R.id.type_footer:
                 return new FooterViewHolder(
-                        inflater.inflate(R.layout.list_item_favorite_footer, parent, false));
+                        inflater.inflate(R.layout.recycler_favorite_footer, parent, false));
             case R.id.type_empty:
             case R.id.type_uninitialized:
                 return new SimpleHintViewHolder(
-                        inflater.inflate(R.layout.view_simple_hint, parent, false));
+                        inflater.inflate(R.layout.recycler_loading, parent, false));
             default:
                 throw new UnsupportedOperationException("Unknown viewType: " + viewType);
         }
@@ -128,7 +128,7 @@ public class FavoritesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
         public FooterViewHolder(View itemView) {
             super(itemView);
-            footerHint = (TextView) itemView.findViewById(R.id.footer_hint);
+            footerHint = (TextView) itemView.findViewById(R.id.hint);
         }
 
     }

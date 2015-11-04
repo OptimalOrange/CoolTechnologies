@@ -56,7 +56,7 @@ private ImageLoader mImageLoader;
     public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder viewHolder;
         if (convertView == null) {
-            convertView = LayoutInflater.from(mContext).inflate(R.layout.list_item_favorite, parent, false);
+            convertView = LayoutInflater.from(mContext).inflate(R.layout.recycler_favorite, parent, false);
             viewHolder = new ViewHolder();
             viewHolder.ivImage = (ImageView) convertView.findViewById(R.id.thumbnail);
             viewHolder.tvDuration = (TextView) convertView.findViewById(R.id.duration);
