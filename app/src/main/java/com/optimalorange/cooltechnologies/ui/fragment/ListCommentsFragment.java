@@ -13,7 +13,7 @@ import com.optimalorange.cooltechnologies.network.RequestsManager;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingleton;
 import com.optimalorange.cooltechnologies.ui.LoginActivity;
-import com.optimalorange.cooltechnologies.ui.view.CommentView;
+import com.optimalorange.cooltechnologies.ui.viewholder.CommentView;
 
 import org.json.JSONException;
 import org.json.JSONObject;

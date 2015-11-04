@@ -9,7 +9,7 @@ import com.optimalorange.cooltechnologies.network.CommentsRequest;
 import com.optimalorange.cooltechnologies.network.RequestsManager;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.optimalorange.cooltechnologies.ui.ListCommentsActivity;
-import com.optimalorange.cooltechnologies.ui.view.CommentView;
+import com.optimalorange.cooltechnologies.ui.viewholder.CommentView;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;

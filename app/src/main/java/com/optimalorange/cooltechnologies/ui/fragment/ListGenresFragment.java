@@ -13,7 +13,7 @@ import com.optimalorange.cooltechnologies.network.VideosRequest;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.optimalorange.cooltechnologies.ui.ListVideosActivity;
 import com.optimalorange.cooltechnologies.ui.PlayVideoActivity;
-import com.optimalorange.cooltechnologies.ui.view.VideoCardViewBuilder;
+import com.optimalorange.cooltechnologies.ui.viewholder.VideoCardViewBuilder;
 import com.optimalorange.cooltechnologies.util.ItemsCountCalculater;
 import com.umeng.analytics.MobclickAgent;
 

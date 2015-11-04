@@ -1,4 +1,4 @@
-package com.optimalorange.cooltechnologies.ui.view;
+package com.optimalorange.cooltechnologies.ui.viewholder;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
