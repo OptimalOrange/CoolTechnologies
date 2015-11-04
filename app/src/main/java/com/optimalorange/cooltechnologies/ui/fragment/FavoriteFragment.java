@@ -527,6 +527,8 @@ public class FavoriteFragment extends SwipeRefreshFragment {
             nonNullFavorites.remove(position);
             if (nonNullFavorites.isEmpty()) {
                 adapter.notifyDataSetChanged();
+            } else {
+                adapter.notifyItemRemoved(position);
             }
         }
 
