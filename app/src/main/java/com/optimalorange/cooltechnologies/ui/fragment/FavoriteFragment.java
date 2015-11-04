@@ -513,11 +513,13 @@ public class FavoriteFragment extends SwipeRefreshFragment {
                 nonNullFavorites.add(added);
                 adapter.notifyDataSetChanged();
             } else {
-                final int sizeBeforeAdd = nonNullFavorites.interestingFavorites.size();
+                final int sizeBeforeAdd = nonNullFavorites.getInterestingFavorites().size();
                 nonNullFavorites.add(added);
-                adapter.notifyItemRangeInserted(sizeBeforeAdd, added.interestingFavorites.size());
+                adapter.notifyItemRangeInserted(
+                        sizeBeforeAdd, added.getInterestingFavorites().size());
                 if (nonNullFavorites.allRead()) {
-                    adapter.notifyItemChanged(nonNullFavorites.interestingFavorites.size());
+                    // footer改为noMoreFooter
+                    adapter.notifyItemChanged(nonNullFavorites.getInterestingFavorites().size());
                 }
             }
         }
