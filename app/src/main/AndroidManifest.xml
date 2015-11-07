@@ -76,6 +76,8 @@
                 android:label="@string/licenses"
                 android:configChanges="keyboardHidden|orientation|screenSize"/>
 
+        <activity android:name=".ui.ShowVideoDetailActivity"/>
+
     </application>
 
 </manifest>
