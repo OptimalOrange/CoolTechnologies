@@ -10,10 +10,11 @@ import com.optimalorange.cooltechnologies.network.NetworkChecker;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingleton;
 import com.optimalorange.cooltechnologies.ui.LoginableBaseActivity;
+import com.optimalorange.cooltechnologies.ui.ShowVideoDetailActivity;
 import com.optimalorange.cooltechnologies.ui.entity.Empty;
-import com.optimalorange.cooltechnologies.ui.entity.Video;
 import com.optimalorange.cooltechnologies.ui.entity.FavoriteFooter;
 import com.optimalorange.cooltechnologies.ui.entity.Loading;
+import com.optimalorange.cooltechnologies.ui.entity.Video;
 import com.optimalorange.cooltechnologies.ui.viewholder.RecyclerEmptyViewHolder;
 import com.optimalorange.cooltechnologies.ui.viewholder.RecyclerFavoriteFooterViewHolder;
 import com.optimalorange.cooltechnologies.ui.viewholder.RecyclerFavoriteViewHolder;
@@ -112,8 +113,19 @@ public class FavoriteFragment extends SwipeRefreshFragment {
         final ViewHolderFactoryRegister register = adapter.getRegister();
         register.registerViewHolderFactory(new RecyclerLoadingViewHolder.Factory());
         register.registerViewHolderFactory(new RecyclerEmptyViewHolder.Factory());
-        register.registerViewHolderFactory(new RecyclerFavoriteViewHolder.Factory());
         register.registerViewHolderFactory(new RecyclerFavoriteFooterViewHolder.Factory());
+        register.registerViewHolderFactory(new RecyclerFavoriteViewHolder.Factory() {
+            @Override
+            public void bindViewHolder(RecyclerFavoriteViewHolder holder, final Video value) {
+                super.bindViewHolder(holder, value);
+                holder.itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        ShowVideoDetailActivity.start(v.getContext(), value.id);
+                    }
+                });
+            }
+        });
 
         adapter.setDataSet(mLoadingDataSet);
         adapter.notifyDataSetChanged();
