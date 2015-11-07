@@ -4,15 +4,20 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.optimalorange.cooltechnologies.BuildConfig;
 import com.optimalorange.cooltechnologies.R;
-import com.optimalorange.cooltechnologies.adapter.FavoriteAdapter;
-import com.optimalorange.cooltechnologies.entity.FavoriteBean;
 import com.optimalorange.cooltechnologies.network.DestroyFavoriteRequest;
 import com.optimalorange.cooltechnologies.network.GetMyFavoriteRequest;
 import com.optimalorange.cooltechnologies.network.NetworkChecker;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingleton;
 import com.optimalorange.cooltechnologies.ui.LoginableBaseActivity;
-import com.optimalorange.cooltechnologies.ui.PlayVideoActivity;
+import com.optimalorange.cooltechnologies.ui.entity.Empty;
+import com.optimalorange.cooltechnologies.ui.entity.Favorite;
+import com.optimalorange.cooltechnologies.ui.entity.FavoriteFooter;
+import com.optimalorange.cooltechnologies.ui.entity.Loading;
+import com.optimalorange.cooltechnologies.ui.viewholder.RecyclerEmptyViewHolder;
+import com.optimalorange.cooltechnologies.ui.viewholder.RecyclerFavoriteFooterViewHolder;
+import com.optimalorange.cooltechnologies.ui.viewholder.RecyclerFavoriteViewHolder;
+import com.optimalorange.cooltechnologies.ui.viewholder.RecyclerLoadingViewHolder;
 import com.umeng.analytics.MobclickAgent;
 
 import org.json.JSONArray;
@@ -20,54 +25,54 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
-import android.content.Intent;
-import android.graphics.PixelFormat;
 import android.os.Bundle;
-import android.view.Gravity;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.widget.AdapterView;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+
+import gq.baijie.classbasedviewadapter.android.adapter.ClassBasedRecyclerViewAdapter;
+import gq.baijie.classbasedviewadapter.android.adapter.DataSet;
+import gq.baijie.classbasedviewadapter.android.adapter.ViewHolderFactoryRegister;
 
 /**
  * Created by WANGZHENGZE on 2014/11/20.
  * 收藏
  */
+//TODO set click listener
 public class FavoriteFragment extends SwipeRefreshFragment {
 
-    private static final String DEFAULT_CATEGORY_LABEL= "科技";
+    private static final String DEFAULT_CATEGORY_LABEL = "科技";
 
     private String mYoukuClientId;
 
-    private View v;
-    private ListView favoriteListView;
     private VolleySingleton mVolleySingleton;
+
     private DefaultSharedPreferencesSingleton mDefaultSharedPreferencesSingleton;
+
     private NetworkChecker mNetworkChecker;
-    private TextView mTvHint;
+
     private boolean mIsCreated = false;
 
-    private WindowManager windowManager = null;
-    private WindowManager.LayoutParams windowParams = null;
-    private View deleteView = null;
-    private ArrayList<FavoriteBean> favoriteBeans;
-    private FavoriteAdapter adapter;
+    private List<Loading> mLoadingDataSet;
 
-    private int page = 1;
-    private int total = 0;
-    private int currentCount = 0;
-    private TextView tvViewMore;
-    private View footer;
+    private FavoritesDataSet mFavoritesDataSet;
+
+    private final ClassBasedRecyclerViewAdapter adapter = new ClassBasedRecyclerViewAdapter();
+
+    private ViewHolder vh;
+
 
     private final LoginableBaseActivity.OnLoginStatusChangeListener mOnLoginStatusChangeListener =
             new LoginableBaseActivity.OnLoginStatusChangeListener() {
@@ -82,7 +87,63 @@ public class FavoriteFragment extends SwipeRefreshFragment {
                 }
             };
 
-    private boolean mIsDelButtonCreate;
+
+    private void initState() {
+        Loading loading = new Loading();
+        Empty empty = new Empty();
+        FavoriteFooter haveMoreFooter = new FavoriteFooter();
+        FavoriteFooter noMoreFooter = new FavoriteFooter();
+        loading.hint = getString(R.string.favorite_new_loading);
+        empty.hint = getString(R.string.favorite_no_fav);
+        haveMoreFooter.hint = getString(R.string.favorite_view_more);
+        noMoreFooter.hint = getString(R.string.favorite_view_more_last);
+        haveMoreFooter.listener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getJsonData();
+            }
+        };
+        mLoadingDataSet = Collections.singletonList(loading);
+        mFavoritesDataSet = new FavoritesDataSet();
+        mFavoritesDataSet.empty = empty;
+        mFavoritesDataSet.haveMoreFooter = haveMoreFooter;
+        mFavoritesDataSet.noMoreFooter = noMoreFooter;
+
+        final ViewHolderFactoryRegister register = adapter.getRegister();
+        register.registerViewHolderFactory(new RecyclerLoadingViewHolder.Factory());
+        register.registerViewHolderFactory(new RecyclerEmptyViewHolder.Factory());
+        register.registerViewHolderFactory(new RecyclerFavoriteViewHolder.Factory());
+        register.registerViewHolderFactory(new RecyclerFavoriteFooterViewHolder.Factory());
+
+        adapter.setDataSet(mLoadingDataSet);
+        adapter.notifyDataSetChanged();
+    }
+
+    public void resetState() {
+        adapter.setDataSet(mLoadingDataSet);
+        adapter.notifyDataSetChanged();
+        mFavoritesDataSet.unsetFavorites();
+    }
+
+    public void addFavorites(Favorites added) {
+        if (mFavoritesDataSet.favorites != null) {
+            mFavoritesDataSet.addFavorites(added, adapter);
+        } else {
+            final Favorites newFavorites = new Favorites(new ArrayList<Favorite>());
+            newFavorites.add(added);
+            mFavoritesDataSet.favorites = newFavorites;
+            adapter.setDataSet(mFavoritesDataSet);
+            adapter.notifyDataSetChanged();
+        }
+    }
+
+    public void removeFavorites(int position) {
+        if (mFavoritesDataSet.favorites == null) {
+            throw new IllegalStateException("");
+        }
+        mFavoritesDataSet.remove(position, adapter);
+    }
+
 
     @Override
     public void onAttach(Context context) {
@@ -96,16 +157,16 @@ public class FavoriteFragment extends SwipeRefreshFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mNetworkChecker = NetworkChecker.newInstance(getActivity());
+
+        initState();
     }
 
     @Override
-    protected View onCreateChildView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        v = inflater.inflate(R.layout.fragment_favorite, container, false);
-        favoriteListView = (ListView) v.findViewById(R.id.favorite_list);
-        mTvHint = (TextView) v.findViewById(R.id.favorite_hint);
-        footer = inflater.inflate(R.layout.ll_favorite_footer, favoriteListView, false);
-        tvViewMore = (TextView) footer.findViewById(R.id.tv_more);
-        return v;
+    protected View onCreateChildView(
+            LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.fragment_favorite, container, false);
+        vh = new ViewHolder(rootView);
+        return rootView;
     }
 
     @Override
@@ -120,95 +181,17 @@ public class FavoriteFragment extends SwipeRefreshFragment {
                 DefaultSharedPreferencesSingleton.getInstance(getActivity());
         ((LoginableBaseActivity) getActivity())
                 .addLoginStatusChangeListener(mOnLoginStatusChangeListener);
-        if (((LoginableBaseActivity) getActivity()).hasLoggedIn()){
+        if (((LoginableBaseActivity) getActivity()).hasLoggedIn()) {
             setRefreshable(true);
         } else {
             setRefreshable(false);
         }
 
-        favoriteListView.setVisibility(View.GONE);
-        favoriteListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(getActivity(), PlayVideoActivity.class);
-                intent.putExtra(PlayVideoActivity.EXTRA_KEY_VIDEO, favoriteBeans.get(position));
-                startActivity(intent);
-            }
-        });
-
-        favoriteBeans = new ArrayList<>();
-        adapter = new FavoriteAdapter(getActivity(), favoriteBeans, mVolleySingleton.getImageLoader());
-
-        tvViewMore.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ((TextView) v).setText(getString(R.string.favorite_view_more_loading));
-                getJsonData();
-            }
-        });
-        favoriteListView.addFooterView(footer);
-        favoriteListView.setAdapter(adapter);
+        vh.favorites.setVisibility(View.GONE);
+        vh.favorites.setLayoutManager(new LinearLayoutManager(vh.favorites.getContext()));
+        vh.favorites.setAdapter(adapter);
         getNewData();
         mIsCreated = true;
-        favoriteListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
-                int[] locationInWindow = new int[2];
-                view.getLocationInWindow(locationInWindow);
-                windowParams = new WindowManager.LayoutParams();
-                windowParams.gravity = Gravity.TOP | Gravity.LEFT;
-                windowParams.x = locationInWindow[0] + view.getWidth() / 2;
-                windowParams.width = WindowManager.LayoutParams.WRAP_CONTENT;
-                windowParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
-                //添加属性FLAG_WATCH_OUTSIDE_TOUCH，用于监听窗口外Touch事件
-                windowParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                        | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                        | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                        | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
-                windowParams.format = PixelFormat.TRANSLUCENT;
-                windowParams.windowAnimations = 0;
-                windowManager = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
-                if (deleteView != null) {
-                    windowManager.removeViewImmediate(deleteView);
-                }
-                deleteView = LayoutInflater.from(getActivity()).inflate(R.layout.ll_favorite_delete, null);
-                deleteView.measure(0, 0);
-                int deleteViewHeight = deleteView.getMeasuredHeight();
-                windowParams.y = locationInWindow[1] - deleteViewHeight;
-                deleteView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        sendDeleteRequest(favoriteBeans.get(position).videoId, position);
-                    }
-                });
-                windowManager.addView(deleteView, windowParams);
-                return true;
-            }
-        });
-
-        favoriteListView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-
-
-                if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    if (deleteView == null) {
-                        mIsDelButtonCreate = true;
-                    } else {
-                        mIsDelButtonCreate = false;
-                        return true;
-                    }
-                }
-
-                if ((event.getAction() == MotionEvent.ACTION_UP
-                        || event.getAction() == MotionEvent.ACTION_MOVE) && deleteView != null
-                        && !mIsDelButtonCreate) {
-                    removeWindowView();
-                    return true;
-                }
-                return false;
-            }
-        });
     }
 
     @Override
@@ -227,12 +210,8 @@ public class FavoriteFragment extends SwipeRefreshFragment {
     public void onDestroyView() {
         ((LoginableBaseActivity) getActivity())
                 .removeLoginStatusChangeListener(mOnLoginStatusChangeListener);
-        tvViewMore = null;
-        footer = null;
-        mTvHint = null;
-        favoriteListView.setAdapter(null);
-        favoriteListView = null;
-        v = null;
+        vh.favorites.setAdapter(null);
+        vh = null;
         super.onDestroyView();
     }
 
@@ -242,24 +221,15 @@ public class FavoriteFragment extends SwipeRefreshFragment {
         super.onDestroy();
     }
 
-    private void removeWindowView() {
-        if (windowManager != null && deleteView != null) {
-            windowManager.removeViewImmediate(deleteView);
-            deleteView = null;
-        }
-    }
-
     private void getNewData() {
-        page = 1;
-        total = 0;
-        currentCount = 0;
-        favoriteBeans.clear();
-        adapter.notifyDataSetChanged();
+        resetState();
+
         getJsonData();
     }
 
+    //TODO 避免重复发送
     public void getJsonData() {
-        if (favoriteListView.getVisibility() == View.GONE) {
+        if (vh.favorites.getVisibility() == View.GONE) {
             setHint(R.string.favorite_new_loading);
         }
         if (mDefaultSharedPreferencesSingleton.hasLoggedIn()) {
@@ -268,17 +238,23 @@ public class FavoriteFragment extends SwipeRefreshFragment {
                 return;
             }
             String token = mDefaultSharedPreferencesSingleton.retrieveString("access_token", "");
-            mVolleySingleton.addToRequestQueue(buildGetMyFavoriteRequest(token, page, 10));
+            int nextPage;
+            if (mFavoritesDataSet.favorites == null) {
+                nextPage = 1;
+            } else {
+                nextPage = mFavoritesDataSet.favorites.getCurrentPage() + 1;
+            }
+            mVolleySingleton.addToRequestQueue(buildGetMyFavoriteRequest(token, nextPage, 10));
         } else {
             setHint(R.string.favorite_hint_no_login);
         }
     }
 
     private void setHint(int res) {
-        mTvHint.setText(getString(res));
-        mTvHint.setVisibility(View.VISIBLE);
-        favoriteListView.setVisibility(View.GONE);
-        mTvHint.setOnClickListener(new View.OnClickListener() {
+        vh.mainHint.setText(getString(res));
+        vh.mainHint.setVisibility(View.VISIBLE);
+        vh.favorites.setVisibility(View.GONE);
+        vh.mainHint.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 getNewData();
@@ -286,11 +262,16 @@ public class FavoriteFragment extends SwipeRefreshFragment {
         });
     }
 
+    private void hideHint() {
+        vh.mainHint.setVisibility(View.GONE);
+        vh.favorites.setVisibility(View.VISIBLE);
+    }
+
 
     @Override
     protected boolean canChildScrollUp() {
-        return favoriteListView.getVisibility() == View.VISIBLE &&
-                favoriteListView.canScrollVertically(-1);
+        return vh.favorites.getVisibility() == View.VISIBLE &&
+                vh.favorites.canScrollVertically(-1);
     }
 
 
@@ -302,21 +283,24 @@ public class FavoriteFragment extends SwipeRefreshFragment {
             if (mIsCreated) {
                 mIsCreated = false;
             } else {
-                if (favoriteListView.getVisibility() == View.GONE) {
+                if (vh.favorites.getVisibility() == View.GONE) {
                     getNewData();
                 }
             }
         }
     }
 
+    //TODO add delete feathure on UI
     private void sendDeleteRequest(String id, final int index) {
         if (!mNetworkChecker.isConnected()) {
-            Toast.makeText(getActivity(), R.string.favorite_delete_no_net, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), R.string.favorite_delete_no_net, Toast.LENGTH_SHORT)
+                    .show();
             return;
         }
         String token = mDefaultSharedPreferencesSingleton.retrieveString("access_token", "");
         if (!mDefaultSharedPreferencesSingleton.hasLoggedIn()) {
-            Toast.makeText(getActivity(), R.string.favorite_delete_no_login, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), R.string.favorite_delete_no_login, Toast.LENGTH_SHORT)
+                    .show();
             return;
         }
 
@@ -336,7 +320,9 @@ public class FavoriteFragment extends SwipeRefreshFragment {
                 .build();
     }
 
-    /** 创建取消收藏的请求 */
+    /**
+     * 创建取消收藏的请求
+     */
     private DestroyFavoriteRequest buildDestroyFavoriteRequest(
             String token, String videoId, int videoIndexInListView) {
         final DestroyFavoriteRequestHandler handler = new DestroyFavoriteRequestHandler(
@@ -375,63 +361,46 @@ public class FavoriteFragment extends SwipeRefreshFragment {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
+                //TODO stop refreshing & change hint
+                owner.setRefreshing(false);
             }
         }
 
         private static void doHandle(JSONObject response, FavoriteFragment owner)
                 throws JSONException {
-            FavoriteInfo newFavoriteInfo = convertToFavoriteInfo(response);
-
-            //TODO add addFavoriteInfo method?
-            owner.total = newFavoriteInfo.total;
-            if (newFavoriteInfo.total != 0) {
-                owner.currentCount += newFavoriteInfo.currentReadCountIncludingUnneeded;
-                if (owner.currentCount == owner.total) {
-                    owner.tvViewMore.setEnabled(false);
-                    owner.tvViewMore.setText(owner.getString(R.string.favorite_view_more_last));
-                } else {
-                    if (BuildConfig.DEBUG && owner.currentCount >= owner.total) {
-                        throw new AssertionError("owner.currentCount < owner.total");
-                    }
-                    owner.tvViewMore.setEnabled(true);
-                    owner.tvViewMore.setText(owner.getString(R.string.favorite_view_more));
-                    owner.page++;//TODO check newFavoriteInfo.currentPage?
-                }
-
-                owner.favoriteBeans.addAll(newFavoriteInfo.hasRead);
-                owner.adapter.notifyDataSetChanged();
-                owner.favoriteListView.setVisibility(View.VISIBLE);
-                if (owner.mTvHint.getVisibility() == View.VISIBLE) {
-                    owner.mTvHint.setVisibility(View.GONE);
-                }
-            } else {
-                owner.setHint(R.string.favorite_no_fav);
-            }
-
-            owner.setRefreshing(false);
+            owner.hideHint();
+            owner.addFavorites(convertToFavoriteInfo(response));
         }
 
-        private static FavoriteInfo convertToFavoriteInfo(JSONObject jsonObject)
+        private static Favorites convertToFavoriteInfo(JSONObject jsonObject)
                 throws JSONException {
-            FavoriteInfo favoriteInfo = new FavoriteInfo();
-            favoriteInfo.total = jsonObject.getInt("total");
-            favoriteInfo.currentPage = jsonObject.getInt("page");
             JSONArray videoArray = jsonObject.getJSONArray("videos");
-            favoriteInfo.currentReadCountIncludingUnneeded = videoArray.length();
-            favoriteInfo.hasRead = convertNeededVideos(videoArray);
-            return favoriteInfo;
+            Favorites favorites = new Favorites(convertNeededVideos(videoArray));
+            favorites.setCurrentReadCountIncludingUnneeded(videoArray.length());
+            favorites.setTotal(jsonObject.getInt("total"));
+            favorites.setCurrentPage(jsonObject.getInt("page"));
+            return favorites;
         }
 
-        private static List<FavoriteBean> convertNeededVideos(JSONArray videoArray)
+        private static List<Favorite> convertNeededVideos(JSONArray videoArray)
                 throws JSONException {
-            List<FavoriteBean> result = new LinkedList<>();
+            List<Favorite> result = new LinkedList<>();
             for (int i = 0; i < videoArray.length(); i++) {
                 JSONObject itemObject = videoArray.getJSONObject(i);
                 if (itemObject.getString("category").equals(DEFAULT_CATEGORY_LABEL)) {
-                    FavoriteBean bean = new FavoriteBean(itemObject);
-                    result.add(bean);
+                    result.add(convertToFavorite(itemObject));
                 }
             }
+            return result;
+        }
+
+        private static Favorite convertToFavorite(JSONObject jsonObject) throws JSONException {
+            Favorite result = new Favorite();
+            result.title = jsonObject.getString("title");
+            result.link = jsonObject.getString("link");
+            result.thumbnail = jsonObject.getString("thumbnail");
+            result.duration = jsonObject.getString("duration");
+            result.videoId = jsonObject.getString("id");
             return result;
         }
 
@@ -469,13 +438,7 @@ public class FavoriteFragment extends SwipeRefreshFragment {
             final Context context = mContextWeakReference.get();
             final FavoriteFragment owner = mOwner.get();
             if (owner != null) {
-                //TODO add remove video method?
-                owner.favoriteBeans.remove(mVideoIndexInListView);
-                owner.adapter.notifyDataSetChanged();
-                owner.removeWindowView();
-                if (owner.favoriteBeans.size() == 0) {
-                    owner.setHint(R.string.favorite_no_fav);
-                }
+                owner.removeFavorites(mVideoIndexInListView);
             }
             if (context != null) {
                 final String message = context.getString(R.string.favorite_delete_success);
@@ -485,15 +448,199 @@ public class FavoriteFragment extends SwipeRefreshFragment {
 
     }
 
-    private static class FavoriteInfo {
+    private static class FavoritesDataSet implements DataSet {
 
-        int total;
+        @Nullable
+        private Favorites favorites;
 
-        int currentPage;
+        private Empty empty;
 
-        int currentReadCountIncludingUnneeded;
+        private FavoriteFooter haveMoreFooter;
 
-        List<FavoriteBean> hasRead;
+        private FavoriteFooter noMoreFooter;
+
+
+        @NonNull
+        private Favorites getNonNullFavorites() {
+            if (favorites != null) {
+                return favorites;
+            } else {
+                throw new IllegalStateException("haven't init FavoritesDataSet");
+            }
+        }
+
+        @Override
+        public int size() {
+            // getNonNullFavorites().isEmpty() 时，get(0)为empty；否则，最后有某种footer
+            return getNonNullFavorites().getInterestingFavorites().size() + 1;
+        }
+
+        //TODO 改善
+        @Override
+        public Object get(int position) {
+            final List<Favorite> interestingFavorites =
+                    getNonNullFavorites().getInterestingFavorites();
+            if (position < interestingFavorites.size()) {
+                return interestingFavorites.get(position);
+            } else {
+                if (!getNonNullFavorites().isEmpty()) {
+                    return getFavoriteFooter(position);
+                } else {
+                    return empty;
+                }
+            }
+        }
+
+        private FavoriteFooter getFavoriteFooter(int position) {
+            if (BuildConfig.DEBUG) {
+                // This if block will be auto deleted when release
+                if (position != getNonNullFavorites().getInterestingFavorites().size()) { //NOPMD
+                    throw new IllegalStateException();
+                }
+            }
+            if (!getNonNullFavorites().allRead()) {
+                return haveMoreFooter;
+            } else {
+                return noMoreFooter;
+            }
+        }
+
+        public void unsetFavorites() {
+            favorites = null;
+        }
+
+        public void addFavorites(Favorites added, RecyclerView.Adapter adapter) {
+            Favorites nonNullFavorites = getNonNullFavorites();
+            if (nonNullFavorites.isEmpty()) {
+                nonNullFavorites.add(added);
+                adapter.notifyDataSetChanged();
+            } else {
+                final int sizeBeforeAdd = nonNullFavorites.getInterestingFavorites().size();
+                nonNullFavorites.add(added);
+                adapter.notifyItemRangeInserted(
+                        sizeBeforeAdd, added.getInterestingFavorites().size());
+                if (nonNullFavorites.allRead()) {
+                    // footer改为noMoreFooter
+                    adapter.notifyItemChanged(nonNullFavorites.getInterestingFavorites().size());
+                }
+            }
+        }
+
+        public void remove(int position, RecyclerView.Adapter adapter) {
+            Favorites nonNullFavorites = getNonNullFavorites();
+            nonNullFavorites.remove(position);
+            if (nonNullFavorites.isEmpty()) {
+                adapter.notifyDataSetChanged();
+            } else {
+                adapter.notifyItemRemoved(position);
+            }
+        }
+
+    }
+
+    private static class Favorites {
+
+        private int total;
+
+        private int currentPage;
+
+        private int currentReadCountIncludingUnneeded;
+
+        @NonNull
+        private final List<Favorite> interestingFavorites;
+
+        public Favorites(@NonNull List<Favorite> interestingFavorites) {
+            this.interestingFavorites = interestingFavorites;
+        }
+
+        public boolean allRead() {
+            if (BuildConfig.DEBUG) {
+                // This if block will be auto deleted when release
+                if (currentReadCountIncludingUnneeded > total) { //NOPMD
+                    throw new AssertionError("currentReadCountIncludingUnneeded > total");
+                }
+            }
+            return currentReadCountIncludingUnneeded >= total;
+        }
+
+        public boolean isEmpty() {
+            if (total == 0) {
+                return true;
+            } else {
+                if (BuildConfig.DEBUG) {
+                    // This if block will be auto deleted when release
+                    if (total < 0) { //NOPMD
+                        throw new AssertionError("total < 0");
+                    }
+                }
+                //TODO ------------------------- test this trick -----------------------
+                return allRead() && getInterestingFavorites().isEmpty();
+            }
+        }
+
+        @NonNull
+        public List<Favorite> getInterestingFavorites() {
+            return Collections.unmodifiableList(interestingFavorites);
+        }
+
+        public int getCurrentPage() {
+            return currentPage;
+        }
+
+        public void setCurrentPage(int currentPage) {
+            this.currentPage = currentPage;
+        }
+
+        /**
+         * 危险：不安全地影响状态
+         */
+        public void setCurrentReadCountIncludingUnneeded(int currentReadCountIncludingUnneeded) {
+            this.currentReadCountIncludingUnneeded = currentReadCountIncludingUnneeded;
+        }
+
+        /**
+         * 危险：不安全地影响状态
+         */
+        public void setTotal(int total) {
+            this.total = total;
+        }
+
+        //TODO check illegal argument
+        //TODO check state
+        public void add(Favorites added) {
+            //TODO check total != added.total?
+            total = added.total;
+
+            //TODO check currentPage + 1 != added.currentPage?
+            //TODO 处理 多请求并发条件下的 乱序问题
+            currentPage = added.currentPage;
+
+            //TODO 重复response？
+            currentReadCountIncludingUnneeded += added.currentReadCountIncludingUnneeded;
+            interestingFavorites.addAll(added.getInterestingFavorites());
+        }
+
+        //TODO check illegal argument
+        //TODO check state
+        public void remove(int index) {
+            total--;
+            currentReadCountIncludingUnneeded--;
+            interestingFavorites.remove(index);
+        }
+
+    }
+
+    static class ViewHolder {
+
+        RecyclerView favorites;
+
+        TextView mainHint;
+
+        private ViewHolder(View root) {
+            favorites = (RecyclerView) root.findViewById(R.id.favorites);
+            mainHint = (TextView) root.findViewById(R.id.main_hint);
+        }
+
     }
 
 }

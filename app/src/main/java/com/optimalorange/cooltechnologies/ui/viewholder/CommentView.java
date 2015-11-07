@@ -1,4 +1,4 @@
-package com.optimalorange.cooltechnologies.ui.view;
+package com.optimalorange.cooltechnologies.ui.viewholder;
 
 import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.entity.Comment;
