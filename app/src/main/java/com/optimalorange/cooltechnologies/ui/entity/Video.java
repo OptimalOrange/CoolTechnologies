@@ -1,8 +1,8 @@
 package com.optimalorange.cooltechnologies.ui.entity;
 
-public class Favorite {
+public class Video {
 
-    public String videoId;
+    public String id;
 
     public String title;
 

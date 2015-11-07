@@ -11,7 +11,7 @@ import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingleton;
 import com.optimalorange.cooltechnologies.ui.LoginableBaseActivity;
 import com.optimalorange.cooltechnologies.ui.entity.Empty;
-import com.optimalorange.cooltechnologies.ui.entity.Favorite;
+import com.optimalorange.cooltechnologies.ui.entity.Video;
 import com.optimalorange.cooltechnologies.ui.entity.FavoriteFooter;
 import com.optimalorange.cooltechnologies.ui.entity.Loading;
 import com.optimalorange.cooltechnologies.ui.viewholder.RecyclerEmptyViewHolder;
@@ -129,7 +129,7 @@ public class FavoriteFragment extends SwipeRefreshFragment {
         if (mFavoritesDataSet.favorites != null) {
             mFavoritesDataSet.addFavorites(added, adapter);
         } else {
-            final Favorites newFavorites = new Favorites(new ArrayList<Favorite>());
+            final Favorites newFavorites = new Favorites(new ArrayList<Video>());
             newFavorites.add(added);
             mFavoritesDataSet.favorites = newFavorites;
             adapter.setDataSet(mFavoritesDataSet);
@@ -382,9 +382,9 @@ public class FavoriteFragment extends SwipeRefreshFragment {
             return favorites;
         }
 
-        private static List<Favorite> convertNeededVideos(JSONArray videoArray)
+        private static List<Video> convertNeededVideos(JSONArray videoArray)
                 throws JSONException {
-            List<Favorite> result = new LinkedList<>();
+            List<Video> result = new LinkedList<>();
             for (int i = 0; i < videoArray.length(); i++) {
                 JSONObject itemObject = videoArray.getJSONObject(i);
                 if (itemObject.getString("category").equals(DEFAULT_CATEGORY_LABEL)) {
@@ -394,13 +394,13 @@ public class FavoriteFragment extends SwipeRefreshFragment {
             return result;
         }
 
-        private static Favorite convertToFavorite(JSONObject jsonObject) throws JSONException {
-            Favorite result = new Favorite();
+        private static Video convertToFavorite(JSONObject jsonObject) throws JSONException {
+            Video result = new Video();
             result.title = jsonObject.getString("title");
             result.link = jsonObject.getString("link");
             result.thumbnail = jsonObject.getString("thumbnail");
             result.duration = jsonObject.getString("duration");
-            result.videoId = jsonObject.getString("id");
+            result.id = jsonObject.getString("id");
             return result;
         }
 
@@ -478,7 +478,7 @@ public class FavoriteFragment extends SwipeRefreshFragment {
         //TODO 改善
         @Override
         public Object get(int position) {
-            final List<Favorite> interestingFavorites =
+            final List<Video> interestingFavorites =
                     getNonNullFavorites().getInterestingFavorites();
             if (position < interestingFavorites.size()) {
                 return interestingFavorites.get(position);
@@ -547,9 +547,9 @@ public class FavoriteFragment extends SwipeRefreshFragment {
         private int currentReadCountIncludingUnneeded;
 
         @NonNull
-        private final List<Favorite> interestingFavorites;
+        private final List<Video> interestingFavorites;
 
-        public Favorites(@NonNull List<Favorite> interestingFavorites) {
+        public Favorites(@NonNull List<Video> interestingFavorites) {
             this.interestingFavorites = interestingFavorites;
         }
 
@@ -579,7 +579,7 @@ public class FavoriteFragment extends SwipeRefreshFragment {
         }
 
         @NonNull
-        public List<Favorite> getInterestingFavorites() {
+        public List<Video> getInterestingFavorites() {
             return Collections.unmodifiableList(interestingFavorites);
         }
 
