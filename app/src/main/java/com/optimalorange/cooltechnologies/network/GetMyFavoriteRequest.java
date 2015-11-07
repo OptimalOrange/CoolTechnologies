@@ -166,7 +166,7 @@ public class GetMyFavoriteRequest extends JsonObjectRequest {
                 throw new IllegalStateException("Please set client_id before build");
             }
             if (access_token == null) {
-                throw new IllegalStateException("Please set video_id before build");
+                throw new IllegalStateException("Please set access_token before build");
             }
             urlBuilder.appendQueryParameter("client_id", client_id);
             urlBuilder.appendQueryParameter("access_token", access_token);
