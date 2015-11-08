@@ -76,7 +76,9 @@
                 android:label="@string/licenses"
                 android:configChanges="keyboardHidden|orientation|screenSize"/>
 
-        <activity android:name=".ui.ShowVideoDetailActivity"/>
+        <activity
+                android:name=".ui.ShowVideoDetailActivity"
+                android:theme="@style/AppTheme.NoActionBar"/>
 
     </application>
 

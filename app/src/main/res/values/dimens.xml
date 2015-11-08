@@ -47,4 +47,7 @@
     <!-- fragment_create_comment -->
     <dimen name="image_send_dimen">48dp</dimen>
 
+    <!-- Floating Action Button at CollapsingToolbarLayout -->
+    <dimen name="fab_margin">16dp</dimen>
+
 </resources>
