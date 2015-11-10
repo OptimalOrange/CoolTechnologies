@@ -27,6 +27,9 @@
     <dimen name="text_size_display3">56sp</dimen>
     <dimen name="text_size_display4">112sp</dimen>
 
+    <dimen name="text_line_spacing_extra_body1_dense">8sp</dimen>
+    <dimen name="text_line_spacing_extra_headline1_dense">10sp</dimen>
+
     <dimen name="favorite_item_padding_left_right">15dp</dimen>
     <dimen name="favorite_item_padding_top_bottom">10dp</dimen>
     <dimen name="favorite_item_height">100dp</dimen>
