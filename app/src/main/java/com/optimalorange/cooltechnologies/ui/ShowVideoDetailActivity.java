@@ -37,8 +37,6 @@ public class ShowVideoDetailActivity extends AppCompatActivity {
 
     private VolleySingleton mVolleySingleton;
 
-    private NetworkChecker mNetworkChecker;
-
     private String mYoukuClientId;
 
     private String mVideoIdExtra;
@@ -108,9 +106,13 @@ public class ShowVideoDetailActivity extends AppCompatActivity {
         if (mVideoIdExtra == null) {
             throw new IllegalStateException("Please do intent.putExtra(EXTRA_KEY_VIDEO_ID, vid)");
         }
-        mNetworkChecker = NetworkChecker.newInstance(this);
         mVolleySingleton = VolleySingleton.getInstance(this);
         mYoukuClientId = getString(R.string.youku_client_id);
+
+        //TODO 实现响应式UI
+        if (!NetworkChecker.newInstance(this).isConnected()) {
+            NetworkChecker.openNoConnectionDialog(getSupportFragmentManager());
+        }
 
         initViews();
 
@@ -131,7 +133,6 @@ public class ShowVideoDetailActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         mViews = null;
-        mNetworkChecker = null;
         super.onDestroy();
     }
 
