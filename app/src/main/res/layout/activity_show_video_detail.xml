@@ -56,7 +56,7 @@
             android:layout_margin="@dimen/fab_margin"
             app:layout_anchor="@id/app_bar"
             app:layout_anchorGravity="bottom|end"
-            android:src="@android:drawable/ic_dialog_email"
+            android:src="@drawable/ic_play_arrow_24dp"
             />
 
 </android.support.design.widget.CoordinatorLayout>

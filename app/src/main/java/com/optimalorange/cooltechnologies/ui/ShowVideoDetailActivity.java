@@ -4,6 +4,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.optimalorange.cooltechnologies.R;
+import com.optimalorange.cooltechnologies.entity.FavoriteBean;
 import com.optimalorange.cooltechnologies.network.NetworkChecker;
 import com.optimalorange.cooltechnologies.network.VideoDetailRequest;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
@@ -16,8 +17,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -66,12 +65,39 @@ public class ShowVideoDetailActivity extends AppCompatActivity {
         if (mViews != null) {
             mViews.title.setText(video.title);
             mViews.description.setText(video.description);
+            mViews.playButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    playVideo();
+                }
+            });
+            // load thumbnail
             final ImageLoader.ImageListener imageListener = ImageLoader.getImageListener(
                     mViews.thumbnail, 0, 0
             );
             VolleySingleton.getInstance(mViews.thumbnail.getContext()).getImageLoader()
                     .get(video.bigThumbnail, imageListener);
         }
+    }
+
+    public void playVideo() {
+        if (mVideo == null) {
+            throw new IllegalStateException("cannot play video before load it.");
+        }
+        //TODO do play history log
+        final Intent intent = new Intent(ShowVideoDetailActivity.this, PlayVideoActivity.class);
+        intent.putExtra(PlayVideoActivity.EXTRA_KEY_VIDEO, convertToFavoriteBean(mVideo));
+        startActivity(intent);
+    }
+
+    private static FavoriteBean convertToFavoriteBean(Video video) {
+        final FavoriteBean result = new FavoriteBean();
+        result.videoId = video.id;
+        result.title = video.title;
+        result.duration = video.duration;
+        result.imageUrl = video.bigThumbnail;
+        result.link = video.link;
+        return result;
     }
 
     @Override
@@ -96,15 +122,6 @@ public class ShowVideoDetailActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
         mViews = new ViewHolder(this);
 
@@ -176,10 +193,13 @@ public class ShowVideoDetailActivity extends AppCompatActivity {
 
         ImageView thumbnail;
 
+        View playButton;
+
         ViewHolder(Activity container) {
             title = (TextView) container.findViewById(R.id.title);
             description = (TextView) container.findViewById(R.id.description);
             thumbnail = (ImageView) container.findViewById(R.id.app_bar_image);
+            playButton = container.findViewById(R.id.fab);
         }
     }
 
