@@ -3,7 +3,6 @@ package com.optimalorange.cooltechnologies.ui.fragment;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
-import com.etsy.android.grid.StaggeredGridView;
 import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.entity.FavoriteBean;
 import com.optimalorange.cooltechnologies.entity.Video;
@@ -24,14 +23,14 @@ import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -39,7 +38,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Created by WANGZHENGZE on 2014/11/20.
  * 热门
  */
 public class ListVideosFragment extends SwipeRefreshFragment {
@@ -87,9 +85,11 @@ public class ListVideosFragment extends SwipeRefreshFragment {
 
     private int mPage = 1;
 
-    private StaggeredGridView mGridView;
+    private RecyclerView mRecyclerView;
 
-    private ItemsAdapter mItemsAdapter;
+    private RecyclerView.Adapter mAdapter;
+
+    private RecyclerView.LayoutManager mLayoutManager;
 
     private LinkedList<Video> mListVideos = new LinkedList<Video>();
 
@@ -188,7 +188,7 @@ public class ListVideosFragment extends SwipeRefreshFragment {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_list_videos, container, false);
         mMainContentView = rootView.findViewById(R.id.main_content);
-        mGridView = (StaggeredGridView) rootView.findViewById(R.id.grid_view);
+        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
         mEmptyView = rootView.findViewById(android.R.id.empty);
         mNoConnectionView = rootView.findViewById(R.id.no_connection);
         return rootView;
@@ -198,9 +198,13 @@ public class ListVideosFragment extends SwipeRefreshFragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mItemsAdapter = new ItemsAdapter(
+        mRecyclerView.setHasFixedSize(true);
+        mLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mAdapter = new MyAdapter(
                 mListVideos, mRequestsManager.getVolleySingleton().getImageLoader());
-        mGridView.setAdapter(mItemsAdapter);
+        mRecyclerView.setAdapter(mAdapter);
+
 
         /* 点击设置网络 */
         mNoConnectionView.setOnClickListener(new View.OnClickListener() {
@@ -216,17 +220,6 @@ public class ListVideosFragment extends SwipeRefreshFragment {
             setRefreshing(true);
             startLoad();
         }
-
-        //item点击监听，点击进行播放视频
-        mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Intent mIntent = new Intent(getActivity(), PlayVideoActivity.class);
-                FavoriteBean favoriteBean = new FavoriteBean(mListVideos.get(i));
-                mIntent.putExtra(PlayVideoActivity.EXTRA_KEY_VIDEO, favoriteBean);
-                startActivity(mIntent);
-            }
-        });
     }
 
     @Override
@@ -245,8 +238,8 @@ public class ListVideosFragment extends SwipeRefreshFragment {
     public void onDestroyView() {
         mNoConnectionView = null;
         mEmptyView = null;
-        mGridView.setAdapter(null);
-        mGridView = null;
+        mRecyclerView.setAdapter(null);
+        mRecyclerView = null;
         mMainContentView = null;
         super.onDestroyView();
     }
@@ -254,7 +247,7 @@ public class ListVideosFragment extends SwipeRefreshFragment {
     @Override
     public void onDestroy() {
         cancelLoad();
-        mItemsAdapter = null;
+        mAdapter = null;
         if (mNetworkReceiver != null) {
             getActivity().unregisterReceiver(mNetworkReceiver);
         }
@@ -269,14 +262,14 @@ public class ListVideosFragment extends SwipeRefreshFragment {
         mListVideos.clear();
         //重新请求第一页的内容
         mPage = 1;
-        mItemsAdapter.notifyDataSetChanged();
+        mAdapter.notifyDataSetChanged();
         restartLoad();
     }
 
     @Override
     protected boolean canChildScrollUp() {
-        return mGridView.getVisibility() == View.VISIBLE &&
-                mGridView.canScrollVertically(-1);
+        return mRecyclerView.getVisibility() == View.VISIBLE &&
+                mRecyclerView.canScrollVertically(-1);
     }
 
     private void startLoad() {
@@ -324,8 +317,8 @@ public class ListVideosFragment extends SwipeRefreshFragment {
     }
 
     private void applyVideos() {
-        if (mItemsAdapter != null) {
-            mItemsAdapter.notifyDataSetChanged();
+        if (mAdapter != null) {
+            mAdapter.notifyDataSetChanged();
         }
         final boolean isEmpty = videosIsEmpty();
         if (mEmptyView != null) {
@@ -354,75 +347,65 @@ public class ListVideosFragment extends SwipeRefreshFragment {
 
     /**
      * 热门视频的图片墙的适配器
-     *
-     * @author Zhou Peican
      */
-    private class ItemsAdapter extends BaseAdapter {
+    public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
         private LinkedList<Video> mVideos;
 
         private ImageLoader mImageLoader;
 
-        public ItemsAdapter(LinkedList<Video> mVideos, ImageLoader mImageLoader) {
-            super();
+        public MyAdapter(LinkedList<Video> mVideos, ImageLoader mImageLoader) {
             this.mVideos = mVideos;
             this.mImageLoader = mImageLoader;
         }
 
         @Override
-        public int getCount() {
-            return mVideos.size();
+        public MyAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
+                int viewType) {
+            View v = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.list_item_video, parent, false);
+            ViewHolder vh = new ViewHolder(v);
+            return vh;
         }
 
         @Override
-        public Object getItem(int position) {
-            return mVideos.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-        public View getView(final int position, View convertView, ViewGroup parent) {
-            ViewHolder vh;
-            if (convertView == null) {
-                convertView = LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.list_item_video, parent, false);
-                vh = new ViewHolder();
-                vh.thumbnail = (ImageView) convertView.findViewById(R.id.thumbnail);
-                vh.duration = (TextView) convertView.findViewById(R.id.duration);
-                vh.title = (TextView) convertView.findViewById(R.id.title);
-                vh.viewCount = (TextView) convertView.findViewById(R.id.view_count);
-                convertView.setTag(vh);
-            } else {
-                vh = (ViewHolder) convertView.getTag();
-            }
-
+        public void onBindViewHolder(ViewHolder holder, final int position) {
             //加载图片
             mImageLoader.get(mVideos.get(position).getThumbnail_v2(),
-                    ImageLoader.getImageListener(vh.thumbnail,
+                    ImageLoader.getImageListener(holder.thumbnail,
                             R.drawable.ic_image_view_placeholder,
                             R.drawable.ic_image_view_placeholder));
             //显示播放时长
-            vh.duration.setText(Utils.getDurationString(mVideos.get(position).getDuration()));
+            holder.duration.setText(Utils.getDurationString(mVideos.get(position).getDuration()));
             //显示视频标题
-            vh.title.setText(mVideos.get(position).getTitle());
+            holder.title.setText(mVideos.get(position).getTitle());
             //显示播放次数（这里使用字符串资源格式化）
-            vh.viewCount.setText(String.format(getString(R.string.view_count),
-                    Utils.formatViewCount(mVideos.get(position).getView_count(),
-                            parent.getContext())));
+            holder.viewCount.setText(String.format(getString(R.string.view_count),
+                    Utils.formatViewCount(mVideos.get(position).getView_count(), getActivity())));
 
             //当滑到末尾的位置时加载更多Video
             if (position == mListVideos.size() - 2) {
                 mRequestsManager.addRequest(buildQueryVideosRequest());
             }
 
-            return convertView;
+            holder.thumbnail.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent mIntent = new Intent(getActivity(), PlayVideoActivity.class);
+                    FavoriteBean favoriteBean = new FavoriteBean(mListVideos.get(position));
+                    mIntent.putExtra(PlayVideoActivity.EXTRA_KEY_VIDEO, favoriteBean);
+                    startActivity(mIntent);
+                }
+            });
+
         }
 
-        private class ViewHolder {
+        @Override
+        public int getItemCount() {
+            return mVideos.size();
+        }
+
+        public class ViewHolder extends RecyclerView.ViewHolder {
 
             ImageView thumbnail;
 
@@ -431,8 +414,15 @@ public class ListVideosFragment extends SwipeRefreshFragment {
             TextView title;
 
             TextView viewCount;
-        }
 
+            public ViewHolder(View v) {
+                super(v);
+                thumbnail = (ImageView) v.findViewById(R.id.thumbnail);
+                duration = (TextView) v.findViewById(R.id.duration);
+                title = (TextView) v.findViewById(R.id.title);
+                viewCount = (TextView) v.findViewById(R.id.view_count);
+            }
+        }
     }
 
 }
