@@ -35,11 +35,7 @@ public class ShowVideoDetailActivity extends AppCompatActivity {
             ShowVideoDetailActivity.class.getName() + ".extra.KEY_VIDEO_ID";
 
 
-    private VolleySingleton mVolleySingleton;
-
     private String mYoukuClientId;
-
-    private String mVideoIdExtra;
 
     private Video mVideo;
 
@@ -102,11 +98,10 @@ public class ShowVideoDetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // 初始化属性
-        mVideoIdExtra = getIntent().getStringExtra(EXTRA_KEY_VIDEO_ID);
-        if (mVideoIdExtra == null) {
+        final String videoIdExtra = getIntent().getStringExtra(EXTRA_KEY_VIDEO_ID);
+        if (videoIdExtra == null) {
             throw new IllegalStateException("Please do intent.putExtra(EXTRA_KEY_VIDEO_ID, vid)");
         }
-        mVolleySingleton = VolleySingleton.getInstance(this);
         mYoukuClientId = getString(R.string.youku_client_id);
 
         //TODO 实现响应式UI
@@ -116,7 +111,7 @@ public class ShowVideoDetailActivity extends AppCompatActivity {
 
         initViews();
 
-        mVolleySingleton.addToRequestQueue(buildVideoDetailRequest(mVideoIdExtra));
+        VolleySingleton.getInstance(this).addToRequestQueue(buildVideoDetailRequest(videoIdExtra));
     }
 
     private void initViews() {
@@ -202,6 +197,7 @@ public class ShowVideoDetailActivity extends AppCompatActivity {
             thumbnail = (ImageView) container.findViewById(R.id.app_bar_image);
             playButton = container.findViewById(R.id.fab);
         }
+
     }
 
 

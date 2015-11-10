@@ -41,6 +41,10 @@
         </activity>
 
         <activity
+                android:name=".ui.ShowVideoDetailActivity"
+                android:theme="@style/AppTheme.NoActionBar"/>
+
+        <activity
                 android:name=".ui.PlayVideoActivity"
                 android:configChanges="keyboardHidden|orientation|screenSize"
                 android:hardwareAccelerated="true"
@@ -75,10 +79,6 @@
                 android:name=".ui.LicensesActivity"
                 android:label="@string/licenses"
                 android:configChanges="keyboardHidden|orientation|screenSize"/>
-
-        <activity
-                android:name=".ui.ShowVideoDetailActivity"
-                android:theme="@style/AppTheme.NoActionBar"/>
 
     </application>
 
