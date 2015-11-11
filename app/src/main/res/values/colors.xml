@@ -20,7 +20,7 @@
     <!-- alpha: 12% -->
     <color name="text_dividers_white">#1FFFFFFF</color>
     <!-- ~~~~~~~~ black font ~~~~~~~~ -->
-    <!-- alpha: 100% -->
+    <!-- alpha: 87% -->
     <color name="text_black">#DE000000</color>
     <!-- alpha: 54% -->
     <color name="text_secondary_black">#8A000000</color>

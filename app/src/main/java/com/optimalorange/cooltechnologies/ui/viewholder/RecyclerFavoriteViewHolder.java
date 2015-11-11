@@ -3,7 +3,7 @@ package com.optimalorange.cooltechnologies.ui.viewholder;
 import com.android.volley.toolbox.ImageLoader;
 import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
-import com.optimalorange.cooltechnologies.ui.entity.Favorite;
+import com.optimalorange.cooltechnologies.ui.entity.Video;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -27,11 +27,11 @@ public class RecyclerFavoriteViewHolder extends RecyclerView.ViewHolder {
         thumbnail = (ImageView) itemView.findViewById(R.id.thumbnail);
     }
 
-    public static class Factory extends BaseVHFactory<Favorite, RecyclerFavoriteViewHolder> {
+    public static class Factory extends BaseVHFactory<Video, RecyclerFavoriteViewHolder> {
 
         @Override
-        public Class<Favorite> forClass() {
-            return Favorite.class;
+        public Class<Video> forClass() {
+            return Video.class;
         }
 
         @Override
@@ -42,7 +42,7 @@ public class RecyclerFavoriteViewHolder extends RecyclerView.ViewHolder {
         }
 
         @Override
-        public void bindViewHolder(RecyclerFavoriteViewHolder holder, Favorite value) {
+        public void bindViewHolder(RecyclerFavoriteViewHolder holder, Video value) {
             holder.title.setText(value.title);
             holder.duration.setText(value.duration);
 
