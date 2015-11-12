@@ -107,6 +107,7 @@ public class DBManager {
             favoriteBean.link = cursor.getString(5);
             favoriteBeans.add(favoriteBean);
         }
+        cursor.close();
         return favoriteBeans;
     }
 
