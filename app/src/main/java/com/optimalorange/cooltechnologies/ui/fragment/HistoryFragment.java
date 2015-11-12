@@ -3,12 +3,11 @@ package com.optimalorange.cooltechnologies.ui.fragment;
 import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.adapter.FavoriteAdapter;
 import com.optimalorange.cooltechnologies.entity.FavoriteBean;
-import com.optimalorange.cooltechnologies.storage.sqlite.DBManager;
-import com.optimalorange.cooltechnologies.ui.PlayVideoActivity;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
+import com.optimalorange.cooltechnologies.storage.sqlite.DBManager;
+import com.optimalorange.cooltechnologies.ui.ShowVideoDetailActivity;
 import com.umeng.analytics.MobclickAgent;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -60,9 +59,8 @@ public class HistoryFragment extends Fragment {
         favoriteListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(getActivity(), PlayVideoActivity.class);
-                intent.putExtra(PlayVideoActivity.EXTRA_KEY_VIDEO, favoriteBeans.get(position));
-                startActivity(intent);
+                ShowVideoDetailActivity.start(
+                        view.getContext(), favoriteBeans.get(position).videoId);
             }
         });
 

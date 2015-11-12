@@ -4,13 +4,12 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.optimalorange.cooltechnologies.R;
-import com.optimalorange.cooltechnologies.entity.FavoriteBean;
 import com.optimalorange.cooltechnologies.entity.Video;
 import com.optimalorange.cooltechnologies.network.NetworkChecker;
 import com.optimalorange.cooltechnologies.network.RequestsManager;
 import com.optimalorange.cooltechnologies.network.VideosRequest;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
-import com.optimalorange.cooltechnologies.ui.PlayVideoActivity;
+import com.optimalorange.cooltechnologies.ui.ShowVideoDetailActivity;
 import com.optimalorange.cooltechnologies.util.Utils;
 import com.umeng.analytics.MobclickAgent;
 
@@ -391,10 +390,8 @@ public class ListVideosFragment extends SwipeRefreshFragment {
             holder.thumbnail.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent mIntent = new Intent(getActivity(), PlayVideoActivity.class);
-                    FavoriteBean favoriteBean = new FavoriteBean(mListVideos.get(position));
-                    mIntent.putExtra(PlayVideoActivity.EXTRA_KEY_VIDEO, favoriteBean);
-                    startActivity(mIntent);
+                    ShowVideoDetailActivity.start(
+                            v.getContext(), mListVideos.get(position).getId());
                 }
             });
 
