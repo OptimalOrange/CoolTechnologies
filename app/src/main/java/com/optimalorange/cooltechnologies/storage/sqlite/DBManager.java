@@ -84,16 +84,18 @@ public class DBManager {
 
     public void saveHistory(FavoriteBean bean) {
         open();
-        if (isInHistory(bean.videoId)) {
-            deleteHistory(bean.videoId);
+        final ContentValues contentValues = convertToContentValues(bean);
+        db.beginTransaction();
+        try {
+            if (isInHistory(bean.videoId)) {
+                deleteHistory(bean.videoId);
+            }
+            db.insert("history", null, contentValues);
+
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
         }
-        ContentValues contentValues = new ContentValues();
-        contentValues.put("_videoId", bean.videoId);
-        contentValues.put("_title", bean.title);
-        contentValues.put("_duration", bean.duration);
-        contentValues.put("_imageUrl", bean.imageUrl);
-        contentValues.put("_link", bean.link);
-        db.insert("history", null, contentValues);
     }
 
     public ArrayList<FavoriteBean> getAllHistory() {
@@ -127,6 +129,16 @@ public class DBManager {
     public void deleteHistory(String videoId) {
         open();
         db.execSQL("delete from history where _videoId = ?", new String[]{videoId});
+    }
+
+    private static ContentValues convertToContentValues(FavoriteBean favoriteBean) {
+        final ContentValues contentValues = new ContentValues();
+        contentValues.put("_videoId", favoriteBean.videoId);
+        contentValues.put("_title", favoriteBean.title);
+        contentValues.put("_duration", favoriteBean.duration);
+        contentValues.put("_imageUrl", favoriteBean.imageUrl);
+        contentValues.put("_link", favoriteBean.link);
+        return contentValues;
     }
 
 }
