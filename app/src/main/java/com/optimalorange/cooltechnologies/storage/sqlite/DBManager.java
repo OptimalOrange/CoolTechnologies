@@ -126,9 +126,9 @@ public class DBManager {
         return count != 0;
     }
 
-    public void deleteHistory(String videoId) {
+    public int deleteHistory(String videoId) {
         open();
-        db.execSQL("delete from history where _videoId = ?", new String[]{videoId});
+        return db.delete("history", "_videoId = ?", new String[]{videoId});
     }
 
     private static ContentValues convertToContentValues(FavoriteBean favoriteBean) {
