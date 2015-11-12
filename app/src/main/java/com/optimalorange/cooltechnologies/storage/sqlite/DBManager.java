@@ -29,15 +29,17 @@ public class DBManager {
     private DataBaseHelper dbHelper = null;
 
     private DBManager(Context context) {
+        // getApplicationContext() is key, it keeps you from leaking the
+        // Activity or BroadcastReceiver if someone passes one in.
+        context = context.getApplicationContext();
+
         this.context = context;
     }
 
     private static class DataBaseHelper extends SQLiteOpenHelper {
 
-        Context context;
         DataBaseHelper(Context context) {
             super(context, DB_NAME, null, DB_VERSION);
-            this.context = context;
         }
 
         @Override
