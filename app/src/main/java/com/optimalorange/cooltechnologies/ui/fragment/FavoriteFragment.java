@@ -197,10 +197,19 @@ public class FavoriteFragment extends SwipeRefreshFragment {
             setRefreshable(false);
         }
 
-        vh.favorites.setVisibility(View.GONE);
         vh.favorites.setLayoutManager(new LinearLayoutManager(vh.favorites.getContext()));
         vh.favorites.setAdapter(adapter);
-        getNewData();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // load data if not do it yet
+        if (mFavoritesDataSet.favorites == null) {
+            vh.favorites.setVisibility(View.GONE);
+            getNewData();
+        }
     }
 
     @Override
