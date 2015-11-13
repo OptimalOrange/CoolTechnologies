@@ -5,7 +5,6 @@ import com.optimalorange.cooltechnologies.entity.FavoriteBean;
 import com.optimalorange.cooltechnologies.network.NetworkChecker;
 import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingleton;
 import com.optimalorange.cooltechnologies.storage.sqlite.DBManager;
-import com.optimalorange.cooltechnologies.ui.fragment.SimpleListCommentsFragment;
 import com.umeng.analytics.MobclickAgent;
 
 import android.annotation.TargetApi;
@@ -140,7 +139,6 @@ public class PlayVideoActivity extends LoginableBaseActivity {
                 getLayoutInflater().inflate(R.layout.view_loading_video, videoLayout, false);
 
         addWebViewToNonVideoLayout();
-        addOthersToNonVideoLayout(savedInstanceState);
 
         // setWebViewClient
         mWebViewClient = new CustomWebViewClient();
@@ -307,15 +305,6 @@ public class PlayVideoActivity extends LoginableBaseActivity {
                 0 //WebView的layout_weight设为0，评论等其他View的weight非0，让其他View充满剩余空间
         );
         mNonVideoLayout.addView(mWebView, 0, layoutParams);
-    }
-
-    private void addOthersToNonVideoLayout(Bundle savedInstanceState) {
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.others_container,
-                            SimpleListCommentsFragment.newInstance(getVideoId()))
-                    .commit();
-        }
     }
 
     private void loadUrlAndClearHistory(String url) {

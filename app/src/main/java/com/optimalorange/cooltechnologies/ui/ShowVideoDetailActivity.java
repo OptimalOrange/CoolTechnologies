@@ -12,6 +12,7 @@ import com.optimalorange.cooltechnologies.network.VideoDetailRequest;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingleton;
 import com.optimalorange.cooltechnologies.ui.entity.Video;
+import com.optimalorange.cooltechnologies.ui.fragment.SimpleListCommentsFragment;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -129,6 +130,7 @@ public class ShowVideoDetailActivity extends LoginableBaseActivity {
         }
 
         initViews();
+        addCommentsFragment(savedInstanceState, videoIdExtra);
 
         mVolleySingleton.addToRequestQueue(buildVideoDetailRequest(videoIdExtra));
     }
@@ -142,6 +144,16 @@ public class ShowVideoDetailActivity extends LoginableBaseActivity {
         mViews = new ViewHolder(this);
 
         setTitle(null);
+    }
+
+    // 评论
+    private void addCommentsFragment(Bundle savedInstanceState, String videoId) {
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.comments_fragment_container,
+                            SimpleListCommentsFragment.newInstance(videoId))
+                    .commit();
+        }
     }
 
     @Override

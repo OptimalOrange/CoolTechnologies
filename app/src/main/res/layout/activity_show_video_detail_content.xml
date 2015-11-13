@@ -13,31 +13,45 @@
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingLeft="@dimen/activity_horizontal_margin"
-            android:paddingRight="@dimen/activity_horizontal_margin"
-            android:paddingTop="36dp"
-            android:paddingBottom="@dimen/activity_vertical_margin"
             android:orientation="vertical"
             >
 
-        <TextView
-                android:id="@+id/title"
+        <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:textColor="@color/text_black"
-                android:textSize="@dimen/text_size_headline"
-                android:lineSpacingExtra="@dimen/text_line_spacing_extra_headline1_dense"
-                />
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingTop="36dp"
+                android:paddingBottom="@dimen/activity_vertical_margin"
+                android:orientation="vertical"
+                >
 
-        <TextView
-                android:id="@+id/description"
+            <TextView
+                    android:id="@+id/title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:textColor="@color/text_black"
+                    android:textSize="@dimen/text_size_headline"
+                    android:lineSpacingExtra="@dimen/text_line_spacing_extra_headline1_dense"
+                    />
+
+            <TextView
+                    android:id="@+id/description"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:textColor="@color/text_black"
+                    android:textSize="@dimen/text_size_body_dense"
+                    android:lineSpacingExtra="@dimen/text_line_spacing_extra_body1_dense"
+                    />
+
+        </LinearLayout>
+
+        <FrameLayout
+                android:id="@+id/comments_fragment_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:textColor="@color/text_black"
-                android:textSize="@dimen/text_size_body_dense"
-                android:lineSpacingExtra="@dimen/text_line_spacing_extra_body1_dense"
                 />
 
     </LinearLayout>
