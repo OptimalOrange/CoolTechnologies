@@ -11,6 +11,7 @@ import com.optimalorange.cooltechnologies.network.NetworkChecker;
 import com.optimalorange.cooltechnologies.network.VideoDetailRequest;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingleton;
+import com.optimalorange.cooltechnologies.storage.sqlite.DBManager;
 import com.optimalorange.cooltechnologies.ui.entity.Video;
 import com.optimalorange.cooltechnologies.ui.fragment.SimpleListCommentsFragment;
 
@@ -90,9 +91,13 @@ public class ShowVideoDetailActivity extends LoginableBaseActivity {
         if (mVideo == null) {
             throw new IllegalStateException("cannot play video before load it.");
         }
-        //TODO do play history log
+
+        final FavoriteBean favoriteBean = convertToFavoriteBean(mVideo);
+        // 保存播放历史
+        DBManager.getInstance(this).saveHistory(favoriteBean);
+        // 跳转到PlayVideoActivity
         final Intent intent = new Intent(ShowVideoDetailActivity.this, PlayVideoActivity.class);
-        intent.putExtra(PlayVideoActivity.EXTRA_KEY_VIDEO, convertToFavoriteBean(mVideo));
+        intent.putExtra(PlayVideoActivity.EXTRA_KEY_VIDEO, favoriteBean);
         startActivity(intent);
     }
 

@@ -4,7 +4,6 @@ import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.entity.FavoriteBean;
 import com.optimalorange.cooltechnologies.network.NetworkChecker;
 import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingleton;
-import com.optimalorange.cooltechnologies.storage.sqlite.DBManager;
 import com.umeng.analytics.MobclickAgent;
 
 import android.annotation.TargetApi;
@@ -39,6 +38,7 @@ public class PlayVideoActivity extends LoginableBaseActivity {
      * 应当播放的Video<br/>
      * Type: {@link FavoriteBean}
      */
+    //TODO 改为EXTRA_KEY_VIDEO_ID
     public static final String EXTRA_KEY_VIDEO =
             PlayVideoActivity.class.getName() + ".extra.KEY_VIDEO";
 
@@ -54,10 +54,6 @@ public class PlayVideoActivity extends LoginableBaseActivity {
 
     /** {@link #URL_PLAY_VIDEO}中用到的{@link WebAppInterface WebAppInterface}实例名 */
     private static final String JAVASCRIPT_INTERFACE_GENERIC = "webAppInterface";
-
-    /** {@link #URL_PLAY_VIDEO}中用到的{@link OnPlayStartListener OnPlayStartListener}实例名 */
-    private static final String JAVASCRIPT_INTERFACE_ON_PLAY_START_LISTENER =
-            "webAppOnPlayStartListener";
 
     /**
      * {@link #URL_PLAY_VIDEO}中用到的
@@ -208,9 +204,6 @@ public class PlayVideoActivity extends LoginableBaseActivity {
                 .setVid(getVideoId());
         //TODO 分析解决安全问题
         mWebView.addJavascriptInterface(webAppInterface, JAVASCRIPT_INTERFACE_GENERIC);
-        mWebView.addJavascriptInterface(
-                new OnPlayStartListener(DBManager.getInstance(this), mFavoriteBean),
-                JAVASCRIPT_INTERFACE_ON_PLAY_START_LISTENER);
         mWebView.addJavascriptInterface(
                 new OnClickSettingsListener(this), JAVASCRIPT_INTERFACE_ON_CLICK_SETTINGS_LISTENER);
     }
@@ -456,27 +449,6 @@ public class PlayVideoActivity extends LoginableBaseActivity {
         @JavascriptInterface
         public boolean isShowRelated() {
             return mShowRelated;
-        }
-    }
-
-    /**
-     * {@link WebView}中的播放器开始播放时被调用。
-     * <p>本类是线程安全的。</p>
-     */
-    private static class OnPlayStartListener {
-
-        private final DBManager mDBManager;
-
-        private final FavoriteBean mFavoriteBean;
-
-        private OnPlayStartListener(DBManager dbManager, FavoriteBean favoriteBean) {
-            mDBManager = dbManager;
-            mFavoriteBean = favoriteBean;
-        }
-
-        @JavascriptInterface
-        public void onPlayStart() {
-            mDBManager.saveHistory(mFavoriteBean);
         }
     }
 
