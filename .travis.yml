@@ -31,3 +31,11 @@ before_script:
 script:
     # see http://tools.android.com/tech-docs/new-build-system/tips#TOC-Improving-Build-Server-performance.
     - ./gradlew build -PdisablePreDex
+
+# Caching
+before_cache:
+  - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
