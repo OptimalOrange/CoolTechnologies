@@ -1,7 +1,6 @@
 package com.optimalorange.cooltechnologies.ui;
 
 import com.optimalorange.cooltechnologies.R;
-import com.optimalorange.cooltechnologies.entity.FavoriteBean;
 import com.optimalorange.cooltechnologies.network.NetworkChecker;
 import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingleton;
 import com.umeng.analytics.MobclickAgent;
@@ -35,12 +34,11 @@ import name.cpr.VideoEnabledWebView;
 public class PlayVideoActivity extends LoginableBaseActivity {
 
     /**
-     * 应当播放的Video<br/>
-     * Type: {@link FavoriteBean}
+     * 应当播放的Video的ID<br/>
+     * Type: {@link String}
      */
-    //TODO 改为EXTRA_KEY_VIDEO_ID
-    public static final String EXTRA_KEY_VIDEO =
-            PlayVideoActivity.class.getName() + ".extra.KEY_VIDEO";
+    public static final String EXTRA_KEY_VIDEO_ID =
+            PlayVideoActivity.class.getName() + ".extra.KEY_VIDEO_ID";
 
     /** 正常情况下，{@link android.webkit.WebView WebView}要加载的网页的路径 */
     private static final String URL_PLAY_VIDEO = "file:///android_asset/playvideo.html";
@@ -69,7 +67,6 @@ public class PlayVideoActivity extends LoginableBaseActivity {
     private static final String JAVASCRIPT_INTERFACE_ON_CLICK_SETTINGS_LISTENER =
             "onClickSettingsListener";
 
-    private FavoriteBean mFavoriteBean;
 
     private DefaultSharedPreferencesSingleton mDefaultSharedPreferencesSingleton;
 
@@ -112,9 +109,9 @@ public class PlayVideoActivity extends LoginableBaseActivity {
         super.onCreate(savedInstanceState);
 
         // 初始化属性
-        mFavoriteBean = (FavoriteBean) getIntent().getSerializableExtra(EXTRA_KEY_VIDEO);
-        if (mFavoriteBean == null) {
-            throw new IllegalStateException("Please do intent.putExtra(EXTRA_KEY_VIDEO, vid)");
+        final String videoIdExtra = getIntent().getStringExtra(EXTRA_KEY_VIDEO_ID);
+        if (videoIdExtra == null) {
+            throw new IllegalStateException("Please do intent.putExtra(EXTRA_KEY_VIDEO_ID, vid)");
         }
         mDefaultSharedPreferencesSingleton = DefaultSharedPreferencesSingleton.getInstance(this);
         mNetworkChecker = NetworkChecker.newInstance(this);
@@ -201,7 +198,7 @@ public class PlayVideoActivity extends LoginableBaseActivity {
         // addJavascriptInterface
         WebAppInterface webAppInterface = new WebAppInterface()
                 .setClientId(getString(R.string.youku_client_id))
-                .setVid(getVideoId());
+                .setVid(videoIdExtra);
         //TODO 分析解决安全问题
         mWebView.addJavascriptInterface(webAppInterface, JAVASCRIPT_INTERFACE_GENERIC);
         mWebView.addJavascriptInterface(
@@ -252,7 +249,6 @@ public class PlayVideoActivity extends LoginableBaseActivity {
         }
         mNetworkChecker = null;
         mDefaultSharedPreferencesSingleton = null;
-        mFavoriteBean = null;
         super.onDestroy();
     }
 
@@ -283,10 +279,6 @@ public class PlayVideoActivity extends LoginableBaseActivity {
     //--------------------------------------------------------------------------
     // 新声明方法
     //--------------------------------------------------------------------------
-
-    private String getVideoId() {
-        return mFavoriteBean.videoId;
-    }
 
     private void addWebViewToNonVideoLayout() {
         int widthPixels = getResources().getDisplayMetrics().widthPixels;

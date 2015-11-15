@@ -97,7 +97,7 @@ public class ShowVideoDetailActivity extends LoginableBaseActivity {
         DBManager.getInstance(this).saveHistory(favoriteBean);
         // 跳转到PlayVideoActivity
         final Intent intent = new Intent(ShowVideoDetailActivity.this, PlayVideoActivity.class);
-        intent.putExtra(PlayVideoActivity.EXTRA_KEY_VIDEO, favoriteBean);
+        intent.putExtra(PlayVideoActivity.EXTRA_KEY_VIDEO_ID, mVideo.id);
         startActivity(intent);
     }
 
