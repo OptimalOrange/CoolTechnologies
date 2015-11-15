@@ -29,15 +29,17 @@ public class DBManager {
     private DataBaseHelper dbHelper = null;
 
     private DBManager(Context context) {
+        // getApplicationContext() is key, it keeps you from leaking the
+        // Activity or BroadcastReceiver if someone passes one in.
+        context = context.getApplicationContext();
+
         this.context = context;
     }
 
     private static class DataBaseHelper extends SQLiteOpenHelper {
 
-        Context context;
         DataBaseHelper(Context context) {
             super(context, DB_NAME, null, DB_VERSION);
-            this.context = context;
         }
 
         @Override
@@ -82,16 +84,18 @@ public class DBManager {
 
     public void saveHistory(FavoriteBean bean) {
         open();
-        if (isInHistory(bean.videoId)) {
-            deleteHistory(bean.videoId);
+        final ContentValues contentValues = convertToContentValues(bean);
+        db.beginTransaction();
+        try {
+            if (isInHistory(bean.videoId)) {
+                deleteHistory(bean.videoId);
+            }
+            db.insert("history", null, contentValues);
+
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
         }
-        ContentValues contentValues = new ContentValues();
-        contentValues.put("_videoId", bean.videoId);
-        contentValues.put("_title", bean.title);
-        contentValues.put("_duration", bean.duration);
-        contentValues.put("_imageUrl", bean.imageUrl);
-        contentValues.put("_link", bean.link);
-        db.insert("history", null, contentValues);
     }
 
     public ArrayList<FavoriteBean> getAllHistory() {
@@ -107,6 +111,7 @@ public class DBManager {
             favoriteBean.link = cursor.getString(5);
             favoriteBeans.add(favoriteBean);
         }
+        cursor.close();
         return favoriteBeans;
     }
 
@@ -121,9 +126,19 @@ public class DBManager {
         return count != 0;
     }
 
-    public void deleteHistory(String videoId) {
+    public int deleteHistory(String videoId) {
         open();
-        db.execSQL("delete from history where _videoId = ?", new String[]{videoId});
+        return db.delete("history", "_videoId = ?", new String[]{videoId});
+    }
+
+    private static ContentValues convertToContentValues(FavoriteBean favoriteBean) {
+        final ContentValues contentValues = new ContentValues();
+        contentValues.put("_videoId", favoriteBean.videoId);
+        contentValues.put("_title", favoriteBean.title);
+        contentValues.put("_duration", favoriteBean.duration);
+        contentValues.put("_imageUrl", favoriteBean.imageUrl);
+        contentValues.put("_link", favoriteBean.link);
+        return contentValues;
     }
 
 }
