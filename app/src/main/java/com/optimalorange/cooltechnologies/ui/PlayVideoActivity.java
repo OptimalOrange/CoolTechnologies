@@ -1,19 +1,10 @@
 package com.optimalorange.cooltechnologies.ui;
 
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.entity.FavoriteBean;
-import com.optimalorange.cooltechnologies.network.CreateFavoriteRequest;
-import com.optimalorange.cooltechnologies.network.DestroyFavoriteRequest;
 import com.optimalorange.cooltechnologies.network.NetworkChecker;
-import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingleton;
-import com.optimalorange.cooltechnologies.storage.sqlite.DBManager;
-import com.optimalorange.cooltechnologies.ui.fragment.SimpleListCommentsFragment;
 import com.umeng.analytics.MobclickAgent;
-
-import org.json.JSONObject;
 
 import android.annotation.TargetApi;
 import android.content.BroadcastReceiver;
@@ -26,8 +17,6 @@ import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
@@ -38,9 +27,6 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.Toast;
-
-import java.lang.ref.WeakReference;
 
 import name.cpr.VideoEnabledWebChromeClient;
 import name.cpr.VideoEnabledWebView;
@@ -52,6 +38,7 @@ public class PlayVideoActivity extends LoginableBaseActivity {
      * 应当播放的Video<br/>
      * Type: {@link FavoriteBean}
      */
+    //TODO 改为EXTRA_KEY_VIDEO_ID
     public static final String EXTRA_KEY_VIDEO =
             PlayVideoActivity.class.getName() + ".extra.KEY_VIDEO";
 
@@ -68,10 +55,6 @@ public class PlayVideoActivity extends LoginableBaseActivity {
     /** {@link #URL_PLAY_VIDEO}中用到的{@link WebAppInterface WebAppInterface}实例名 */
     private static final String JAVASCRIPT_INTERFACE_GENERIC = "webAppInterface";
 
-    /** {@link #URL_PLAY_VIDEO}中用到的{@link OnPlayStartListener OnPlayStartListener}实例名 */
-    private static final String JAVASCRIPT_INTERFACE_ON_PLAY_START_LISTENER =
-            "webAppOnPlayStartListener";
-
     /**
      * {@link #URL_PLAY_VIDEO}中用到的
      * {@link WebAppFullscreenToggleSwitch WebAppFullscreenToggleSwitch}实例名
@@ -86,13 +69,9 @@ public class PlayVideoActivity extends LoginableBaseActivity {
     private static final String JAVASCRIPT_INTERFACE_ON_CLICK_SETTINGS_LISTENER =
             "onClickSettingsListener";
 
-    private String mYoukuClientId;
-
     private FavoriteBean mFavoriteBean;
 
     private DefaultSharedPreferencesSingleton mDefaultSharedPreferencesSingleton;
-
-    private VolleySingleton mVolleySingleton;
 
     private NetworkChecker mNetworkChecker;
 
@@ -102,11 +81,6 @@ public class PlayVideoActivity extends LoginableBaseActivity {
      * 状态属性：已经加载播放器
      */
     private boolean mPlayerIsLoaded = false;
-
-    /**
-     * 状态属性：已经收藏此视频
-     */
-    private boolean mHasBookmarked = false;
 
     private LinearLayout mNonVideoLayout;
 
@@ -144,8 +118,6 @@ public class PlayVideoActivity extends LoginableBaseActivity {
         }
         mDefaultSharedPreferencesSingleton = DefaultSharedPreferencesSingleton.getInstance(this);
         mNetworkChecker = NetworkChecker.newInstance(this);
-        mVolleySingleton = VolleySingleton.getInstance(this);
-        mYoukuClientId = getString(R.string.youku_client_id);
 
         addLoginStatusChangeListener(new OnLoginStatusChangeListener() {
             @Override
@@ -163,7 +135,6 @@ public class PlayVideoActivity extends LoginableBaseActivity {
                 getLayoutInflater().inflate(R.layout.view_loading_video, videoLayout, false);
 
         addWebViewToNonVideoLayout();
-        addOthersToNonVideoLayout(savedInstanceState);
 
         // setWebViewClient
         mWebViewClient = new CustomWebViewClient();
@@ -233,9 +204,6 @@ public class PlayVideoActivity extends LoginableBaseActivity {
                 .setVid(getVideoId());
         //TODO 分析解决安全问题
         mWebView.addJavascriptInterface(webAppInterface, JAVASCRIPT_INTERFACE_GENERIC);
-        mWebView.addJavascriptInterface(
-                new OnPlayStartListener(DBManager.getInstance(this), mFavoriteBean),
-                JAVASCRIPT_INTERFACE_ON_PLAY_START_LISTENER);
         mWebView.addJavascriptInterface(
                 new OnClickSettingsListener(this), JAVASCRIPT_INTERFACE_ON_CLICK_SETTINGS_LISTENER);
     }
@@ -312,66 +280,12 @@ public class PlayVideoActivity extends LoginableBaseActivity {
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        boolean superResult = super.onCreateOptionsMenu(menu);
-        getMenuInflater().inflate(R.menu.menu_activity_play_video, menu);
-        return hasDeclaredMenuItem() || superResult;
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        boolean superResult = super.onPrepareOptionsMenu(menu);
-        MenuItem bookmarkMenuItem = menu.findItem(R.id.action_bookmark);
-        boolean hasLoggedIn = hasLoggedIn();
-        bookmarkMenuItem.setVisible(hasLoggedIn);
-        bookmarkMenuItem.setEnabled(hasLoggedIn);
-        if (mHasBookmarked) {
-            bookmarkMenuItem.setIcon(R.drawable.ic_favorite_white_24dp);
-        } else {
-            bookmarkMenuItem.setIcon(R.drawable.ic_favorite_outline_white_24dp);
-        }
-        return hasDeclaredMenuItem() || superResult;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_bookmark:
-                if (!mNetworkChecker.isConnected()) {
-                    NetworkChecker.openNoConnectionDialog(getSupportFragmentManager());
-                    return true;
-                }
-                if (mDefaultSharedPreferencesSingleton.hasLoggedIn()) {
-                    String token =
-                            mDefaultSharedPreferencesSingleton.retrieveString("access_token", "");
-                    if (mHasBookmarked) {
-                        mVolleySingleton.addToRequestQueue(buildDestroyFavoriteRequest(token));
-                    } else {
-                        mVolleySingleton.addToRequestQueue(buildCreateFavoriteRequest(token));
-                    }
-                } else {
-                    System.err.println("Shouldn't be there.@onOptionsItemSelected.action_bookmark");
-                }
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
     //--------------------------------------------------------------------------
     // 新声明方法
     //--------------------------------------------------------------------------
 
     private String getVideoId() {
         return mFavoriteBean.videoId;
-    }
-
-    /**
-     * 有新添加的菜单项
-     */
-    private boolean hasDeclaredMenuItem() {
-        return hasLoggedIn();
     }
 
     private void addWebViewToNonVideoLayout() {
@@ -384,15 +298,6 @@ public class PlayVideoActivity extends LoginableBaseActivity {
                 0 //WebView的layout_weight设为0，评论等其他View的weight非0，让其他View充满剩余空间
         );
         mNonVideoLayout.addView(mWebView, 0, layoutParams);
-    }
-
-    private void addOthersToNonVideoLayout(Bundle savedInstanceState) {
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.others_container,
-                            SimpleListCommentsFragment.newInstance(getVideoId()))
-                    .commit();
-        }
     }
 
     private void loadUrlAndClearHistory(String url) {
@@ -429,29 +334,6 @@ public class PlayVideoActivity extends LoginableBaseActivity {
         } else {
             return mNetworkChecker.isConnected();
         }
-    }
-
-
-    /** 创建添加收藏的请求 */
-    private CreateFavoriteRequest buildCreateFavoriteRequest(String token) {
-        return new CreateFavoriteRequest.Builder()
-                .setClient_id(mYoukuClientId)
-                .setVideo_id(mFavoriteBean.videoId)
-                .setAccess_token(token)
-                .setResponseListener(new OnResponseListener(this, RequestType.CREATE_FAVORITE))
-                .setErrorListener(new OnErrorResponseListener(this, RequestType.CREATE_FAVORITE))
-                .build();
-    }
-
-    /** 创建取消收藏的请求 */
-    private DestroyFavoriteRequest buildDestroyFavoriteRequest(String token) {
-        return new DestroyFavoriteRequest.Builder()
-                .setClient_id(mYoukuClientId)
-                .setVideo_id(mFavoriteBean.videoId)
-                .setAccess_token(token)
-                .setResponseListener(new OnResponseListener(this, RequestType.DESTROY_FAVORITE))
-                .setErrorListener(new OnErrorResponseListener(this, RequestType.DESTROY_FAVORITE))
-                .build();
     }
 
     //--------------------------------------------------------------------------
@@ -571,27 +453,6 @@ public class PlayVideoActivity extends LoginableBaseActivity {
     }
 
     /**
-     * {@link WebView}中的播放器开始播放时被调用。
-     * <p>本类是线程安全的。</p>
-     */
-    private static class OnPlayStartListener {
-
-        private final DBManager mDBManager;
-
-        private final FavoriteBean mFavoriteBean;
-
-        private OnPlayStartListener(DBManager dbManager, FavoriteBean favoriteBean) {
-            mDBManager = dbManager;
-            mFavoriteBean = favoriteBean;
-        }
-
-        @JavascriptInterface
-        public void onPlayStart() {
-            mDBManager.saveHistory(mFavoriteBean);
-        }
-    }
-
-    /**
      * 在{@link Build.VERSION_CODES#KITKAT}以上版本，点击{@link #URL_PLAY_VIDEO}中视屏全屏按钮时，
      * 触发本类的实例的{@link PlayVideoActivity.WebAppFullscreenToggleSwitch#toggleFullscreen()}方法。
      */
@@ -659,88 +520,6 @@ public class PlayVideoActivity extends LoginableBaseActivity {
         @JavascriptInterface
         public void onClickSystemSettings() {
             mContext.startActivity(new Intent(Settings.ACTION_SETTINGS));
-        }
-    }
-
-    //-------------------------------------
-    // Response Listeners
-    //-------------------------------------
-
-    private enum RequestType {CREATE_FAVORITE, DESTROY_FAVORITE}
-
-    /**
-     * 此类不会导致内存泄漏
-     */
-    private static class OnResponseListener implements Response.Listener<JSONObject> {
-
-        private final WeakReference<PlayVideoActivity> mActivityWeakReference;
-
-        private final WeakReference<Context> mContextWeakReference;
-
-        private final RequestType mRequestType;
-
-        public OnResponseListener(PlayVideoActivity activity, RequestType requestType) {
-            mActivityWeakReference = new WeakReference<>(activity);
-            mContextWeakReference = new WeakReference<>(activity.getApplicationContext());
-            mRequestType = requestType;
-        }
-
-        @Override
-        public void onResponse(JSONObject jsonObject) {
-            final PlayVideoActivity activity = mActivityWeakReference.get();
-            if (activity != null) {
-                activity.mHasBookmarked = mRequestType == RequestType.CREATE_FAVORITE;
-                activity.invalidateOptionsMenu();
-            }
-            final Context context = mContextWeakReference.get();
-            if (context != null) {
-                Toast.makeText(context, getToastTextResId(), Toast.LENGTH_SHORT).show();
-            }
-        }
-
-        private int getToastTextResId() {
-            switch (mRequestType) {
-                case CREATE_FAVORITE:
-                    return R.string.create_favorite_success;
-                case DESTROY_FAVORITE:
-                    return R.string.destroy_favorite_success;
-                default:
-                    throw new IllegalArgumentException("Unknown RequestType:" + mRequestType);
-            }
-        }
-    }
-
-    /**
-     * 此类不会导致内存泄漏
-     */
-    private static class OnErrorResponseListener implements Response.ErrorListener {
-
-        private final WeakReference<Context> mContextWeakReference;
-
-        private final RequestType mRequestType;
-
-        private OnErrorResponseListener(Context context, RequestType requestType) {
-            mContextWeakReference = new WeakReference<>(context.getApplicationContext());
-            mRequestType = requestType;
-        }
-
-        @Override
-        public void onErrorResponse(VolleyError volleyError) {
-            final Context context = mContextWeakReference.get();
-            if (context != null) {
-                Toast.makeText(context, getToastTextResId(), Toast.LENGTH_SHORT).show();
-            }
-        }
-
-        private int getToastTextResId() {
-            switch (mRequestType) {
-                case CREATE_FAVORITE:
-                    return R.string.create_favorite_failure;
-                case DESTROY_FAVORITE:
-                    return R.string.destroy_favorite_failure;
-                default:
-                    throw new IllegalArgumentException("Unknown RequestType:" + mRequestType);
-            }
         }
     }
 

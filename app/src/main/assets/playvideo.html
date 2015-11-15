@@ -26,9 +26,6 @@
             });
         }
     };
-    var onPlayStart = function() {
-        webAppOnPlayStartListener.onPlayStart();
-    };
     </script>
 </head>
 
@@ -43,8 +40,7 @@ player = new YKU.Player('youkuplayer', {
     autoplay: webAppInterface.isAutoplay(),
     show_related: webAppInterface.isShowRelated(),
     events: {
-        onPlayerReady: onPlayerReady,
-        onPlayStart: onPlayStart
+        onPlayerReady: onPlayerReady
     }
 });
 </script>
