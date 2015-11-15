@@ -64,8 +64,6 @@ public class FavoriteFragment extends SwipeRefreshFragment {
 
     private NetworkChecker mNetworkChecker;
 
-    private boolean mIsCreated = false;
-
     private List<Loading> mLoadingDataSet;
 
     private FavoritesDataSet mFavoritesDataSet;
@@ -199,11 +197,19 @@ public class FavoriteFragment extends SwipeRefreshFragment {
             setRefreshable(false);
         }
 
-        vh.favorites.setVisibility(View.GONE);
         vh.favorites.setLayoutManager(new LinearLayoutManager(vh.favorites.getContext()));
         vh.favorites.setAdapter(adapter);
-        getNewData();
-        mIsCreated = true;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // load data if not do it yet
+        if (mFavoritesDataSet.favorites == null) {
+            vh.favorites.setVisibility(View.GONE);
+            getNewData();
+        }
     }
 
     @Override
@@ -286,21 +292,6 @@ public class FavoriteFragment extends SwipeRefreshFragment {
                 vh.favorites.canScrollVertically(-1);
     }
 
-
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        //显示的时候判断有没有走onCreated，没有判断是否有列表，没有则刷新列表。
-        if (isVisibleToUser) {
-            if (mIsCreated) {
-                mIsCreated = false;
-            } else {
-                if (vh.favorites.getVisibility() == View.GONE) {
-                    getNewData();
-                }
-            }
-        }
-    }
 
     //TODO add delete feathure on UI
     private void sendDeleteRequest(String id, final int index) {

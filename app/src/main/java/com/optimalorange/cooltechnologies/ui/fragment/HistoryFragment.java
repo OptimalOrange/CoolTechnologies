@@ -33,8 +33,6 @@ public class HistoryFragment extends Fragment {
     private ListView favoriteListView;
     private TextView mTvHint;
 
-    private boolean mIsCreated;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,7 +66,6 @@ public class HistoryFragment extends Fragment {
 
         favoriteListView.setAdapter(adapter);
         favoriteListView.setVisibility(View.VISIBLE);
-        mIsCreated = true;
         isNoHistory();
     }
 
@@ -123,16 +120,4 @@ public class HistoryFragment extends Fragment {
         favoriteListView.setVisibility(View.GONE);
     }
 
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        //显示的时候判断有没有走onCreated，没有判断是否有列表，没有则刷新列表。
-        if (isVisibleToUser) {
-            if (mIsCreated) {
-                mIsCreated = false;
-            } else {
-                refreshData();
-            }
-        }
-    }
 }
