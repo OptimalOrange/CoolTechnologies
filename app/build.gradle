@@ -6,8 +6,6 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:1.4.0-beta6'
         classpath 'com.jakewharton.sdkmanager:gradle-plugin:0.12.0'
-        classpath 'com.uphyca.gradle:gradle-android-aspectj-plugin:0.9.12'    //0.9.13尚不完善，暂不更新
-
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -15,7 +13,6 @@ buildscript {
 
 apply plugin: 'android-sdk-manager'
 apply plugin: 'com.android.application'
-apply plugin: 'android-aspectj'
 
 android {
     compileSdkVersion 23
