@@ -45,12 +45,6 @@
                 android:theme="@style/AppTheme.NoActionBar"/>
 
         <activity
-                android:name=".ui.PlayVideoActivity"
-                android:configChanges="keyboardHidden|orientation|screenSize"
-                android:hardwareAccelerated="true"
-                android:label="@string/play_video"/>
-
-        <activity
                 android:name=".ui.ListCommentsActivity"
                 android:label="@string/comments_title"/>
 
@@ -65,6 +59,12 @@
                     android:name="android.app.searchable"
                     android:resource="@xml/searchable"/>
         </activity>
+
+        <activity
+                android:name=".ui.SimpleWebViewActivity"
+                android:theme="@style/FullscreenTheme"
+                android:configChanges="orientation|keyboardHidden|screenSize"
+                android:screenOrientation="sensorLandscape"/>
 
         <activity
                 android:name=".ui.SettingsActivity"

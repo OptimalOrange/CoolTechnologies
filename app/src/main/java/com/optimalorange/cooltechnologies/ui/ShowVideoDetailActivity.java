@@ -95,10 +95,8 @@ public class ShowVideoDetailActivity extends LoginableBaseActivity {
         final FavoriteBean favoriteBean = convertToFavoriteBean(mVideo);
         // 保存播放历史
         DBManager.getInstance(this).saveHistory(favoriteBean);
-        // 跳转到PlayVideoActivity
-        final Intent intent = new Intent(ShowVideoDetailActivity.this, PlayVideoActivity.class);
-        intent.putExtra(PlayVideoActivity.EXTRA_KEY_VIDEO, favoriteBean);
-        startActivity(intent);
+        // 跳转到 SimpleWebViewActivity
+        SimpleWebViewActivity.start(this, mVideo.link);
     }
 
     private static FavoriteBean convertToFavoriteBean(Video video) {
