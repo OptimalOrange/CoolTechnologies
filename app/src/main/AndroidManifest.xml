@@ -45,12 +45,6 @@
                 android:theme="@style/AppTheme.NoActionBar"/>
 
         <activity
-                android:name=".ui.PlayVideoActivity"
-                android:configChanges="keyboardHidden|orientation|screenSize"
-                android:hardwareAccelerated="true"
-                android:label="@string/play_video"/>
-
-        <activity
                 android:name=".ui.ListCommentsActivity"
                 android:label="@string/comments_title"/>
 
