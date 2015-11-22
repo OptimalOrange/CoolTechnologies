@@ -5,6 +5,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.entity.Video;
+import com.optimalorange.cooltechnologies.listener.OnRecyclerViewScrollListener;
 import com.optimalorange.cooltechnologies.network.SearchRequest;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.optimalorange.cooltechnologies.util.Utils;
@@ -25,14 +26,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.LinkedList;
 import java.util.List;
 
+import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
+
 /**
  * 搜索页面
  *
- * @author Zhou Peican
  */
 public class SearchActivity extends BaseActivity {
 
@@ -54,6 +57,13 @@ public class SearchActivity extends BaseActivity {
 
     private LinkedList<Video> mListVideos = new LinkedList<Video>();
 
+    private MaterialProgressBar mProgressBar;
+
+    /** 是否有正在获取Video */
+    private boolean mIsQueryingVideos = false;
+
+    private OnRecyclerViewScrollListener mScrollListener;
+
     private SearchRequest buildSearchVideosRequest() {
         SearchRequest.Builder builder = new SearchRequest.Builder()
                 .setClient_id(mYoukuClientId)
@@ -71,17 +81,28 @@ public class SearchActivity extends BaseActivity {
                                 mAdapter.notifyDataSetChanged();
                             }
                         }
+                        mIsQueryingVideos = false;
+                        mProgressBar.setVisibility(View.GONE);
+                        if (videos.size() == 0) {
+                            mRecyclerView.removeOnScrollListener(mScrollListener);
+                            Toast.makeText(SearchActivity.this, getString(R.string.at_last),
+                                    Toast.LENGTH_SHORT).show();
+                        }
                     }
                 })
                 .setErrorListener(new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         error.printStackTrace();
+                        mIsQueryingVideos = false;
+                        mProgressBar.setVisibility(View.GONE);
                     }
                 });
 
         //为下一次请求获取Video翻页
         mPage++;
+
+        mIsQueryingVideos = true;
 
         return builder.build();
     }
@@ -94,12 +115,16 @@ public class SearchActivity extends BaseActivity {
         mYoukuClientId = getString(R.string.youku_client_id);
         mVolleySingleton = VolleySingleton.getInstance(this);
 
+        mProgressBar = (MaterialProgressBar) findViewById(R.id.progressbar);
+
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
         mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new GridLayoutManager(this, 2);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mAdapter = new MyAdapter(mListVideos, mVolleySingleton.getImageLoader());
         mRecyclerView.setAdapter(mAdapter);
+
+        initListener();
 
         //处理搜索，当在actionbar上的SearchView输入完成点击搜索时
         // 系统会启动一个搜索请求，由本页面自身接收（singleTop）
@@ -159,6 +184,20 @@ public class SearchActivity extends BaseActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    private void initListener() {
+        mScrollListener = new OnRecyclerViewScrollListener() {
+            @Override
+            public void onBottom() {
+                super.onBottom();
+                if (!mIsQueryingVideos) {
+                    mProgressBar.setVisibility(View.VISIBLE);
+                    mVolleySingleton.addToRequestQueue(buildSearchVideosRequest());
+                }
+            }
+        };
+        mRecyclerView.addOnScrollListener(mScrollListener);
+    }
+
     /**
      * 搜索结果适配器
      */
@@ -197,11 +236,6 @@ public class SearchActivity extends BaseActivity {
             holder.viewCount.setText(String.format(getString(R.string.view_count),
                     Utils.formatViewCount(mVideos.get(position).getView_count(),
                             SearchActivity.this)));
-
-            //当滑到末尾的位置时加载更多Video
-            if (position == mListVideos.size() - 2) {
-                mVolleySingleton.addToRequestQueue(buildSearchVideosRequest());
-            }
 
             holder.thumbnail.setOnClickListener(new View.OnClickListener() {
                 @Override

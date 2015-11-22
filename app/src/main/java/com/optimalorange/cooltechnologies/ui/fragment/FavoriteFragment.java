@@ -95,7 +95,7 @@ public class FavoriteFragment extends SwipeRefreshFragment {
         loading.hint = getString(R.string.favorite_new_loading);
         empty.hint = getString(R.string.favorite_no_fav);
         haveMoreFooter.hint = getString(R.string.favorite_view_more);
-        noMoreFooter.hint = getString(R.string.favorite_view_more_last);
+        noMoreFooter.hint = getString(R.string.at_last);
         haveMoreFooter.listener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
