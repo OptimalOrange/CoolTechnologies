@@ -289,6 +289,7 @@ public class ListVideosFragment extends SwipeRefreshFragment {
         mPage = 1;
         mAdapter.notifyDataSetChanged();
         restartLoad();
+        initListener();
     }
 
     @Override
