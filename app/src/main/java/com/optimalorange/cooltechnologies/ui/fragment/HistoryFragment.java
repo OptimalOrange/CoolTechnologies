@@ -1,23 +1,26 @@
 package com.optimalorange.cooltechnologies.ui.fragment;
 
 import com.optimalorange.cooltechnologies.R;
-import com.optimalorange.cooltechnologies.adapter.FavoriteAdapter;
-import com.optimalorange.cooltechnologies.entity.FavoriteBean;
-import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.optimalorange.cooltechnologies.storage.sqlite.DBManager;
 import com.optimalorange.cooltechnologies.ui.ShowVideoDetailActivity;
+import com.optimalorange.cooltechnologies.ui.entity.Video;
+import com.optimalorange.cooltechnologies.ui.viewholder.RecyclerFavoriteViewHolder;
 import com.umeng.analytics.MobclickAgent;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import gq.baijie.classbasedviewadapter.android.adapter.ClassBasedRecyclerViewAdapter;
+import gq.baijie.classbasedviewadapter.android.adapter.DataSet;
 
 /**
  * Created by WANGZHENGZE on 2014/11/20.
@@ -25,28 +28,33 @@ import java.util.ArrayList;
  */
 public class HistoryFragment extends Fragment {
 
-    private ArrayList<FavoriteBean> favoriteBeans;
-    private FavoriteAdapter adapter;
+    private final HistoryDataSet mHistoryDataSet = new HistoryDataSet();
 
-    private View v;
-    private ListView favoriteListView;
-    private TextView mTvHint;
+    private final ClassBasedRecyclerViewAdapter mAdapter = new ClassBasedRecyclerViewAdapter();
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        favoriteBeans = new ArrayList<>(20);
-        adapter = new FavoriteAdapter(
-                getActivity(), favoriteBeans,
-                VolleySingleton.getInstance(getActivity()).getImageLoader());
+    {
+        mAdapter.getRegister().registerViewHolderFactory(new RecyclerFavoriteViewHolder.Factory() {
+            @Override
+            public void bindViewHolder(RecyclerFavoriteViewHolder holder, final Video value) {
+                super.bindViewHolder(holder, value);
+                holder.itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        ShowVideoDetailActivity.start(v.getContext(), value.id);
+                    }
+                });
+            }
+        });
+        mAdapter.setDataSet(mHistoryDataSet);
     }
+
+    private ViewHolder mViewHolder;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        v = inflater.inflate(R.layout.fragment_history, container, false);
-        favoriteListView = (ListView) v.findViewById(R.id.favorites);
-        mTvHint = (TextView) v.findViewById(R.id.main_hint);
+        final View v = inflater.inflate(R.layout.fragment_history, container, false);
+        mViewHolder = new ViewHolder(v);
         return v;
     }
 
@@ -54,17 +62,11 @@ public class HistoryFragment extends Fragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        favoriteListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                ShowVideoDetailActivity.start(
-                        view.getContext(), favoriteBeans.get(position).videoId);
-            }
-        });
-
-        favoriteListView.setAdapter(adapter);
-        favoriteListView.setVisibility(View.VISIBLE);
-        isNoHistory();
+        mViewHolder.histories.setLayoutManager(
+                new LinearLayoutManager(mViewHolder.histories.getContext()));
+        mViewHolder.histories.setAdapter(mAdapter);
+        mViewHolder.histories.setVisibility(View.VISIBLE);
+        checkIsNoHistory();
     }
 
     @Override
@@ -82,40 +84,69 @@ public class HistoryFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
-        mTvHint = null;
-        favoriteListView.setAdapter(null);
-        favoriteListView.setOnTouchListener(null);
-        favoriteListView.setOnItemLongClickListener(null);
-        favoriteListView.setOnItemClickListener(null);
-        favoriteListView = null;
-        v = null;
+        mViewHolder.histories.setAdapter(null);
+        mViewHolder = null;
         super.onDestroyView();
     }
 
     public void refreshData() {
-        if (favoriteBeans != null) {
-            favoriteBeans.clear();
-            favoriteBeans.addAll(DBManager.getInstance(getActivity()).getAllHistory());
-            if (adapter != null) {
-                adapter.notifyDataSetChanged();
-                isNoHistory();
-            }
-        }
+        mHistoryDataSet.setVideos(DBManager.getInstance(getActivity()).getAllHistory());
+        mAdapter.notifyDataSetChanged();
+        checkIsNoHistory();
     }
 
-    private void isNoHistory() {
-        if (favoriteBeans.size() == 0) {
+    private void checkIsNoHistory() {
+        if (mHistoryDataSet.size() == 0) {
             setHint(R.string.history_no_history);
         } else {
-            mTvHint.setVisibility(View.GONE);
-            favoriteListView.setVisibility(View.VISIBLE);
+            setHint(0);
         }
     }
 
     private void setHint(int res) {
-        mTvHint.setText(getString(res));
-        mTvHint.setVisibility(View.VISIBLE);
-        favoriteListView.setVisibility(View.GONE);
+        if (mViewHolder != null) {
+            if (res != 0) {
+                mViewHolder.mainHint.setText(getString(res));
+                mViewHolder.mainHint.setVisibility(View.VISIBLE);
+                mViewHolder.histories.setVisibility(View.GONE);
+            } else {
+                mViewHolder.mainHint.setVisibility(View.GONE);
+                mViewHolder.histories.setVisibility(View.VISIBLE);
+            }
+        }
+    }
+
+    private static class HistoryDataSet implements DataSet {
+
+        final private List<Video> mVideos = new ArrayList<>();
+
+        public void setVideos(List<Video> videos) {
+            mVideos.clear();
+            mVideos.addAll(videos);
+        }
+
+        @Override
+        public int size() {
+            return mVideos.size();
+        }
+
+        @Override
+        public Video get(int position) {
+            return mVideos.get(position);
+        }
+
+    }
+
+    private static class ViewHolder {
+
+        final RecyclerView histories;
+
+        final TextView mainHint;
+
+        public ViewHolder(View root) {
+            mainHint = (TextView) root.findViewById(R.id.main_hint);
+            histories = (RecyclerView) root.findViewById(R.id.histories);
+        }
     }
 
 }
