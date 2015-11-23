@@ -1,6 +1,7 @@
 package com.optimalorange.cooltechnologies.storage.sqlite;
 
 import com.optimalorange.cooltechnologies.entity.FavoriteBean;
+import com.optimalorange.cooltechnologies.ui.entity.Video;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -9,7 +10,8 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Created by WANGZHENGZE on 2014/12/24.
@@ -98,21 +100,15 @@ public class DBManager {
         }
     }
 
-    public ArrayList<FavoriteBean> getAllHistory() {
+    public List<Video> getAllHistory() {
         open();
-        ArrayList<FavoriteBean> favoriteBeans = new ArrayList<>();
+        List<Video> result = new LinkedList<>();
         Cursor cursor = db.rawQuery("select * from history order by _id desc", null);
         while (cursor.moveToNext()) {
-            FavoriteBean favoriteBean = new FavoriteBean();
-            favoriteBean.videoId = cursor.getString(1);
-            favoriteBean.title = cursor.getString(2);
-            favoriteBean.duration = cursor.getString(3);
-            favoriteBean.imageUrl = cursor.getString(4);
-            favoriteBean.link = cursor.getString(5);
-            favoriteBeans.add(favoriteBean);
+            result.add(convertToVideo(cursor));
         }
         cursor.close();
-        return favoriteBeans;
+        return result;
     }
 
     public boolean isInHistory(String videoId) {
@@ -139,6 +135,19 @@ public class DBManager {
         contentValues.put("_imageUrl", favoriteBean.imageUrl);
         contentValues.put("_link", favoriteBean.link);
         return contentValues;
+    }
+
+    /**
+     * convert current row of {@link Cursor} to {@link Video}
+     */
+    private static Video convertToVideo(Cursor cursor) {
+        final Video result = new Video();
+        result.id = cursor.getString(1);
+        result.title = cursor.getString(2);
+        result.duration = cursor.getString(3);
+        result.thumbnail = cursor.getString(4);
+        result.link = cursor.getString(5);
+        return result;
     }
 
 }
