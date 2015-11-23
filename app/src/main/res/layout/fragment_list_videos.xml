@@ -28,7 +28,8 @@
                 android:layout_gravity="bottom"
                 android:indeterminate="true"
                 app:mpb_progressStyle="horizontal"
-                style="@style/Widget.MaterialProgressBar.ProgressBar.Horizontal"
+                app:mpb_useIntrinsicPadding="false"
+                style="@style/Widget.MaterialProgressBar.ProgressBar.Horizontal.NoPadding"
                 android:visibility="gone"
                 />
 
