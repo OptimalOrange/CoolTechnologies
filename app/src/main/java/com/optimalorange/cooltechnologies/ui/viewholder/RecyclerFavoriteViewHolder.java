@@ -4,6 +4,7 @@ import com.android.volley.toolbox.ImageLoader;
 import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.optimalorange.cooltechnologies.ui.entity.Video;
+import com.optimalorange.cooltechnologies.util.Utils;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -44,7 +45,9 @@ public class RecyclerFavoriteViewHolder extends RecyclerView.ViewHolder {
         @Override
         public void bindViewHolder(RecyclerFavoriteViewHolder holder, Video value) {
             holder.title.setText(value.title);
-            holder.duration.setText(value.duration);
+            holder.duration.setText(
+                    Utils.getDurationString((int) Double.parseDouble(value.duration))
+            );
 
             final ImageLoader.ImageListener imageListener = ImageLoader.getImageListener(
                     holder.thumbnail,
