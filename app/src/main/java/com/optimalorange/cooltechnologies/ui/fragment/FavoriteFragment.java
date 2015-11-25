@@ -582,6 +582,7 @@ public class FavoriteFragment extends SwipeRefreshFragment {
             this.interestingFavorites = interestingFavorites;
         }
 
+        // TODO 由于不明原因，有些收藏可能读取不到，会导致此方法出问题
         public boolean allRead() {
             if (BuildConfig.DEBUG) {
                 // This if block will be auto deleted when release
