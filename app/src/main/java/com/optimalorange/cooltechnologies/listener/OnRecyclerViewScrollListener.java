@@ -13,33 +13,32 @@ public class OnRecyclerViewScrollListener extends RecyclerView.OnScrollListener
         STAGGERED_GRID
     }
 
-    protected LayoutManagerType layoutManagerType;
-
-    /**
-     * 最后一个的位置
-     */
-    private int[] lastPositions;
-
-    /**
-     * 最后一个可见的item的位置
-     */
-    private int lastVisibleItemPosition;
-
     @Override
     public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
         super.onScrolled(recyclerView, dx, dy);
+
+        LayoutManagerType layoutManagerType;
+
+        /**
+         * 最后一个的位置
+         */
+        int[] lastPositions;
+
+        /**
+         * 最后一个可见的item的位置
+         */
+        int lastVisibleItemPosition = -1;
+
         RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
 
         // GridLayoutManager 是 LinearLayoutManager子类，且获取最后一个可见item位置方法是一样的
-        if (layoutManagerType == null) {
-            if (layoutManager instanceof LinearLayoutManager) {
-                layoutManagerType = LayoutManagerType.LINEAR;
-            } else if (layoutManager instanceof StaggeredGridLayoutManager) {
-                layoutManagerType = LayoutManagerType.STAGGERED_GRID;
-            } else {
-                throw new RuntimeException(
-                        "Unsupported LayoutManager used. Valid ones are LinearLayoutManager, GridLayoutManager and StaggeredGridLayoutManager");
-            }
+        if (layoutManager instanceof LinearLayoutManager) {
+            layoutManagerType = LayoutManagerType.LINEAR;
+        } else if (layoutManager instanceof StaggeredGridLayoutManager) {
+            layoutManagerType = LayoutManagerType.STAGGERED_GRID;
+        } else {
+            throw new RuntimeException(
+                    "Unsupported LayoutManager used. Valid ones are LinearLayoutManager, GridLayoutManager and StaggeredGridLayoutManager");
         }
 
         switch (layoutManagerType) {
@@ -50,9 +49,7 @@ public class OnRecyclerViewScrollListener extends RecyclerView.OnScrollListener
             case STAGGERED_GRID:
                 StaggeredGridLayoutManager staggeredGridLayoutManager
                         = (StaggeredGridLayoutManager) layoutManager;
-                if (lastPositions == null) {
-                    lastPositions = new int[staggeredGridLayoutManager.getSpanCount()];
-                }
+                lastPositions = new int[staggeredGridLayoutManager.getSpanCount()];
                 staggeredGridLayoutManager.findLastVisibleItemPositions(lastPositions);
                 lastVisibleItemPosition = findMax(lastPositions);
                 break;

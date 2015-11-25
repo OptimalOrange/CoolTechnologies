@@ -127,7 +127,7 @@ public class ListVideosFragment extends SwipeRefreshFragment {
                         mIsQueryingVideos = false;
                         mProgressBar.setVisibility(View.GONE);
                         if (videos.size() == 0) {
-                            mRecyclerView.removeOnScrollListener(mScrollListener);
+                            removeListener();
                             Toast.makeText(getActivity(), getString(R.string.at_last),
                                     Toast.LENGTH_SHORT).show();
                         }
@@ -272,6 +272,7 @@ public class ListVideosFragment extends SwipeRefreshFragment {
     @Override
     public void onDestroy() {
         cancelLoad();
+        removeListener();
         mAdapter = null;
         if (mNetworkReceiver != null) {
             getActivity().unregisterReceiver(mNetworkReceiver);
@@ -289,7 +290,7 @@ public class ListVideosFragment extends SwipeRefreshFragment {
         mPage = 1;
         mAdapter.notifyDataSetChanged();
         restartLoad();
-        initListener();
+        resetListener();
     }
 
     @Override
@@ -310,6 +311,18 @@ public class ListVideosFragment extends SwipeRefreshFragment {
             }
         };
         mRecyclerView.addOnScrollListener(mScrollListener);
+    }
+
+    private void removeListener() {
+        if (mScrollListener != null){
+            mRecyclerView.removeOnScrollListener(mScrollListener);
+            mScrollListener = null;
+        }
+    }
+
+    private void resetListener(){
+        removeListener();
+        initListener();
     }
 
     private void startLoad() {

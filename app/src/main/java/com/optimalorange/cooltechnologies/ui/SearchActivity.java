@@ -84,7 +84,7 @@ public class SearchActivity extends BaseActivity {
                         mIsQueryingVideos = false;
                         mProgressBar.setVisibility(View.GONE);
                         if (videos.size() == 0) {
-                            mRecyclerView.removeOnScrollListener(mScrollListener);
+                            removeListener();
                             Toast.makeText(SearchActivity.this, getString(R.string.at_last),
                                     Toast.LENGTH_SHORT).show();
                         }
@@ -196,6 +196,13 @@ public class SearchActivity extends BaseActivity {
             }
         };
         mRecyclerView.addOnScrollListener(mScrollListener);
+    }
+
+    private void removeListener() {
+        if (mScrollListener != null){
+            mRecyclerView.removeOnScrollListener(mScrollListener);
+            mScrollListener = null;
+        }
     }
 
     /**
