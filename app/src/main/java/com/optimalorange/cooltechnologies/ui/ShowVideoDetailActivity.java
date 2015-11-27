@@ -82,7 +82,7 @@ public class ShowVideoDetailActivity extends LoginableBaseActivity {
             final ImageLoader.ImageListener imageListener = ImageLoader.getImageListener(
                     mViews.thumbnail, 0, 0
             );
-            mVolleySingleton.getImageLoader().get(video.bigThumbnail, imageListener);
+            mVolleySingleton.getImageLoader().get(video.thumbnail, imageListener);
         }
     }
 
@@ -265,8 +265,7 @@ public class ShowVideoDetailActivity extends LoginableBaseActivity {
             result.id = jsonObject.getString("id");
             result.title = jsonObject.getString("title");
             result.link = jsonObject.getString("link");
-            result.thumbnail = jsonObject.getString("thumbnail");
-            result.bigThumbnail = jsonObject.getString("bigThumbnail");
+            result.thumbnail = jsonObject.getString("bigThumbnail");
             result.duration = jsonObject.getString("duration");
             result.description = jsonObject.getString("description");
             return result;

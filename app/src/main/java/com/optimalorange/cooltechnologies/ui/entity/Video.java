@@ -15,8 +15,6 @@ public class Video {
      */
     public String thumbnail;
 
-    public String bigThumbnail;
-
     public String description;
 
 }
