@@ -4,7 +4,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.optimalorange.cooltechnologies.R;
-import com.optimalorange.cooltechnologies.entity.FavoriteBean;
 import com.optimalorange.cooltechnologies.network.CreateFavoriteRequest;
 import com.optimalorange.cooltechnologies.network.DestroyFavoriteRequest;
 import com.optimalorange.cooltechnologies.network.NetworkChecker;
@@ -92,21 +91,10 @@ public class ShowVideoDetailActivity extends LoginableBaseActivity {
             throw new IllegalStateException("cannot play video before load it.");
         }
 
-        final FavoriteBean favoriteBean = convertToFavoriteBean(mVideo);
         // 保存播放历史
-        DBManager.getInstance(this).saveHistory(favoriteBean);
+        DBManager.getInstance(this).saveHistory(mVideo);
         // 跳转到 SimpleWebViewActivity
         SimpleWebViewActivity.start(this, mVideo.link);
-    }
-
-    private static FavoriteBean convertToFavoriteBean(Video video) {
-        final FavoriteBean result = new FavoriteBean();
-        result.videoId = video.id;
-        result.title = video.title;
-        result.duration = video.duration;
-        result.imageUrl = video.bigThumbnail;
-        result.link = video.link;
-        return result;
     }
 
     /**
