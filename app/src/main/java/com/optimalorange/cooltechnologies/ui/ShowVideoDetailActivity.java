@@ -82,7 +82,18 @@ public class ShowVideoDetailActivity extends LoginableBaseActivity {
             final ImageLoader.ImageListener imageListener = ImageLoader.getImageListener(
                     mViews.thumbnail, 0, 0
             );
-            mVolleySingleton.getImageLoader().get(video.thumbnail, imageListener);
+            final ImageLoader.ImageListener imageListenerWrapper = new ImageLoader.ImageListener() {
+                @Override
+                public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
+                    imageListener.onResponse(response, isImmediate);
+                    mViews.thumbnail.setBackgroundResource(R.color.black);
+                }
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    imageListener.onErrorResponse(error);
+                }
+            };
+            mVolleySingleton.getImageLoader().get(video.thumbnail, imageListenerWrapper);
         }
     }
 
