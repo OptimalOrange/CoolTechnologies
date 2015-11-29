@@ -1,6 +1,5 @@
 package com.optimalorange.cooltechnologies.storage.sqlite;
 
-import com.optimalorange.cooltechnologies.entity.FavoriteBean;
 import com.optimalorange.cooltechnologies.ui.entity.Video;
 
 import android.content.ContentValues;
@@ -84,13 +83,13 @@ public class DBManager {
         return db != null && db.isOpen();
     }
 
-    public void saveHistory(FavoriteBean bean) {
+    public void saveHistory(Video bean) {
         open();
         final ContentValues contentValues = convertToContentValues(bean);
         db.beginTransaction();
         try {
-            if (isInHistory(bean.videoId)) {
-                deleteHistory(bean.videoId);
+            if (isInHistory(bean.id)) {
+                deleteHistory(bean.id);
             }
             db.insert("history", null, contentValues);
 
@@ -127,13 +126,13 @@ public class DBManager {
         return db.delete("history", "_videoId = ?", new String[]{videoId});
     }
 
-    private static ContentValues convertToContentValues(FavoriteBean favoriteBean) {
+    private static ContentValues convertToContentValues(Video video) {
         final ContentValues contentValues = new ContentValues();
-        contentValues.put("_videoId", favoriteBean.videoId);
-        contentValues.put("_title", favoriteBean.title);
-        contentValues.put("_duration", favoriteBean.duration);
-        contentValues.put("_imageUrl", favoriteBean.imageUrl);
-        contentValues.put("_link", favoriteBean.link);
+        contentValues.put("_videoId", video.id);
+        contentValues.put("_title", video.title);
+        contentValues.put("_duration", video.duration);
+        contentValues.put("_imageUrl", video.thumbnail);
+        contentValues.put("_link", video.link);
         return contentValues;
     }
 
