@@ -31,7 +31,9 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -124,6 +126,22 @@ public class FavoriteFragment extends SwipeRefreshFragment {
                         ShowVideoDetailActivity.start(v.getContext(), value.id);
                     }
                 });
+                holder.itemView.setOnCreateContextMenuListener(
+                        new View.OnCreateContextMenuListener() {
+                            @Override
+                            public void onCreateContextMenu(ContextMenu menu, final View v,
+                                    ContextMenu.ContextMenuInfo menuInfo) {
+                                menu.add(R.string.action_delete)
+                                        .setOnMenuItemClickListener(
+                                                new MenuItem.OnMenuItemClickListener() {
+                                                    @Override
+                                                    public boolean onMenuItemClick(MenuItem item) {
+                                                        sendDeleteRequest(value.id, position);
+                                                        return true;
+                                                    }
+                                                });
+                            }
+                        });
             }
         });
 
@@ -310,7 +328,6 @@ public class FavoriteFragment extends SwipeRefreshFragment {
     }
 
 
-    //TODO add delete feathure on UI
     private void sendDeleteRequest(String id, final int index) {
         if (!mNetworkChecker.isConnected()) {
             Toast.makeText(getActivity(), R.string.favorite_delete_no_net, Toast.LENGTH_SHORT)
