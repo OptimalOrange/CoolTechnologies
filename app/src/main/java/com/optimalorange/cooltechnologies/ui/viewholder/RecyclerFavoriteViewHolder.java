@@ -43,7 +43,7 @@ public class RecyclerFavoriteViewHolder extends RecyclerView.ViewHolder {
         }
 
         @Override
-        public void bindViewHolder(RecyclerFavoriteViewHolder holder, Video value) {
+        public void bindViewHolder(RecyclerFavoriteViewHolder holder, Video value, int position) {
             holder.title.setText(value.title);
             holder.duration.setText(
                     Utils.getDurationString((int) Double.parseDouble(value.duration))

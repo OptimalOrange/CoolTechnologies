@@ -51,7 +51,6 @@ import gq.baijie.classbasedviewadapter.android.adapter.ViewHolderFactoryRegister
  * Created by WANGZHENGZE on 2014/11/20.
  * 收藏
  */
-//TODO set click listener
 public class FavoriteFragment extends SwipeRefreshFragment {
 
     private static final String DEFAULT_CATEGORY_LABEL = "科技";
@@ -116,8 +115,9 @@ public class FavoriteFragment extends SwipeRefreshFragment {
         register.registerViewHolderFactory(new RecyclerFavoriteFooterViewHolder.Factory());
         register.registerViewHolderFactory(new RecyclerFavoriteViewHolder.Factory() {
             @Override
-            public void bindViewHolder(RecyclerFavoriteViewHolder holder, final Video value) {
-                super.bindViewHolder(holder, value);
+            public void bindViewHolder(
+                    RecyclerFavoriteViewHolder holder, final Video value, final int position) {
+                super.bindViewHolder(holder, value, position);
                 holder.itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
