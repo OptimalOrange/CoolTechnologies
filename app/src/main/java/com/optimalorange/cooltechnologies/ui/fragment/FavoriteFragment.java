@@ -68,6 +68,8 @@ public class FavoriteFragment extends SwipeRefreshFragment {
 
     private FavoritesDataSet mFavoritesDataSet;
 
+    private boolean mIsLoadingFavorites = false;
+
     private final ClassBasedRecyclerViewAdapter adapter = new ClassBasedRecyclerViewAdapter();
 
     private ViewHolder vh;
@@ -87,7 +89,7 @@ public class FavoriteFragment extends SwipeRefreshFragment {
             };
 
 
-    private void initState() {
+    private void initProperties() {
         Loading loading = new Loading();
         Empty empty = new Empty();
         FavoriteFooter haveMoreFooter = new FavoriteFooter();
@@ -129,7 +131,12 @@ public class FavoriteFragment extends SwipeRefreshFragment {
         adapter.notifyDataSetChanged();
     }
 
+    private void initState() {
+        mIsLoadingFavorites = false;
+    }
+
     public void resetState() {
+        mIsLoadingFavorites = false; //TODO cancel pending requests
         adapter.setDataSet(mLoadingDataSet);
         adapter.notifyDataSetChanged();
         mFavoritesDataSet.unsetFavorites();
@@ -168,6 +175,7 @@ public class FavoriteFragment extends SwipeRefreshFragment {
         super.onCreate(savedInstanceState);
         mNetworkChecker = NetworkChecker.newInstance(getActivity());
 
+        initProperties();
         initState();
     }
 
@@ -206,7 +214,7 @@ public class FavoriteFragment extends SwipeRefreshFragment {
         super.onStart();
 
         // load data if not do it yet
-        if (mFavoritesDataSet.favorites == null) {
+        if (mFavoritesDataSet.favorites == null && !mIsLoadingFavorites) {
             vh.favorites.setVisibility(View.GONE);
             getNewData();
         }
@@ -245,8 +253,11 @@ public class FavoriteFragment extends SwipeRefreshFragment {
         getJsonData();
     }
 
-    //TODO 避免重复发送
     public void getJsonData() {
+        // 避免重复发送
+        if (mIsLoadingFavorites) {
+            return;
+        }
         if (vh.favorites.getVisibility() == View.GONE) {
             setHint(R.string.favorite_new_loading);
         }
@@ -262,27 +273,33 @@ public class FavoriteFragment extends SwipeRefreshFragment {
             } else {
                 nextPage = mFavoritesDataSet.favorites.getCurrentPage() + 1;
             }
-            mVolleySingleton.addToRequestQueue(buildGetMyFavoriteRequest(token, nextPage, 10));
+            GetMyFavoriteRequest favoriteRequest = buildGetMyFavoriteRequest(token, nextPage, 10);
+            mIsLoadingFavorites = true;
+            mVolleySingleton.addToRequestQueue(favoriteRequest);
         } else {
             setHint(R.string.favorite_hint_no_login);
         }
     }
 
     private void setHint(int res) {
-        vh.mainHint.setText(getString(res));
-        vh.mainHint.setVisibility(View.VISIBLE);
-        vh.favorites.setVisibility(View.GONE);
-        vh.mainHint.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getNewData();
-            }
-        });
+        if (vh != null) {
+            vh.mainHint.setText(getString(res));
+            vh.mainHint.setVisibility(View.VISIBLE);
+            vh.favorites.setVisibility(View.GONE);
+            vh.mainHint.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    getNewData();
+                }
+            });
+        }
     }
 
     private void hideHint() {
-        vh.mainHint.setVisibility(View.GONE);
-        vh.favorites.setVisibility(View.VISIBLE);
+        if (vh != null) {
+            vh.mainHint.setVisibility(View.GONE);
+            vh.favorites.setVisibility(View.VISIBLE);
+        }
     }
 
 
@@ -352,7 +369,11 @@ public class FavoriteFragment extends SwipeRefreshFragment {
         public void onErrorResponse(VolleyError error) {
             new RuntimeException(error).printStackTrace();
 
-            //TODO stop refreshing & change hint
+            final FavoriteFragment owner = mOwner.get();
+            if (owner != null) {
+                onFinished(owner);
+                //TODO show error info
+            }
         }
 
         @Override
@@ -364,14 +385,19 @@ public class FavoriteFragment extends SwipeRefreshFragment {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-                //TODO stop refreshing & change hint
-                owner.setRefreshing(false);
+                onFinished(owner);
             }
+        }
+
+        //!!!注意!!! owner为null的一种可能情况是系统临时destroy了它。此情况下，应当在recreate时重置状态。
+        private void onFinished(@NonNull FavoriteFragment owner) {
+            owner.mIsLoadingFavorites = false;
+            owner.setRefreshing(false);
+            owner.hideHint();
         }
 
         private static void doHandle(JSONObject response, FavoriteFragment owner)
                 throws JSONException {
-            owner.hideHint();
             owner.addFavorites(convertToFavoriteInfo(response));
         }
 
@@ -556,11 +582,15 @@ public class FavoriteFragment extends SwipeRefreshFragment {
             this.interestingFavorites = interestingFavorites;
         }
 
+        // TODO 由于不明原因，有些收藏可能读取不到，会导致此方法出问题
         public boolean allRead() {
             if (BuildConfig.DEBUG) {
                 // This if block will be auto deleted when release
                 if (currentReadCountIncludingUnneeded > total) { //NOPMD
-                    throw new AssertionError("currentReadCountIncludingUnneeded > total");
+                    final String message = "currentReadCountIncludingUnneeded > total: " +
+                            "currentReadCountIncludingUnneeded=" + currentReadCountIncludingUnneeded
+                            + ", total=" + total;
+                    throw new AssertionError(message);
                 }
             }
             return currentReadCountIncludingUnneeded >= total;
