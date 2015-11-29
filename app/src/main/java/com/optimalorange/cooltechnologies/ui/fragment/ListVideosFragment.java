@@ -102,7 +102,7 @@ public class ListVideosFragment extends SwipeRefreshFragment {
                 .setClient_id(mYoukuClientId)
                 .setCategory(CATEGORY_LABEL_OF_TECH)
                 .setPage(mPage)
-                .setPeriod(VideosRequest.Builder.PERIOD.WEEK)
+                .setPeriod(VideosRequest.Builder.PERIOD.TODAY)
                 .setOrderby(VideosRequest.Builder.ORDER_BY.VIEW_COUNT)
                 .setResponseListener(new Response.Listener<List<Video>>() {
                     @Override
