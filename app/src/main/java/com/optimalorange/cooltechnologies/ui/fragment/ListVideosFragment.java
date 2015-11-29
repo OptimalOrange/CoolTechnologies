@@ -124,6 +124,8 @@ public class ListVideosFragment extends SwipeRefreshFragment {
                         }
                         applyVideos();
                         mRequestsManager.addRequestRespondeds();
+                        //为下一次请求获取Video翻页
+                        mPage++;
                         mIsQueryingVideos = false;
                         mProgressBar.setVisibility(View.GONE);
                         if (videos.size() == 0) {
@@ -142,11 +144,6 @@ public class ListVideosFragment extends SwipeRefreshFragment {
                         mProgressBar.setVisibility(View.GONE);
                     }
                 });
-
-        //为下一次请求获取Video翻页
-        mPage++;
-
-        mIsQueryingVideos = true;
 
         //如果没设置mGenre就用默认的，如果设置了mGenre就请求相应的类型Video
         if (mGenre != null) {
@@ -264,6 +261,7 @@ public class ListVideosFragment extends SwipeRefreshFragment {
         mNoConnectionView = null;
         mEmptyView = null;
         mRecyclerView.setAdapter(null);
+        removeListener();
         mRecyclerView = null;
         mMainContentView = null;
         super.onDestroyView();
@@ -272,7 +270,6 @@ public class ListVideosFragment extends SwipeRefreshFragment {
     @Override
     public void onDestroy() {
         cancelLoad();
-        removeListener();
         mAdapter = null;
         if (mNetworkReceiver != null) {
             getActivity().unregisterReceiver(mNetworkReceiver);
@@ -305,6 +302,7 @@ public class ListVideosFragment extends SwipeRefreshFragment {
             public void onBottom() {
                 super.onBottom();
                 if (!mIsQueryingVideos) {
+                    mIsQueryingVideos = true;
                     mProgressBar.setVisibility(View.VISIBLE);
                     mRequestsManager.addRequest(buildQueryVideosRequest());
                 }
@@ -314,7 +312,7 @@ public class ListVideosFragment extends SwipeRefreshFragment {
     }
 
     private void removeListener() {
-        if (mScrollListener != null){
+        if (mScrollListener != null && mRecyclerView != null){
             mRecyclerView.removeOnScrollListener(mScrollListener);
             mScrollListener = null;
         }

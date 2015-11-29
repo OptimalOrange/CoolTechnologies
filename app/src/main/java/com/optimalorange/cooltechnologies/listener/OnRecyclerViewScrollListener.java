@@ -8,7 +8,7 @@ import android.support.v7.widget.StaggeredGridLayoutManager;
 public class OnRecyclerViewScrollListener extends RecyclerView.OnScrollListener
         implements OnBottomListener {
 
-    public enum LayoutManagerType {
+    private enum LayoutManagerType {
         LINEAR,
         STAGGERED_GRID
     }

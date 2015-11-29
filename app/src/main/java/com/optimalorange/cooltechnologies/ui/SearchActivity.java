@@ -81,6 +81,8 @@ public class SearchActivity extends BaseActivity {
                                 mAdapter.notifyDataSetChanged();
                             }
                         }
+                        //为下一次请求获取Video翻页
+                        mPage++;
                         mIsQueryingVideos = false;
                         mProgressBar.setVisibility(View.GONE);
                         if (videos.size() == 0) {
@@ -98,11 +100,6 @@ public class SearchActivity extends BaseActivity {
                         mProgressBar.setVisibility(View.GONE);
                     }
                 });
-
-        //为下一次请求获取Video翻页
-        mPage++;
-
-        mIsQueryingVideos = true;
 
         return builder.build();
     }
@@ -190,6 +187,7 @@ public class SearchActivity extends BaseActivity {
             public void onBottom() {
                 super.onBottom();
                 if (!mIsQueryingVideos) {
+                    mIsQueryingVideos = true;
                     mProgressBar.setVisibility(View.VISIBLE);
                     mVolleySingleton.addToRequestQueue(buildSearchVideosRequest());
                 }
@@ -199,7 +197,7 @@ public class SearchActivity extends BaseActivity {
     }
 
     private void removeListener() {
-        if (mScrollListener != null){
+        if (mScrollListener != null && mRecyclerView != null){
             mRecyclerView.removeOnScrollListener(mScrollListener);
             mScrollListener = null;
         }
