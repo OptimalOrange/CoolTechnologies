@@ -5,6 +5,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.optimalorange.cooltechnologies.R;
 import com.optimalorange.cooltechnologies.entity.Video;
+import com.optimalorange.cooltechnologies.listener.OnRecyclerViewScrollListener;
 import com.optimalorange.cooltechnologies.network.NetworkChecker;
 import com.optimalorange.cooltechnologies.network.RequestsManager;
 import com.optimalorange.cooltechnologies.network.VideosRequest;
@@ -32,9 +33,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.LinkedList;
 import java.util.List;
+
+import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
 
 /**
  * 热门
@@ -74,6 +78,7 @@ public class ListVideosFragment extends SwipeRefreshFragment {
 
     private View mMainContentView;
 
+
     /**
      * 应当显示的Video的genre（类型，示例：手机）。null表示显示所有类别的Video。
      *
@@ -91,6 +96,13 @@ public class ListVideosFragment extends SwipeRefreshFragment {
     private RecyclerView.LayoutManager mLayoutManager;
 
     private LinkedList<Video> mListVideos = new LinkedList<Video>();
+
+    private MaterialProgressBar mProgressBar;
+
+    /** 是否有正在获取Video */
+    private boolean mIsQueryingVideos = false;
+
+    private OnRecyclerViewScrollListener mScrollListener;
 
     /**
      * 获取Video（见entity包中Video）
@@ -112,6 +124,15 @@ public class ListVideosFragment extends SwipeRefreshFragment {
                         }
                         applyVideos();
                         mRequestsManager.addRequestRespondeds();
+                        //为下一次请求获取Video翻页
+                        mPage++;
+                        mIsQueryingVideos = false;
+                        mProgressBar.setVisibility(View.GONE);
+                        if (videos.size() == 0) {
+                            removeListener();
+                            Toast.makeText(getActivity(), getString(R.string.at_last),
+                                    Toast.LENGTH_SHORT).show();
+                        }
                     }
                 })
                 .setErrorListener(new Response.ErrorListener() {
@@ -119,11 +140,10 @@ public class ListVideosFragment extends SwipeRefreshFragment {
                     public void onErrorResponse(VolleyError error) {
                         error.printStackTrace();
                         mRequestsManager.addRequestErrors();
+                        mIsQueryingVideos = false;
+                        mProgressBar.setVisibility(View.GONE);
                     }
                 });
-
-        //为下一次请求获取Video翻页
-        mPage++;
 
         //如果没设置mGenre就用默认的，如果设置了mGenre就请求相应的类型Video
         if (mGenre != null) {
@@ -190,6 +210,7 @@ public class ListVideosFragment extends SwipeRefreshFragment {
         mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
         mEmptyView = rootView.findViewById(android.R.id.empty);
         mNoConnectionView = rootView.findViewById(R.id.no_connection);
+        mProgressBar = (MaterialProgressBar) rootView.findViewById(R.id.progressbar);
         return rootView;
     }
 
@@ -203,6 +224,8 @@ public class ListVideosFragment extends SwipeRefreshFragment {
         mAdapter = new MyAdapter(
                 mListVideos, mRequestsManager.getVolleySingleton().getImageLoader());
         mRecyclerView.setAdapter(mAdapter);
+
+        initListener();
 
 
         /* 点击设置网络 */
@@ -238,6 +261,7 @@ public class ListVideosFragment extends SwipeRefreshFragment {
         mNoConnectionView = null;
         mEmptyView = null;
         mRecyclerView.setAdapter(null);
+        removeListener();
         mRecyclerView = null;
         mMainContentView = null;
         super.onDestroyView();
@@ -263,12 +287,40 @@ public class ListVideosFragment extends SwipeRefreshFragment {
         mPage = 1;
         mAdapter.notifyDataSetChanged();
         restartLoad();
+        resetListener();
     }
 
     @Override
     protected boolean canChildScrollUp() {
         return mRecyclerView.getVisibility() == View.VISIBLE &&
                 mRecyclerView.canScrollVertically(-1);
+    }
+
+    private void initListener() {
+        mScrollListener = new OnRecyclerViewScrollListener() {
+            @Override
+            public void onBottom() {
+                super.onBottom();
+                if (!mIsQueryingVideos) {
+                    mIsQueryingVideos = true;
+                    mProgressBar.setVisibility(View.VISIBLE);
+                    mRequestsManager.addRequest(buildQueryVideosRequest());
+                }
+            }
+        };
+        mRecyclerView.addOnScrollListener(mScrollListener);
+    }
+
+    private void removeListener() {
+        if (mScrollListener != null && mRecyclerView != null){
+            mRecyclerView.removeOnScrollListener(mScrollListener);
+            mScrollListener = null;
+        }
+    }
+
+    private void resetListener(){
+        removeListener();
+        initListener();
     }
 
     private void startLoad() {
@@ -381,11 +433,6 @@ public class ListVideosFragment extends SwipeRefreshFragment {
             //显示播放次数（这里使用字符串资源格式化）
             holder.viewCount.setText(String.format(getString(R.string.view_count),
                     Utils.formatViewCount(mVideos.get(position).getView_count(), getActivity())));
-
-            //当滑到末尾的位置时加载更多Video
-            if (position == mListVideos.size() - 2) {
-                mRequestsManager.addRequest(buildQueryVideosRequest());
-            }
 
             holder.thumbnail.setOnClickListener(new View.OnClickListener() {
                 @Override

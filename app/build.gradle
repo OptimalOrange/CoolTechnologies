@@ -97,6 +97,7 @@ dependencies {
     compile 'gq.baijie:classbasedviewadapter:0.1.0'
     compile 'com.umeng.update:library:2.5.0'
     compile 'com.umeng.analytics:library:5.4.1'
+    compile 'me.zhanghai.android.materialprogressbar:library:1.1.4'
 }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 代码质量检查 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
