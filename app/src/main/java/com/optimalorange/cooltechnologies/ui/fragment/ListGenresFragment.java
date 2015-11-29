@@ -162,7 +162,7 @@ public class ListGenresFragment extends SwipeRefreshFragment {
                 .setClient_id(mYoukuClientId)
                 .setCategory(CATEGORY_LABEL_OF_TECH)
                 .setGenre(genre)
-                .setPeriod(VideosRequest.Builder.PERIOD.MONTH)
+                .setPeriod(VideosRequest.Builder.PERIOD.WEEK)
                 .setCount(mItemsCountAndDimension.getCount())
                 .setResponseListener(new Response.Listener<List<Video>>() {
                     @Override
