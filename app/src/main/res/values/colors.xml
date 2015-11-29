@@ -28,13 +28,11 @@
     <color name="text_disabled_or_hint_black">#42000000</color>
     <!-- alpha: 12% -->
     <color name="text_dividers_black">#1F000000</color>
+    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Font Color End ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
 
-    <!-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Font Color ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
     <!-- alpha: 40% -->
     <color name="scrim_black">#66000000</color>
     <!-- alpha: 50% -->
     <color name="scrim_white">#80FFFFFF</color>
-
-    <color name="favorite_item_background">#f0f0f0</color>
 
 </resources>

@@ -12,9 +12,8 @@
             android:layout_height="wrap_content"
             android:textColor="@color/text_black"
             android:text="@string/favorite_view_more"
-            android:background="@color/favorite_item_background"
-            android:paddingTop="@dimen/favorite_view_more_padding_top_bottom"
-            android:paddingBottom="@dimen/favorite_view_more_padding_top_bottom"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
             android:gravity="center"
             />
 
