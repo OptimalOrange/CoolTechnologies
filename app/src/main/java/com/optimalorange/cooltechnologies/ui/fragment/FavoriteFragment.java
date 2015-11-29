@@ -90,6 +90,9 @@ public class FavoriteFragment extends SwipeRefreshFragment {
 
 
     private void initProperties() {
+        mVolleySingleton = VolleySingleton.getInstance(getActivity());
+        mYoukuClientId = getString(R.string.youku_client_id);
+
         Loading loading = new Loading();
         Empty empty = new Empty();
         FavoriteFooter haveMoreFooter = new FavoriteFooter();
@@ -161,14 +164,6 @@ public class FavoriteFragment extends SwipeRefreshFragment {
         mFavoritesDataSet.remove(position, adapter);
     }
 
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-        mVolleySingleton = VolleySingleton.getInstance(getActivity());
-        mYoukuClientId = getString(R.string.youku_client_id);
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -283,7 +278,7 @@ public class FavoriteFragment extends SwipeRefreshFragment {
 
     private void setHint(int res) {
         if (vh != null) {
-            vh.mainHint.setText(getString(res));
+            vh.mainHint.setText(vh.mainHint.getContext().getString(res));
             vh.mainHint.setVisibility(View.VISIBLE);
             vh.favorites.setVisibility(View.GONE);
             vh.mainHint.setOnClickListener(new View.OnClickListener() {
