@@ -1,6 +1,7 @@
 package com.optimalorange.cooltechnologies.ui;
 
 import com.optimalorange.cooltechnologies.R;
+import com.umeng.analytics.MobclickAgent;
 
 import android.app.Activity;
 import android.content.Context;
@@ -61,12 +62,19 @@ public class SimpleWebViewActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        // call it because this didn't extend BaseActivity
+        MobclickAgent.onResume(this);
+        MobclickAgent.onPageStart(getClass().getSimpleName());
+
         mWebView.onResume();
     }
 
     @Override
     protected void onPause() {
         mWebView.onPause();
+
+        MobclickAgent.onPageEnd(getClass().getSimpleName());
+        MobclickAgent.onPause(this);
         super.onPause();
     }
 

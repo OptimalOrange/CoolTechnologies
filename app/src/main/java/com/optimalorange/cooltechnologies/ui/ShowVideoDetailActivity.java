@@ -13,6 +13,7 @@ import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingle
 import com.optimalorange.cooltechnologies.storage.sqlite.DBManager;
 import com.optimalorange.cooltechnologies.ui.entity.Video;
 import com.optimalorange.cooltechnologies.ui.fragment.SimpleListCommentsFragment;
+import com.umeng.analytics.MobclickAgent;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -156,6 +157,18 @@ public class ShowVideoDetailActivity extends LoginableBaseActivity {
                             SimpleListCommentsFragment.newInstance(videoId))
                     .commit();
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MobclickAgent.onPageStart(getClass().getSimpleName());
+    }
+
+    @Override
+    protected void onPause() {
+        MobclickAgent.onPageEnd(getClass().getSimpleName());
+        super.onPause();
     }
 
     @Override
