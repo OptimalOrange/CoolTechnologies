@@ -33,7 +33,7 @@ public class RecyclerLoadingViewHolder extends RecyclerView.ViewHolder {
         }
 
         @Override
-        public void bindViewHolder(RecyclerLoadingViewHolder holder, Loading value) {
+        public void bindViewHolder(RecyclerLoadingViewHolder holder, Loading value, int position) {
             holder.hint.setText(value.hint);
         }
 

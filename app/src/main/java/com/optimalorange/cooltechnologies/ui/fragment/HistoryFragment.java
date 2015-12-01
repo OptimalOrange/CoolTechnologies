@@ -35,8 +35,9 @@ public class HistoryFragment extends Fragment {
     {
         mAdapter.getRegister().registerViewHolderFactory(new RecyclerFavoriteViewHolder.Factory() {
             @Override
-            public void bindViewHolder(RecyclerFavoriteViewHolder holder, final Video value) {
-                super.bindViewHolder(holder, value);
+            public void bindViewHolder(
+                    RecyclerFavoriteViewHolder holder, final Video value, int position) {
+                super.bindViewHolder(holder, value, position);
                 holder.itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {

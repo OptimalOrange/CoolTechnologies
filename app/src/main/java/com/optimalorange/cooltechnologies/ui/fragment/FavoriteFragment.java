@@ -31,7 +31,9 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -51,7 +53,6 @@ import gq.baijie.classbasedviewadapter.android.adapter.ViewHolderFactoryRegister
  * Created by WANGZHENGZE on 2014/11/20.
  * 收藏
  */
-//TODO set click listener
 public class FavoriteFragment extends SwipeRefreshFragment {
 
     private static final String DEFAULT_CATEGORY_LABEL = "科技";
@@ -116,14 +117,31 @@ public class FavoriteFragment extends SwipeRefreshFragment {
         register.registerViewHolderFactory(new RecyclerFavoriteFooterViewHolder.Factory());
         register.registerViewHolderFactory(new RecyclerFavoriteViewHolder.Factory() {
             @Override
-            public void bindViewHolder(RecyclerFavoriteViewHolder holder, final Video value) {
-                super.bindViewHolder(holder, value);
+            public void bindViewHolder(
+                    RecyclerFavoriteViewHolder holder, final Video value, final int position) {
+                super.bindViewHolder(holder, value, position);
                 holder.itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         ShowVideoDetailActivity.start(v.getContext(), value.id);
                     }
                 });
+                holder.itemView.setOnCreateContextMenuListener(
+                        new View.OnCreateContextMenuListener() {
+                            @Override
+                            public void onCreateContextMenu(ContextMenu menu, final View v,
+                                    ContextMenu.ContextMenuInfo menuInfo) {
+                                menu.add(R.string.action_delete)
+                                        .setOnMenuItemClickListener(
+                                                new MenuItem.OnMenuItemClickListener() {
+                                                    @Override
+                                                    public boolean onMenuItemClick(MenuItem item) {
+                                                        sendDeleteRequest(value.id, position);
+                                                        return true;
+                                                    }
+                                                });
+                            }
+                        });
             }
         });
 
@@ -310,7 +328,6 @@ public class FavoriteFragment extends SwipeRefreshFragment {
     }
 
 
-    //TODO add delete feathure on UI
     private void sendDeleteRequest(String id, final int index) {
         if (!mNetworkChecker.isConnected()) {
             Toast.makeText(getActivity(), R.string.favorite_delete_no_net, Toast.LENGTH_SHORT)

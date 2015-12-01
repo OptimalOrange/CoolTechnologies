@@ -16,6 +16,7 @@
     <string name="action_login_fail">登录失败！</string>
     <string name="action_login_no_net">没有网络不能登录的啦~~</string>
     <string name="action_search">搜索</string>
+    <string name="action_delete">删除</string>
     <string name="search_hint">输入关键词搜索</string>
 
     <!-- common -->

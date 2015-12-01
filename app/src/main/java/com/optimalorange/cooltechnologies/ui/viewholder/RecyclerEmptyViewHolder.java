@@ -33,7 +33,7 @@ public class RecyclerEmptyViewHolder extends RecyclerView.ViewHolder {
         }
 
         @Override
-        public void bindViewHolder(RecyclerEmptyViewHolder holder, Empty value) {
+        public void bindViewHolder(RecyclerEmptyViewHolder holder, Empty value, int position) {
             holder.hint.setText(value.hint);
         }
 
