@@ -4,7 +4,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
-## [1.1.0] - 2015-1X-XX
+## [1.1.0] - 2015-12-03
 ### Changed
 - 主页中向上滑动时，隐藏工具栏
 - 提高主页内容的更新速度，热门页面显示当天点击量多的视频
