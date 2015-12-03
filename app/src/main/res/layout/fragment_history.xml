@@ -5,17 +5,18 @@
     android:orientation="vertical">
 
     <TextView
-        android:id="@+id/favorite_hint"
+        android:id="@+id/main_hint"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
         android:textColor="@color/text_black"
         android:visibility="gone" />
 
-    <ListView
-        android:id="@+id/favorite_list"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone" />
+    <android.support.v7.widget.RecyclerView
+            android:id="@+id/histories"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            />
 
 </LinearLayout>

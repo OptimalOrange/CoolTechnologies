@@ -34,7 +34,7 @@ public class ListVideosActivity extends BaseActivity {
         }
         // 添加videosFragment
         if (savedInstanceState == null) {
-            getFragmentManager().beginTransaction()
+            getSupportFragmentManager().beginTransaction()
                     .add(R.id.container, videosFragment)
                     .commit();
         }

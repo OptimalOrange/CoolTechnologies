@@ -15,14 +15,14 @@
                 android:layout_height="wrap_content"
                 android:paddingBottom="@dimen/comments_margin_5dp"
                 android:textColor="@color/text_secondary_black"
-                android:textSize="@dimen/text_size_micro"
+                android:textSize="@dimen/text_size_title_dense"
                 />
         <TextView
                 android:id="@+id/content"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/text_secondary_black"
-                android:textSize="@dimen/text_size_small"
+                android:textSize="@dimen/text_size_body_dense"
                 />
         <TextView
                 android:id="@+id/date"
@@ -30,7 +30,7 @@
                 android:layout_height="wrap_content"
                 android:paddingTop="@dimen/comments_margin_5dp"
                 android:textColor="@color/text_disabled_or_hint_black"
-                android:textSize="@dimen/text_size_micro"
+                android:textSize="@dimen/text_size_caption_dense"
                 />
 
     </LinearLayout>

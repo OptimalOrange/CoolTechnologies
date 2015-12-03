@@ -3,10 +3,9 @@ package com.optimalorange.cooltechnologies.ui;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
-import com.etsy.android.grid.StaggeredGridView;
 import com.optimalorange.cooltechnologies.R;
-import com.optimalorange.cooltechnologies.entity.FavoriteBean;
 import com.optimalorange.cooltechnologies.entity.Video;
+import com.optimalorange.cooltechnologies.listener.OnRecyclerViewScrollListener;
 import com.optimalorange.cooltechnologies.network.SearchRequest;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.optimalorange.cooltechnologies.util.Utils;
@@ -16,24 +15,27 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
-import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.LinkedList;
 import java.util.List;
 
+import me.zhanghai.android.materialprogressbar.MaterialProgressBar;
+
 /**
  * 搜索页面
  *
- * @author Zhou Peican
  */
 public class SearchActivity extends BaseActivity {
 
@@ -47,11 +49,20 @@ public class SearchActivity extends BaseActivity {
 
     private VolleySingleton mVolleySingleton;
 
-    private StaggeredGridView mGridView;
+    private RecyclerView mRecyclerView;
 
-    private ItemsAdapter mItemsAdapter;
+    private RecyclerView.Adapter mAdapter;
+
+    private RecyclerView.LayoutManager mLayoutManager;
 
     private LinkedList<Video> mListVideos = new LinkedList<Video>();
+
+    private MaterialProgressBar mProgressBar;
+
+    /** 是否有正在获取Video */
+    private boolean mIsQueryingVideos = false;
+
+    private OnRecyclerViewScrollListener mScrollListener;
 
     private SearchRequest buildSearchVideosRequest() {
         SearchRequest.Builder builder = new SearchRequest.Builder()
@@ -66,9 +77,18 @@ public class SearchActivity extends BaseActivity {
                     public void onResponse(List<Video> videos) {
                         for (Video mVideo : videos) {
                             mListVideos.add(mVideo);
-                            if (mItemsAdapter != null) {
-                                mItemsAdapter.notifyDataSetChanged();
+                            if (mAdapter != null) {
+                                mAdapter.notifyDataSetChanged();
                             }
+                        }
+                        //为下一次请求获取Video翻页
+                        mPage++;
+                        mIsQueryingVideos = false;
+                        mProgressBar.setVisibility(View.GONE);
+                        if (videos.size() == 0) {
+                            removeListener();
+                            Toast.makeText(SearchActivity.this, getString(R.string.at_last),
+                                    Toast.LENGTH_SHORT).show();
                         }
                     }
                 })
@@ -76,11 +96,10 @@ public class SearchActivity extends BaseActivity {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         error.printStackTrace();
+                        mIsQueryingVideos = false;
+                        mProgressBar.setVisibility(View.GONE);
                     }
                 });
-
-        //为下一次请求获取Video翻页
-        mPage++;
 
         return builder.build();
     }
@@ -93,19 +112,16 @@ public class SearchActivity extends BaseActivity {
         mYoukuClientId = getString(R.string.youku_client_id);
         mVolleySingleton = VolleySingleton.getInstance(this);
 
-        mGridView = (StaggeredGridView) findViewById(R.id.grid_view);
-        mItemsAdapter = new ItemsAdapter(mListVideos, mVolleySingleton.getImageLoader());
-        mGridView.setAdapter(mItemsAdapter);
-        //item点击监听，点击进行播放视频
-        mGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Intent mIntent = new Intent(SearchActivity.this, PlayVideoActivity.class);
-                FavoriteBean favoriteBean = new FavoriteBean(mListVideos.get(i));
-                mIntent.putExtra(PlayVideoActivity.EXTRA_KEY_VIDEO, favoriteBean);
-                startActivity(mIntent);
-            }
-        });
+        mProgressBar = (MaterialProgressBar) findViewById(R.id.progressbar);
+
+        mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        mRecyclerView.setHasFixedSize(true);
+        mLayoutManager = new GridLayoutManager(this, 2);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mAdapter = new MyAdapter(mListVideos, mVolleySingleton.getImageLoader());
+        mRecyclerView.setAdapter(mAdapter);
+
+        initListener();
 
         //处理搜索，当在actionbar上的SearchView输入完成点击搜索时
         // 系统会启动一个搜索请求，由本页面自身接收（singleTop）
@@ -121,7 +137,7 @@ public class SearchActivity extends BaseActivity {
         /* 清除原有的搜索结果 */
         if (mListVideos.size() > 0) {
             mListVideos.clear();
-            mItemsAdapter.notifyDataSetChanged();
+            mAdapter.notifyDataSetChanged();
         }
 
         //搜索请求
@@ -151,7 +167,7 @@ public class SearchActivity extends BaseActivity {
         SearchManager searchManager =
                 (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView =
-                (SearchView) menu.findItem(R.id.action_search).getActionView();
+                (SearchView) MenuItemCompat.getActionView(menu.findItem(R.id.action_search));
         searchView.setSearchableInfo(
                 searchManager.getSearchableInfo(getComponentName()));
 
@@ -165,75 +181,83 @@ public class SearchActivity extends BaseActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    private void initListener() {
+        mScrollListener = new OnRecyclerViewScrollListener() {
+            @Override
+            public void onBottom() {
+                super.onBottom();
+                if (!mIsQueryingVideos) {
+                    mIsQueryingVideos = true;
+                    mProgressBar.setVisibility(View.VISIBLE);
+                    mVolleySingleton.addToRequestQueue(buildSearchVideosRequest());
+                }
+            }
+        };
+        mRecyclerView.addOnScrollListener(mScrollListener);
+    }
+
+    private void removeListener() {
+        if (mScrollListener != null && mRecyclerView != null){
+            mRecyclerView.removeOnScrollListener(mScrollListener);
+            mScrollListener = null;
+        }
+    }
+
     /**
      * 搜索结果适配器
      */
-    private class ItemsAdapter extends BaseAdapter {
+    public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
         private LinkedList<Video> mVideos;
 
         private ImageLoader mImageLoader;
 
-        public ItemsAdapter(LinkedList<Video> mVideos, ImageLoader mImageLoader) {
-            super();
+        public MyAdapter(LinkedList<Video> mVideos, ImageLoader mImageLoader) {
             this.mVideos = mVideos;
             this.mImageLoader = mImageLoader;
         }
 
         @Override
-        public int getCount() {
-            return mVideos.size();
+        public MyAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
+                int viewType) {
+            View v = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.list_item_video, parent, false);
+            ViewHolder vh = new ViewHolder(v);
+            return vh;
         }
 
         @Override
-        public Object getItem(int position) {
-            return mVideos.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-        public View getView(final int position, View convertView, ViewGroup parent) {
-            ViewHolder vh;
-            if (convertView == null) {
-                convertView = LayoutInflater.from(parent.getContext())
-                        .inflate(R.layout.list_item_video, parent, false);
-                vh = new ViewHolder();
-                vh.thumbnail = (ImageView) convertView.findViewById(R.id.thumbnail);
-                vh.duration = (TextView) convertView.findViewById(R.id.duration);
-                vh.title = (TextView) convertView.findViewById(R.id.title);
-                vh.viewCount = (TextView) convertView.findViewById(R.id.view_count);
-                convertView.setTag(vh);
-            } else {
-                vh = (ViewHolder) convertView.getTag();
-            }
-
+        public void onBindViewHolder(ViewHolder holder, final int position) {
             //加载图片
             mImageLoader.get(mVideos.get(position).getThumbnail_v2(),
-                    ImageLoader.getImageListener(vh.thumbnail,
+                    ImageLoader.getImageListener(holder.thumbnail,
                             R.drawable.ic_image_view_placeholder,
                             R.drawable.ic_image_view_placeholder));
             //显示播放时长
-            vh.duration.setText(Utils.getDurationString(mVideos.get(position).getDuration()));
+            holder.duration.setText(Utils.getDurationString(mVideos.get(position).getDuration()));
             //显示视频标题
-            vh.title.setText(mVideos.get(position).getTitle());
+            holder.title.setText(mVideos.get(position).getTitle());
             //显示播放次数（这里使用字符串资源格式化）
-            vh.viewCount.setText(String.format(getString(R.string.view_count),
+            holder.viewCount.setText(String.format(getString(R.string.view_count),
                     Utils.formatViewCount(mVideos.get(position).getView_count(),
-                            parent.getContext())));
+                            SearchActivity.this)));
 
-            //当滑到末尾的位置时加载更多Video
-            if (position == mListVideos.size() - 2) {
-                mVolleySingleton.addToRequestQueue(buildSearchVideosRequest());
-            }
+            holder.thumbnail.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ShowVideoDetailActivity.start(
+                            v.getContext(), mListVideos.get(position).getId());
+                }
+            });
 
-            return convertView;
         }
 
-        private class ViewHolder {
+        @Override
+        public int getItemCount() {
+            return mVideos.size();
+        }
+
+        public class ViewHolder extends RecyclerView.ViewHolder {
 
             ImageView thumbnail;
 
@@ -242,7 +266,14 @@ public class SearchActivity extends BaseActivity {
             TextView title;
 
             TextView viewCount;
-        }
 
+            public ViewHolder(View v) {
+                super(v);
+                thumbnail = (ImageView) v.findViewById(R.id.thumbnail);
+                duration = (TextView) v.findViewById(R.id.duration);
+                title = (TextView) v.findViewById(R.id.title);
+                viewCount = (TextView) v.findViewById(R.id.view_count);
+            }
+        }
     }
 }

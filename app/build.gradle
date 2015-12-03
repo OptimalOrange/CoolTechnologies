@@ -1,14 +1,28 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+        maven { url "https://jitpack.io" }
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.0.0-alpha1'
+        classpath 'com.github.JakeWharton:sdk-manager-plugin:220bf7a88a'
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
 apply plugin: 'android-sdk-manager'
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 21
-    buildToolsVersion "21.1.2"
+    compileSdkVersion 23
+    buildToolsVersion "23.0.2"
 
     defaultConfig {
         applicationId "com.optimalorange.cooltechnologies"
         minSdkVersion 15
-        targetSdkVersion 21
+        targetSdkVersion 22
         versionCode version.versionCode
         versionName version.versionName
     }
@@ -69,17 +83,21 @@ android {
 }
 
 dependencies {
+    def supportLibraryVersion = "23.1.1"
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:support-v4:21.0.3'
-    compile 'com.android.support:cardview-v7:21.0.3'
-    compile 'com.android.support:recyclerview-v7:21.0.3'
-    compile 'com.android.support:support-v13:21.0.3'
-    compile 'com.viewpagerindicator:library:2.4.1'
-    compile 'com.mcxiaoke.volley:library:1.0.10@aar'
-    compile 'com.etsy.android.grid:library:1.0.5'
-    compile 'cpr.name.videoenabledwebview:library:1.0'
+    compile "com.android.support:support-annotations:$supportLibraryVersion"
+    compile "com.android.support:support-v4:$supportLibraryVersion"
+    compile "com.android.support:appcompat-v7:$supportLibraryVersion"
+    compile "com.android.support:design:$supportLibraryVersion"
+    compile "com.android.support:percent:$supportLibraryVersion"
+    compile "com.android.support:cardview-v7:$supportLibraryVersion"
+    compile "com.android.support:recyclerview-v7:$supportLibraryVersion"
+    compile "com.android.support:support-v13:$supportLibraryVersion"
+    compile 'com.mcxiaoke.volley:library:1.0.19@aar'
+    compile 'gq.baijie:classbasedviewadapter:0.2.0'
     compile 'com.umeng.update:library:2.5.0'
     compile 'com.umeng.analytics:library:5.4.1'
+    compile 'me.zhanghai.android.materialprogressbar:library:1.1.4'
 }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 代码质量检查 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

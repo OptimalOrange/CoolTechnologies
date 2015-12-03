@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v7.widget.CardView
         xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:card_view="http://schemas.android.com/apk/res-auto"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/card_margin"
-        card_view:contentPadding="0dp"
+        app:contentPadding="0dp"
         >
 
     <LinearLayout
@@ -15,14 +15,19 @@
             android:orientation="vertical"
             >
 
-        <ImageView
-                android:id="@+id/thumbnail"
+        <android.support.percent.PercentFrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:adjustViewBounds="true"
-                android:contentDescription="@android:string/no"
-                android:scaleType="fitXY"
-                />
+                >
+            <ImageView
+                    android:id="@+id/thumbnail"
+                    app:layout_widthPercent="100%"
+                    app:layout_aspectRatio="178%"
+                    android:adjustViewBounds="true"
+                    android:contentDescription="@android:string/no"
+                    android:scaleType="fitXY"
+                    />
+        </android.support.percent.PercentFrameLayout>
 
         <TextView
                 android:id="@+id/title"
@@ -31,7 +36,7 @@
                 android:padding="@dimen/space_3dp"
                 android:singleLine="true"
                 android:ellipsize="end"
-                android:textSize="@dimen/text_size_small"
+                android:textSize="@dimen/text_size_body_dense"
                 android:textColor="@color/text_black"
                 />
 
@@ -43,7 +48,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="@dimen/space_3dp"
-                    android:textSize="@dimen/text_size_micro"
+                    android:textSize="@dimen/text_size_caption_dense"
                     android:textColor="@color/text_black"
                     />
             <TextView
@@ -52,7 +57,7 @@
                     android:layout_height="wrap_content"
                     android:padding="@dimen/space_3dp"
                     android:layout_alignParentRight="true"
-                    android:textSize="@dimen/text_size_micro"
+                    android:textSize="@dimen/text_size_caption_dense"
                     android:textColor="@color/text_black"
                     />
         </RelativeLayout>

@@ -12,7 +12,7 @@
             android:layout_marginLeft="@dimen/comments_margin_10dp"
             android:layout_marginRight="@dimen/comments_edit_margin"
             android:text="@string/comment_word_number"
-            android:textSize="@dimen/text_size_medium"
+            android:textSize="@dimen/text_size_input_dense"
             android:textColor="@color/text_disabled_or_hint_black"
             />
 

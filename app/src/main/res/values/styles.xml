@@ -1,31 +1,36 @@
 <resources>
 
-    <!-- Base application theme. -->
-    <style name="BaseAppTheme" parent="android:Theme.Holo.Light.DarkActionBar">
-        <item name="android:actionBarStyle">@style/CustomActionBar</item>
-    </style>
     <!-- Application theme. -->
-    <style name="AppTheme" parent="BaseAppTheme">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
-        <item name="vpiTitlePageIndicatorStyle">@style/CustomTitlePageIndicator</item>
+        <!-- colorPrimary is used for the default action bar background -->
+        <item name="colorPrimary">@color/primary</item>
+        <!-- colorPrimaryDark is used for the status bar -->
+        <item name="colorPrimaryDark">@color/primary_dark</item>
+        <!-- colorAccent is used as the default value for colorControlActivated,
+             which is used to tint widgets -->
+        <item name="colorAccent">@color/accent</item>
+        <!-- You can also set colorControlNormal, colorControlActivated
+             colorControlHighlight, and colorSwitchThumbNormal. -->
     </style>
 
-    <!-- ActionBar styles -->
-    <style name="CustomActionBar" parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
-        <item name="android:background">@color/primary</item>
+    <!-- see http://stackoverflow.com/questions/29790070/upgraded-to-appcompat-v22-1-0-and-now-getting-illegalargumentexception-appcompa -->
+    <style name="AppTheme.NoActionBar">
+        <!-- Both of these are needed -->
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
     </style>
-    <!-- Indicators styles -->
-    <style name="CustomTitlePageIndicator">
-        <item name="android:background">@color/primary</item>
-        <item name="topPadding">4dp</item>
-        <item name="footerPadding">4dp</item>
-        <item name="footerColor">@color/text_white</item>
-        <item name="footerLineHeight">0dp</item>
-        <item name="footerIndicatorHeight">5dp</item>
-        <item name="footerIndicatorStyle">triangle</item>
-        <item name="android:textColor">@color/text_secondary_white</item>
-        <item name="selectedColor">@color/text_white</item>
-        <item name="selectedBold">true</item>
+
+    <style name="FullscreenThemeBase" parent="android:Theme.Holo.Light.NoActionBar.Fullscreen"/>
+    <style name="FullscreenTheme" parent="FullscreenThemeBase">
+        <item name="android:windowBackground">@null</item>
     </style>
+
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+        <!--<item name="android:textColorPrimary">#fff</item>-->
+        <!--<item name="colorControlHighlight">#3fff</item>-->
+    </style>
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light"/>
 
 </resources>

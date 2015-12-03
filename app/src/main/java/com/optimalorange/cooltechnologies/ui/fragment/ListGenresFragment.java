@@ -5,14 +5,14 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.optimalorange.cooltechnologies.R;
-import com.optimalorange.cooltechnologies.entity.FavoriteBean;
 import com.optimalorange.cooltechnologies.entity.Video;
 import com.optimalorange.cooltechnologies.network.NetworkChecker;
+import com.optimalorange.cooltechnologies.network.RequestsManager;
 import com.optimalorange.cooltechnologies.network.VideosRequest;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.optimalorange.cooltechnologies.ui.ListVideosActivity;
-import com.optimalorange.cooltechnologies.ui.PlayVideoActivity;
-import com.optimalorange.cooltechnologies.ui.view.VideoCardViewBuilder;
+import com.optimalorange.cooltechnologies.ui.ShowVideoDetailActivity;
+import com.optimalorange.cooltechnologies.ui.viewholder.VideoCardViewBuilder;
 import com.optimalorange.cooltechnologies.util.ItemsCountCalculater;
 import com.umeng.analytics.MobclickAgent;
 
@@ -27,9 +27,9 @@ import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.support.v4.util.Pair;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,7 +57,7 @@ public class ListGenresFragment extends SwipeRefreshFragment {
 
     private String mYoukuClientId;
 
-    private VolleySingleton mVolleySingleton;
+    private RequestsManager mRequestsManager;
 
     private NetworkChecker mNetworkChecker;
 
@@ -65,8 +65,6 @@ public class ListGenresFragment extends SwipeRefreshFragment {
      * 类型列表及每种类型对应的视频
      */
     private Pair<ArrayList<String>, ArrayList<List<Video>>> mGenres;
-
-    private final RequestsManager mRequestsManager = new RequestsManager();
 
     /**
      * 状态属性：网络联通性。true表示已连接网络；false表示网络已断开。
@@ -95,7 +93,6 @@ public class ListGenresFragment extends SwipeRefreshFragment {
     private final Request mVideoCategorySchemaRequest = new JsonObjectRequest(
             Request.Method.GET,
             YOUKU_API_SCHEMAS_VIDEO_CATEGORY,
-            null,
             new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject jsonObject) {
@@ -148,7 +145,7 @@ public class ListGenresFragment extends SwipeRefreshFragment {
                     mRequestsManager.addRequestErrors();
                 }
             }
-    ).setTag(this);
+    );
 
     /**
      * @param genre  类型
@@ -165,7 +162,7 @@ public class ListGenresFragment extends SwipeRefreshFragment {
                 .setClient_id(mYoukuClientId)
                 .setCategory(CATEGORY_LABEL_OF_TECH)
                 .setGenre(genre)
-                .setPeriod(VideosRequest.Builder.PERIOD.MONTH)
+                .setPeriod(VideosRequest.Builder.PERIOD.WEEK)
                 .setCount(mItemsCountAndDimension.getCount())
                 .setResponseListener(new Response.Listener<List<Video>>() {
                     @Override
@@ -182,8 +179,7 @@ public class ListGenresFragment extends SwipeRefreshFragment {
                         mRequestsManager.addRequestErrors();
                     }
                 })
-                .build()
-                .setTag(this);
+                .build();
     }
 
     //--------------------------------------------------------------------------
@@ -194,7 +190,14 @@ public class ListGenresFragment extends SwipeRefreshFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mYoukuClientId = getString(R.string.youku_client_id);
-        mVolleySingleton = VolleySingleton.getInstance(getActivity());
+        mRequestsManager = new RequestsManager(VolleySingleton.getInstance(getActivity()));
+        mRequestsManager.setOnAllRequestsFinishedListener(
+                new RequestsManager.OnAllRequestsFinishedListener() {
+                    @Override
+                    public void onAllRequestsFinished(RequestsManager requestsManager) {
+                        onLoadFinished();
+                    }
+                });
         mNetworkChecker = NetworkChecker.newInstance(getActivity());
         // Register BroadcastReceiver to track connection changes.
         IntentFilter filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
@@ -314,7 +317,6 @@ public class ListGenresFragment extends SwipeRefreshFragment {
     }
 
     private void cancelLoad() {
-        mVolleySingleton.getRequestQueue().cancelAll(this);
         mRequestsManager.reset();
     }
 
@@ -378,84 +380,6 @@ public class ListGenresFragment extends SwipeRefreshFragment {
     //--------------------------------------------------------------------------
     // 内部类
     //--------------------------------------------------------------------------
-
-    /**
-     * {@link Request Requests}管理器。用于统计Requests状态。
-     */
-    private class RequestsManager {
-
-        private int mRequests = 0;
-
-        private int mRequestRespondeds = 0;
-
-        private int mRequestErrors = 0;
-
-        private int mRequestCancelleds = 0;
-
-        /**
-         * 初始化总{@link Request}数为0
-         */
-        private void reset() {
-            mRequests = mRequestRespondeds = mRequestErrors = mRequestCancelleds = 0;
-        }
-
-        /**
-         * 添加{@link Request}数
-         *
-         * @return 添加后，总Request数
-         */
-        public int addRequest(Request request) {
-            mVolleySingleton.addToRequestQueue(request);
-            return mRequests++;
-        }
-
-        /**
-         * 添加收到响应的{@link Request}数
-         *
-         * @return 添加后，总收到响应的Request数
-         */
-        public int addRequestRespondeds() {
-            int result = mRequestRespondeds++;
-            checkIsAllRequestsFinished();
-            return result;
-        }
-
-        /**
-         * 添加失败的{@link Request}数
-         *
-         * @return 添加后，总失败的Request数
-         */
-        public int addRequestErrors() {
-            int result = mRequestErrors++;
-            checkIsAllRequestsFinished();
-            return result;
-        }
-
-        /**
-         * 添加取消的{@link Request}数
-         *
-         * @return 添加后，总取消的Request数
-         */
-        public int addRequestCancelleds() {
-            int result = mRequestCancelleds++;
-            checkIsAllRequestsFinished();
-            return result;
-        }
-
-        public int getRequestFinisheds() {
-            return mRequestRespondeds + mRequestErrors;
-        }
-
-        public boolean isAllRequestsFinished() {
-            return mRequests == getRequestFinisheds() + mRequestCancelleds;
-        }
-
-        private void checkIsAllRequestsFinished() {
-            if (isAllRequestsFinished()) {
-                onLoadFinished();
-            }
-        }
-    }
 
     //-------------------------------------
     // Adapter
@@ -521,7 +445,7 @@ public class ListGenresFragment extends SwipeRefreshFragment {
                 }
             }
             for (; cardViewsIndex < holder.mCardViews.size(); cardViewsIndex++) {
-                holder.mCardViews.get(cardViewsIndex).clearAllViewsContent();
+                clearVideoCardView(holder.mCardViews.get(cardViewsIndex));
             }
         }
 
@@ -529,18 +453,21 @@ public class ListGenresFragment extends SwipeRefreshFragment {
             return true;
         }
 
+        private void clearVideoCardView(VideoCardViewBuilder.VideoCardViewHolder videoCardView) {
+            videoCardView.clearAllViewsContent();
+            videoCardView.mRootCardView.setOnClickListener(null);
+        }
+
         private void bindVideoCardView(
                 final VideoCardViewBuilder.VideoCardViewHolder videoCardView,
                 final Video video,
                 final boolean showImage) {
-            videoCardView.bindVideo(video, showImage, mVolleySingleton.getImageLoader());
+            videoCardView.bindVideo(
+                    video, showImage, mRequestsManager.getVolleySingleton().getImageLoader());
             videoCardView.mRootCardView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(v.getContext(), PlayVideoActivity.class);
-                    FavoriteBean favoriteBean = new FavoriteBean(video);
-                    intent.putExtra(PlayVideoActivity.EXTRA_KEY_VIDEO, favoriteBean);
-                    startActivity(intent);
+                    ShowVideoDetailActivity.start(v.getContext(), video.getId());
                 }
             });
         }
