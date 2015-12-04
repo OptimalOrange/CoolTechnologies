@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
@@ -218,9 +219,9 @@ public class ShowVideoDetailActivity extends LoginableBaseActivity {
                 if (defaultSharedPreferences.hasLoggedIn()) {
                     String token = defaultSharedPreferences.retrieveString("access_token", "");
                     if (mHasBookmarked) {
-                        mVolleySingleton.addToRequestQueue(buildDestroyFavoriteRequest(token));
+                        sendDestroyFavoriteRequest(token);
                     } else {
-                        mVolleySingleton.addToRequestQueue(buildCreateFavoriteRequest(token));
+                        sendCreateFavoriteRequest(token);
                     }
                 } else {
                     System.err.println("Shouldn't be there.@onOptionsItemSelected.action_bookmark");
@@ -242,11 +243,38 @@ public class ShowVideoDetailActivity extends LoginableBaseActivity {
                 .build();
     }
 
+    private boolean checkVideo() {
+        if (mVideo != null) {
+            return true;
+        } else {
+            Snackbar
+                    .make(
+                            findViewById(R.id.video_detail_root_view),
+                            R.string.did_not_load_video,
+                            Snackbar.LENGTH_LONG
+                    )
+                    .show();
+            return false;
+        }
+    }
+
+    public void sendCreateFavoriteRequest(String token) {
+        if (checkVideo()) {
+            mVolleySingleton.addToRequestQueue(buildCreateFavoriteRequest(token, mVideo));
+        }
+    }
+
+    public void sendDestroyFavoriteRequest(String token) {
+        if (checkVideo()) {
+            mVolleySingleton.addToRequestQueue(buildDestroyFavoriteRequest(token, mVideo));
+        }
+    }
+
     /** 创建添加收藏的请求 */
-    private CreateFavoriteRequest buildCreateFavoriteRequest(String token) {
+    private CreateFavoriteRequest buildCreateFavoriteRequest(String token, Video video) {
         return new CreateFavoriteRequest.Builder()
                 .setClient_id(mYoukuClientId)
-                .setVideo_id(mVideo.id)
+                .setVideo_id(video.id)
                 .setAccess_token(token)
                 .setResponseListener(new OnResponseListener(this, RequestType.CREATE_FAVORITE))
                 .setErrorListener(new OnErrorResponseListener(this, RequestType.CREATE_FAVORITE))
@@ -254,10 +282,10 @@ public class ShowVideoDetailActivity extends LoginableBaseActivity {
     }
 
     /** 创建取消收藏的请求 */
-    private DestroyFavoriteRequest buildDestroyFavoriteRequest(String token) {
+    private DestroyFavoriteRequest buildDestroyFavoriteRequest(String token, Video video) {
         return new DestroyFavoriteRequest.Builder()
                 .setClient_id(mYoukuClientId)
-                .setVideo_id(mVideo.id)
+                .setVideo_id(video.id)
                 .setAccess_token(token)
                 .setResponseListener(new OnResponseListener(this, RequestType.DESTROY_FAVORITE))
                 .setErrorListener(new OnErrorResponseListener(this, RequestType.DESTROY_FAVORITE))
