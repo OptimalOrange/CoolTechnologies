@@ -5,6 +5,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 ### Fixed
 - 修复“仅在WLAN下，播放视频”设置失效的问题
+- 避免视频详情页加载缩略图时，先闪过全黑图的问题
+- 修复进入并马上退出视频详情页时，程序崩溃的问题
 
 ## [1.1.0] - 2015-12-03
 ### Changed
