@@ -316,7 +316,9 @@ public class Video {
         /** 审核中 */
         IN_REVIEW,
         /** 已屏蔽 */
-        BLOCKED;
+        BLOCKED,
+        /** 暂未在文档中发现此项，但会遇到 */
+        LIMITED;
 
         @NonNull
         public static State fromStringIgnoreCase(String value) {
