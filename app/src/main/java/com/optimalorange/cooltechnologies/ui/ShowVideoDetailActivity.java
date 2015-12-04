@@ -19,9 +19,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -89,6 +93,7 @@ public class ShowVideoDetailActivity extends LoginableBaseActivity {
                     imageListener.onResponse(response, isImmediate);
                     mViews.thumbnail.setBackgroundResource(R.color.black);
                 }
+
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     imageListener.onErrorResponse(error);
@@ -103,10 +108,23 @@ public class ShowVideoDetailActivity extends LoginableBaseActivity {
             throw new IllegalStateException("cannot play video before load it.");
         }
 
-        // 保存播放历史
-        DBManager.getInstance(this).saveHistory(mVideo);
-        // 跳转到 SimpleWebViewActivity
-        SimpleWebViewActivity.start(this, mVideo.link);
+        switch (NetworkError.checkNetwork(this)) {
+            case NO_ERROR:
+                // 保存播放历史
+                DBManager.getInstance(this).saveHistory(mVideo);
+                // 跳转到 SimpleWebViewActivity
+                SimpleWebViewActivity.start(this, mVideo.link);
+                break;
+            case NO_WIFI_NETWORK:
+                new NoWifiNetworkDialogFragment()
+                        .show(getSupportFragmentManager(), "no_wifi_network");
+                break;
+            case NO_NETWORK:
+                new NoNetworkDialogFragment().show(getSupportFragmentManager(), "no_network");
+                break;
+            default:
+                throw new UnsupportedOperationException("Unsupported NetworkError");
+        }
     }
 
     /**
@@ -371,6 +389,83 @@ public class ShowVideoDetailActivity extends LoginableBaseActivity {
                 default:
                     throw new IllegalArgumentException("Unknown RequestType:" + mRequestType);
             }
+        }
+    }
+
+    private enum NetworkError {
+        NO_ERROR,
+        NO_NETWORK,
+        NO_WIFI_NETWORK;
+
+        public static NetworkError checkNetwork(Context context) {
+            NetworkChecker networkChecker = NetworkChecker.newInstance(context);
+            if (DefaultSharedPreferencesSingleton.getInstance(context).onlyPlayVideoWhenUseWlan()) {
+                if (networkChecker.isConnected()) {
+                    return networkChecker.isWifiConnected() ? NO_ERROR : NO_WIFI_NETWORK;
+                } else {
+                    return NO_NETWORK;
+                }
+            } else {
+                return networkChecker.isConnected() ? NO_ERROR : NO_NETWORK;
+            }
+        }
+    }
+
+    public static class NoNetworkDialogFragment extends DialogFragment {
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            // Use the Builder class for convenient dialog construction
+            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+            builder
+                    .setTitle(R.string.no_network_title)
+                    .setMessage(R.string.no_network_message)
+                    .setPositiveButton(
+                            R.string.action_settings, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    NetworkChecker.openWirelessSettings(getContext());
+                                }
+                            })
+                    .setNegativeButton(
+                            android.R.string.cancel, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    // do nothing when click cancel
+                                }
+                            });
+            // Create the AlertDialog object and return it
+            return builder.create();
+        }
+    }
+
+    public static class NoWifiNetworkDialogFragment extends DialogFragment {
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            // Use the Builder class for convenient dialog construction
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder
+                    .setTitle(R.string.no_wifi_network_title)
+                    .setItems(R.array.no_wifi_network_buttons,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    switch (which) {
+                                        case 0:
+                                            NetworkChecker.openWirelessSettings(getContext());
+                                            break;
+                                        case 1:
+                                            SettingsActivity.start(getContext());
+                                            break;
+                                        case 2:
+                                            // do nothing when click cancel
+                                            break;
+                                        default:
+                                            throw new UnsupportedOperationException("unsupported");
+                                    }
+                                }
+                            });
+            // Create the AlertDialog object and return it
+            return builder.create();
         }
     }
 
