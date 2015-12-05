@@ -53,6 +53,7 @@
         <item>@string/no_wifi_network_button2</item>
         <item>@android:string/cancel</item>
     </string-array>
+    <string name="did_not_load_video">尚未加载视频</string>
 
     <!-- SearchActivity -->
     <string name="search">搜索</string>
