@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Changed
+- 微调界面
+
 ### Fixed
 - 修复有时遇到空主页，不显示内容的问题
 - 修复“仅在WLAN下，播放视频”设置失效的问题
