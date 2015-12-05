@@ -1,56 +1,53 @@
 package com.optimalorange.cooltechnologies.ui.fragment;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
+import com.optimalorange.cooltechnologies.BuildConfig;
 import com.optimalorange.cooltechnologies.R;
-import com.optimalorange.cooltechnologies.adapter.FavoriteAdapter;
-import com.optimalorange.cooltechnologies.entity.FavoriteBean;
+import com.optimalorange.cooltechnologies.network.DestroyFavoriteRequest;
+import com.optimalorange.cooltechnologies.network.GetMyFavoriteRequest;
 import com.optimalorange.cooltechnologies.network.NetworkChecker;
 import com.optimalorange.cooltechnologies.network.VolleySingleton;
 import com.optimalorange.cooltechnologies.storage.DefaultSharedPreferencesSingleton;
 import com.optimalorange.cooltechnologies.ui.LoginableBaseActivity;
-import com.optimalorange.cooltechnologies.ui.PlayVideoActivity;
+import com.optimalorange.cooltechnologies.ui.ShowVideoDetailActivity;
+import com.optimalorange.cooltechnologies.ui.entity.Empty;
+import com.optimalorange.cooltechnologies.ui.entity.FavoriteFooter;
+import com.optimalorange.cooltechnologies.ui.entity.Loading;
+import com.optimalorange.cooltechnologies.ui.entity.Video;
+import com.optimalorange.cooltechnologies.ui.viewholder.RecyclerEmptyViewHolder;
+import com.optimalorange.cooltechnologies.ui.viewholder.RecyclerFavoriteFooterViewHolder;
+import com.optimalorange.cooltechnologies.ui.viewholder.RecyclerFavoriteViewHolder;
+import com.optimalorange.cooltechnologies.ui.viewholder.RecyclerLoadingViewHolder;
 import com.umeng.analytics.MobclickAgent;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.HTTP;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
-import android.content.Intent;
-import android.graphics.PixelFormat;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.view.Gravity;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
-import android.widget.AdapterView;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+
+import gq.baijie.classbasedviewadapter.android.adapter.ClassBasedRecyclerViewAdapter;
+import gq.baijie.classbasedviewadapter.android.adapter.DataSet;
+import gq.baijie.classbasedviewadapter.android.adapter.ViewHolderFactoryRegister;
 
 /**
  * Created by WANGZHENGZE on 2014/11/20.
@@ -58,34 +55,26 @@ import java.util.ArrayList;
  */
 public class FavoriteFragment extends SwipeRefreshFragment {
 
-    private static final String DEFAULT_CATEGORY_LABEL= "科技";
+    private static final String DEFAULT_CATEGORY_LABEL = "科技";
 
-    private View v;
-    private static final String FAVORITE_BASE_URL = "https://openapi.youku.com/v2/videos/favorite/by_me.json";
-    private ListView favoriteListView;
+    private String mYoukuClientId;
+
     private VolleySingleton mVolleySingleton;
+
     private DefaultSharedPreferencesSingleton mDefaultSharedPreferencesSingleton;
+
     private NetworkChecker mNetworkChecker;
-    private TextView mTvHint;
-    private boolean mIsCreated = false;
 
-    private WindowManager windowManager = null;
-    private WindowManager.LayoutParams windowParams = null;
-    private View deleteView = null;
-    private ArrayList<FavoriteBean> favoriteBeans;
-    private FavoriteAdapter adapter;
+    private List<Loading> mLoadingDataSet;
 
-    private static final String BASE_FAVORITE_DELETE_URL = "https://openapi.youku.com/v2/videos/favorite/destroy.json";
-    private static final int DELETE_FAVORITE_OK = 0;
-    private static final int DELETE_FAVORITE_ERROR = 1;
-    private int page = 1;
-    private int total = 0;
-    private int currentCount = 0;
-    private TextView tvViewMore;
-    private View footer;
+    private FavoritesDataSet mFavoritesDataSet;
 
-    private Handler mUiThreadHandler =
-            new Handler(Looper.getMainLooper(), new HandlerCallback(new WeakReference<>(this)));
+    private boolean mIsLoadingFavorites = false;
+
+    private final ClassBasedRecyclerViewAdapter adapter = new ClassBasedRecyclerViewAdapter();
+
+    private ViewHolder vh;
+
 
     private final LoginableBaseActivity.OnLoginStatusChangeListener mOnLoginStatusChangeListener =
             new LoginableBaseActivity.OnLoginStatusChangeListener() {
@@ -100,22 +89,115 @@ public class FavoriteFragment extends SwipeRefreshFragment {
                 }
             };
 
-    private boolean mIsDelButtonCreate;
+
+    private void initProperties() {
+        mVolleySingleton = VolleySingleton.getInstance(getActivity());
+        mYoukuClientId = getString(R.string.youku_client_id);
+
+        Loading loading = new Loading();
+        Empty empty = new Empty();
+        FavoriteFooter haveMoreFooter = new FavoriteFooter();
+        FavoriteFooter noMoreFooter = new FavoriteFooter();
+        loading.hint = getString(R.string.favorite_new_loading);
+        empty.hint = getString(R.string.favorite_no_fav);
+        haveMoreFooter.hint = getString(R.string.favorite_view_more);
+        noMoreFooter.hint = getString(R.string.at_last);
+        haveMoreFooter.listener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getJsonData();
+            }
+        };
+        mLoadingDataSet = Collections.singletonList(loading);
+        mFavoritesDataSet = new FavoritesDataSet();
+        mFavoritesDataSet.empty = empty;
+        mFavoritesDataSet.haveMoreFooter = haveMoreFooter;
+        mFavoritesDataSet.noMoreFooter = noMoreFooter;
+
+        final ViewHolderFactoryRegister register = adapter.getRegister();
+        register.registerViewHolderFactory(new RecyclerLoadingViewHolder.Factory());
+        register.registerViewHolderFactory(new RecyclerEmptyViewHolder.Factory());
+        register.registerViewHolderFactory(new RecyclerFavoriteFooterViewHolder.Factory());
+        register.registerViewHolderFactory(new RecyclerFavoriteViewHolder.Factory() {
+            @Override
+            public void bindViewHolder(
+                    RecyclerFavoriteViewHolder holder, final Video value, final int position) {
+                super.bindViewHolder(holder, value, position);
+                holder.itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        ShowVideoDetailActivity.start(v.getContext(), value.id);
+                    }
+                });
+                holder.itemView.setOnCreateContextMenuListener(
+                        new View.OnCreateContextMenuListener() {
+                            @Override
+                            public void onCreateContextMenu(ContextMenu menu, final View v,
+                                    ContextMenu.ContextMenuInfo menuInfo) {
+                                menu.add(R.string.action_delete)
+                                        .setOnMenuItemClickListener(
+                                                new MenuItem.OnMenuItemClickListener() {
+                                                    @Override
+                                                    public boolean onMenuItemClick(MenuItem item) {
+                                                        sendDeleteRequest(value.id, position);
+                                                        return true;
+                                                    }
+                                                });
+                            }
+                        });
+            }
+        });
+
+        adapter.setDataSet(mLoadingDataSet);
+        adapter.notifyDataSetChanged();
+    }
+
+    private void initState() {
+        mIsLoadingFavorites = false;
+    }
+
+    public void resetState() {
+        mIsLoadingFavorites = false; //TODO cancel pending requests
+        adapter.setDataSet(mLoadingDataSet);
+        adapter.notifyDataSetChanged();
+        mFavoritesDataSet.unsetFavorites();
+    }
+
+    public void addFavorites(Favorites added) {
+        if (mFavoritesDataSet.favorites != null) {
+            mFavoritesDataSet.addFavorites(added, adapter);
+        } else {
+            final Favorites newFavorites = new Favorites(new ArrayList<Video>());
+            newFavorites.add(added);
+            mFavoritesDataSet.favorites = newFavorites;
+            adapter.setDataSet(mFavoritesDataSet);
+            adapter.notifyDataSetChanged();
+        }
+    }
+
+    public void removeFavorites(int position) {
+        if (mFavoritesDataSet.favorites == null) {
+            throw new IllegalStateException("");
+        }
+        mFavoritesDataSet.remove(position, adapter);
+    }
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mNetworkChecker = NetworkChecker.newInstance(getActivity());
+
+        initProperties();
+        initState();
     }
 
     @Override
-    protected View onCreateChildView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        v = inflater.inflate(R.layout.fragment_favorite, container, false);
-        favoriteListView = (ListView) v.findViewById(R.id.favorite_list);
-        mTvHint = (TextView) v.findViewById(R.id.favorite_hint);
-        footer = inflater.inflate(R.layout.ll_favorite_footer, favoriteListView, false);
-        tvViewMore = (TextView) footer.findViewById(R.id.tv_more);
-        return v;
+    protected View onCreateChildView(
+            LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View rootView = inflater.inflate(R.layout.fragment_favorite, container, false);
+        vh = new ViewHolder(rootView);
+        return rootView;
     }
 
     @Override
@@ -126,100 +208,29 @@ public class FavoriteFragment extends SwipeRefreshFragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mVolleySingleton = VolleySingleton.getInstance(getActivity());
         mDefaultSharedPreferencesSingleton =
                 DefaultSharedPreferencesSingleton.getInstance(getActivity());
         ((LoginableBaseActivity) getActivity())
                 .addLoginStatusChangeListener(mOnLoginStatusChangeListener);
-        if (((LoginableBaseActivity) getActivity()).hasLoggedIn()){
+        if (((LoginableBaseActivity) getActivity()).hasLoggedIn()) {
             setRefreshable(true);
         } else {
             setRefreshable(false);
         }
 
-        favoriteListView.setVisibility(View.GONE);
-        favoriteListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(getActivity(), PlayVideoActivity.class);
-                intent.putExtra(PlayVideoActivity.EXTRA_KEY_VIDEO, favoriteBeans.get(position));
-                startActivity(intent);
-            }
-        });
+        vh.favorites.setLayoutManager(new LinearLayoutManager(vh.favorites.getContext()));
+        vh.favorites.setAdapter(adapter);
+    }
 
-        favoriteBeans = new ArrayList<>();
-        adapter = new FavoriteAdapter(getActivity(), favoriteBeans, mVolleySingleton.getImageLoader());
+    @Override
+    public void onStart() {
+        super.onStart();
 
-        tvViewMore.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ((TextView) v).setText(getString(R.string.favorite_view_more_loading));
-                getJsonData();
-            }
-        });
-        favoriteListView.addFooterView(footer);
-        favoriteListView.setAdapter(adapter);
-        getNewData();
-        mIsCreated = true;
-        favoriteListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, final int position, long id) {
-                int[] locationInWindow = new int[2];
-                view.getLocationInWindow(locationInWindow);
-                windowParams = new WindowManager.LayoutParams();
-                windowParams.gravity = Gravity.TOP | Gravity.LEFT;
-                windowParams.x = locationInWindow[0] + view.getWidth() / 2;
-                windowParams.width = WindowManager.LayoutParams.WRAP_CONTENT;
-                windowParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
-                //添加属性FLAG_WATCH_OUTSIDE_TOUCH，用于监听窗口外Touch事件
-                windowParams.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                        | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                        | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                        | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
-                windowParams.format = PixelFormat.TRANSLUCENT;
-                windowParams.windowAnimations = 0;
-                windowManager = (WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE);
-                if (deleteView != null) {
-                    windowManager.removeViewImmediate(deleteView);
-                }
-                deleteView = LayoutInflater.from(getActivity()).inflate(R.layout.ll_favorite_delete, null);
-                deleteView.measure(0, 0);
-                int deleteViewHeight = deleteView.getMeasuredHeight();
-                windowParams.y = locationInWindow[1] - deleteViewHeight;
-                deleteView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        sendDeleteRequest(favoriteBeans.get(position).videoId, position);
-                    }
-                });
-                windowManager.addView(deleteView, windowParams);
-                return true;
-            }
-        });
-
-        favoriteListView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-
-
-                if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    if (deleteView == null) {
-                        mIsDelButtonCreate = true;
-                    } else {
-                        mIsDelButtonCreate = false;
-                        return true;
-                    }
-                }
-
-                if ((event.getAction() == MotionEvent.ACTION_UP
-                        || event.getAction() == MotionEvent.ACTION_MOVE) && deleteView != null
-                        && !mIsDelButtonCreate) {
-                    removeWindowView();
-                    return true;
-                }
-                return false;
-            }
-        });
+        // load data if not do it yet
+        if (mFavoritesDataSet.favorites == null && !mIsLoadingFavorites) {
+            vh.favorites.setVisibility(View.GONE);
+            getNewData();
+        }
     }
 
     @Override
@@ -238,12 +249,8 @@ public class FavoriteFragment extends SwipeRefreshFragment {
     public void onDestroyView() {
         ((LoginableBaseActivity) getActivity())
                 .removeLoginStatusChangeListener(mOnLoginStatusChangeListener);
-        tvViewMore = null;
-        footer = null;
-        mTvHint = null;
-        favoriteListView.setAdapter(null);
-        favoriteListView = null;
-        v = null;
+        vh.favorites.setAdapter(null);
+        vh = null;
         super.onDestroyView();
     }
 
@@ -253,209 +260,432 @@ public class FavoriteFragment extends SwipeRefreshFragment {
         super.onDestroy();
     }
 
-    private void removeWindowView() {
-        if (windowManager != null && deleteView != null) {
-            windowManager.removeViewImmediate(deleteView);
-            deleteView = null;
-        }
-    }
-
     private void getNewData() {
-        page = 1;
-        total = 0;
-        currentCount = 0;
-        favoriteBeans.clear();
-        adapter.notifyDataSetChanged();
+        resetState();
+
         getJsonData();
     }
 
     public void getJsonData() {
-        if (favoriteListView.getVisibility() == View.GONE) {
+        // 避免重复发送
+        if (mIsLoadingFavorites) {
+            return;
+        }
+        if (vh.favorites.getVisibility() == View.GONE) {
             setHint(R.string.favorite_new_loading);
         }
-        String token = mDefaultSharedPreferencesSingleton.retrieveString("access_token", "");
         if (mDefaultSharedPreferencesSingleton.hasLoggedIn()) {
             if (!mNetworkChecker.isConnected()) {
                 setHint(R.string.favorite_hint_no_net);
                 return;
             }
-            RequestQueue requestQueue = Volley.newRequestQueue(getActivity());
-            String url = FAVORITE_BASE_URL + "?client_id=" + getString(R.string.youku_client_id) + "&access_token=" + token + "&page=" + page + "&count=10";
-            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject jsonObject) {
-                    try {
-                        total = jsonObject.getInt("total");
-                        if (total != 0) {
-                            JSONArray videoArray = jsonObject.getJSONArray("videos");
-                            int pageCount = videoArray.length();
-                            currentCount += pageCount;
-                            if (currentCount == total) {
-                                tvViewMore.setEnabled(false);
-                                tvViewMore.setText(getString(R.string.favorite_view_more_last));
-                            } else {
-                                tvViewMore.setEnabled(true);
-                                tvViewMore.setText(getString(R.string.favorite_view_more));
-                                page++;
-                            }
-                            for (int i = 0; i < videoArray.length(); i++) {
-                                JSONObject itemObject = videoArray.getJSONObject(i);
-                                if(itemObject.getString("category").equals(DEFAULT_CATEGORY_LABEL)){
-                                    FavoriteBean bean = new FavoriteBean(itemObject);
-                                    favoriteBeans.add(bean);
-                                }
-                            }
-                            adapter.notifyDataSetChanged();
-                            favoriteListView.setVisibility(View.VISIBLE);
-                            if (mTvHint.getVisibility() == View.VISIBLE) {
-                                mTvHint.setVisibility(View.GONE);
-                            }
-                        } else {
-                            setHint(R.string.favorite_no_fav);
-                        }
-
-                        setRefreshing(false);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError volleyError) {
-                    volleyError.printStackTrace();
-                }
-            });
-            requestQueue.add(jsonObjectRequest);
+            String token = mDefaultSharedPreferencesSingleton.retrieveString("access_token", "");
+            int nextPage;
+            if (mFavoritesDataSet.favorites == null) {
+                nextPage = 1;
+            } else {
+                nextPage = mFavoritesDataSet.favorites.getCurrentPage() + 1;
+            }
+            GetMyFavoriteRequest favoriteRequest = buildGetMyFavoriteRequest(token, nextPage, 10);
+            mIsLoadingFavorites = true;
+            mVolleySingleton.addToRequestQueue(favoriteRequest);
         } else {
             setHint(R.string.favorite_hint_no_login);
         }
     }
 
     private void setHint(int res) {
-        mTvHint.setText(getString(res));
-        mTvHint.setVisibility(View.VISIBLE);
-        favoriteListView.setVisibility(View.GONE);
-        mTvHint.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getNewData();
-            }
-        });
+        if (vh != null) {
+            vh.mainHint.setText(vh.mainHint.getContext().getString(res));
+            vh.mainHint.setVisibility(View.VISIBLE);
+            vh.favorites.setVisibility(View.GONE);
+            vh.mainHint.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    getNewData();
+                }
+            });
+        }
+    }
+
+    private void hideHint() {
+        if (vh != null) {
+            vh.mainHint.setVisibility(View.GONE);
+            vh.favorites.setVisibility(View.VISIBLE);
+        }
     }
 
 
     @Override
     protected boolean canChildScrollUp() {
-        return favoriteListView.getVisibility() == View.VISIBLE &&
-                favoriteListView.canScrollVertically(-1);
+        return vh.favorites.getVisibility() == View.VISIBLE &&
+                vh.favorites.canScrollVertically(-1);
     }
 
-
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-        //显示的时候判断有没有走onCreated，没有判断是否有列表，没有则刷新列表。
-        if (isVisibleToUser) {
-            if (mIsCreated) {
-                mIsCreated = false;
-            } else {
-                if (favoriteListView.getVisibility() == View.GONE) {
-                    getNewData();
-                }
-            }
-        }
-    }
 
     private void sendDeleteRequest(String id, final int index) {
         if (!mNetworkChecker.isConnected()) {
-            Toast.makeText(getActivity(), R.string.favorite_delete_no_net, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), R.string.favorite_delete_no_net, Toast.LENGTH_SHORT)
+                    .show();
             return;
         }
         String token = mDefaultSharedPreferencesSingleton.retrieveString("access_token", "");
         if (!mDefaultSharedPreferencesSingleton.hasLoggedIn()) {
-            Toast.makeText(getActivity(), R.string.favorite_delete_no_login, Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), R.string.favorite_delete_no_login, Toast.LENGTH_SHORT)
+                    .show();
             return;
         }
-        final HttpPost request = new HttpPost(BASE_FAVORITE_DELETE_URL);
-        ArrayList<NameValuePair> paramList = new ArrayList<NameValuePair>();
-        BasicNameValuePair param;
-        param = new BasicNameValuePair("client_id", getString(R.string.youku_client_id));
-        paramList.add(param);
-        param = new BasicNameValuePair("access_token", token);
-        paramList.add(param);
-        param = new BasicNameValuePair("video_id", id);
-        paramList.add(param);
-        try {
-            request.setEntity(new UrlEncodedFormEntity(paramList, HTTP.UTF_8));
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                HttpClient client = new DefaultHttpClient();
-                try {
-                    HttpResponse response = client.execute(request);
-                    Message msg = new Message();
-                    if (response.getStatusLine().getStatusCode() == 200) {
-                        msg.what = DELETE_FAVORITE_OK;
-                        msg.arg1 = index;
-                        msg.obj = EntityUtils.toString(response.getEntity());
-                        mUiThreadHandler.sendMessage(msg);
-                    } else {
-                        msg.what = DELETE_FAVORITE_ERROR;
-                        mUiThreadHandler.sendMessage(msg);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
+        mVolleySingleton.addToRequestQueue(buildDestroyFavoriteRequest(token, id, index));
+    }
+
+    private GetMyFavoriteRequest buildGetMyFavoriteRequest(String token, int page, int count) {
+        final GetMyFavoriteRequestHandler handler =
+                new GetMyFavoriteRequestHandler(new WeakReference<>(this));
+        return new GetMyFavoriteRequest.Builder()
+                .setClient_id(mYoukuClientId)
+                .setAccess_token(token)
+                .setPage(page)
+                .setCount(count)
+                .setResponseListener(handler)
+                .setErrorListener(handler)
+                .build();
     }
 
     /**
-     * <b>Note</b>：<strong>必须</strong>在UI线程中调用此{@link HandlerCallback}。
+     * 创建取消收藏的请求
      */
-    private static class HandlerCallback implements Handler.Callback {
+    private DestroyFavoriteRequest buildDestroyFavoriteRequest(
+            String token, String videoId, int videoIndexInListView) {
+        final DestroyFavoriteRequestHandler handler = new DestroyFavoriteRequestHandler(
+                videoIndexInListView, new WeakReference<>(getContext()), new WeakReference<>(this));
+        return new DestroyFavoriteRequest.Builder()
+                .setClient_id(mYoukuClientId)
+                .setVideo_id(videoId)
+                .setAccess_token(token)
+                .setResponseListener(handler)
+                .setErrorListener(handler)
+                .build();
+    }
 
-        private final WeakReference<FavoriteFragment> mOuterClass;
+    private static class GetMyFavoriteRequestHandler
+            implements Response.Listener<JSONObject>, Response.ErrorListener {
 
-        private HandlerCallback(WeakReference<FavoriteFragment> outerClass) {
-            mOuterClass = outerClass;
+        private final WeakReference<FavoriteFragment> mOwner;
+
+        private GetMyFavoriteRequestHandler(WeakReference<FavoriteFragment> owner) {
+            mOwner = owner;
         }
 
         @Override
-        public boolean handleMessage(Message msg) {
-            FavoriteFragment outerClass = mOuterClass.get();
-            if (outerClass == null) {
-                return msg.what == DELETE_FAVORITE_OK || msg.what == DELETE_FAVORITE_ERROR;
-            }
-            switch (msg.what) {
-                case DELETE_FAVORITE_OK:
-                    outerClass.favoriteBeans.remove(msg.arg1);
-                    outerClass.adapter.notifyDataSetChanged();
-                    outerClass.removeWindowView();
-                    Toast.makeText(
-                            outerClass.getActivity(),
-                            outerClass.getString(R.string.favorite_delete_success),
-                            Toast.LENGTH_SHORT)
-                            .show();
-                    if (outerClass.favoriteBeans.size() == 0) {
-                        outerClass.setHint(R.string.favorite_no_fav);
-                    }
-                    return true;
-                case DELETE_FAVORITE_ERROR:
-                    Toast.makeText(
-                            outerClass.getActivity(),
-                            outerClass.getString(R.string.favorite_delete_fail),
-                            Toast.LENGTH_SHORT)
-                            .show();
-                    return true;
-                default:
-                    return false;
+        public void onErrorResponse(VolleyError error) {
+            new RuntimeException(error).printStackTrace();
+
+            final FavoriteFragment owner = mOwner.get();
+            if (owner != null) {
+                onFinished(owner);
+                //TODO show error info
             }
         }
+
+        @Override
+        public void onResponse(JSONObject response) {
+            final FavoriteFragment owner = mOwner.get();
+            if (owner != null) {
+                try {
+                    doHandle(response, owner);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                onFinished(owner);
+            }
+        }
+
+        //!!!注意!!! owner为null的一种可能情况是系统临时destroy了它。此情况下，应当在recreate时重置状态。
+        private void onFinished(@NonNull FavoriteFragment owner) {
+            owner.mIsLoadingFavorites = false;
+            owner.setRefreshing(false);
+            owner.hideHint();
+        }
+
+        private static void doHandle(JSONObject response, FavoriteFragment owner)
+                throws JSONException {
+            owner.addFavorites(convertToFavoriteInfo(response));
+        }
+
+        private static Favorites convertToFavoriteInfo(JSONObject jsonObject)
+                throws JSONException {
+            JSONArray videoArray = jsonObject.getJSONArray("videos");
+            Favorites favorites = new Favorites(convertNeededVideos(videoArray));
+            favorites.setCurrentReadCountIncludingUnneeded(videoArray.length());
+            favorites.setTotal(jsonObject.getInt("total"));
+            favorites.setCurrentPage(jsonObject.getInt("page"));
+            return favorites;
+        }
+
+        private static List<Video> convertNeededVideos(JSONArray videoArray)
+                throws JSONException {
+            List<Video> result = new LinkedList<>();
+            for (int i = 0; i < videoArray.length(); i++) {
+                JSONObject itemObject = videoArray.getJSONObject(i);
+                if (itemObject.getString("category").equals(DEFAULT_CATEGORY_LABEL)) {
+                    result.add(convertToFavorite(itemObject));
+                }
+            }
+            return result;
+        }
+
+        private static Video convertToFavorite(JSONObject jsonObject) throws JSONException {
+            Video result = new Video();
+            result.title = jsonObject.getString("title");
+            result.link = jsonObject.getString("link");
+            result.thumbnail = jsonObject.getString("thumbnail");
+            result.duration = jsonObject.getString("duration");
+            result.id = jsonObject.getString("id");
+            return result;
+        }
+
+    }
+
+    private static class DestroyFavoriteRequestHandler
+            implements Response.Listener<JSONObject>, Response.ErrorListener {
+
+        private final int mVideoIndexInListView;
+
+        private final WeakReference<Context> mContextWeakReference;
+
+        private final WeakReference<FavoriteFragment> mOwner;
+
+        private DestroyFavoriteRequestHandler(
+                int videoIndexInListView,
+                WeakReference<Context> contextWeakReference,
+                WeakReference<FavoriteFragment> owner) {
+            mVideoIndexInListView = videoIndexInListView;
+            mContextWeakReference = contextWeakReference;
+            mOwner = owner;
+        }
+
+        @Override
+        public void onErrorResponse(VolleyError error) {
+            final Context context = mContextWeakReference.get();
+            if (context != null) {
+                final String message = context.getString(R.string.favorite_delete_fail);
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        @Override
+        public void onResponse(JSONObject response) {
+            final Context context = mContextWeakReference.get();
+            final FavoriteFragment owner = mOwner.get();
+            if (owner != null) {
+                owner.removeFavorites(mVideoIndexInListView);
+            }
+            if (context != null) {
+                final String message = context.getString(R.string.favorite_delete_success);
+                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+            }
+        }
+
+    }
+
+    private static class FavoritesDataSet implements DataSet {
+
+        @Nullable
+        private Favorites favorites;
+
+        private Empty empty;
+
+        private FavoriteFooter haveMoreFooter;
+
+        private FavoriteFooter noMoreFooter;
+
+
+        @NonNull
+        private Favorites getNonNullFavorites() {
+            if (favorites != null) {
+                return favorites;
+            } else {
+                throw new IllegalStateException("haven't init FavoritesDataSet");
+            }
+        }
+
+        @Override
+        public int size() {
+            // getNonNullFavorites().isEmpty() 时，get(0)为empty；否则，最后有某种footer
+            return getNonNullFavorites().getInterestingFavorites().size() + 1;
+        }
+
+        //TODO 改善
+        @Override
+        public Object get(int position) {
+            final List<Video> interestingFavorites =
+                    getNonNullFavorites().getInterestingFavorites();
+            if (position < interestingFavorites.size()) {
+                return interestingFavorites.get(position);
+            } else {
+                if (!getNonNullFavorites().isEmpty()) {
+                    return getFavoriteFooter(position);
+                } else {
+                    return empty;
+                }
+            }
+        }
+
+        private FavoriteFooter getFavoriteFooter(int position) {
+            if (BuildConfig.DEBUG) {
+                // This if block will be auto deleted when release
+                if (position != getNonNullFavorites().getInterestingFavorites().size()) { //NOPMD
+                    throw new IllegalStateException();
+                }
+            }
+            if (!getNonNullFavorites().allRead()) {
+                return haveMoreFooter;
+            } else {
+                return noMoreFooter;
+            }
+        }
+
+        public void unsetFavorites() {
+            favorites = null;
+        }
+
+        public void addFavorites(Favorites added, RecyclerView.Adapter adapter) {
+            Favorites nonNullFavorites = getNonNullFavorites();
+            if (nonNullFavorites.isEmpty()) {
+                nonNullFavorites.add(added);
+                adapter.notifyDataSetChanged();
+            } else {
+                final int sizeBeforeAdd = nonNullFavorites.getInterestingFavorites().size();
+                nonNullFavorites.add(added);
+                adapter.notifyItemRangeInserted(
+                        sizeBeforeAdd, added.getInterestingFavorites().size());
+                if (nonNullFavorites.allRead()) {
+                    // footer改为noMoreFooter
+                    adapter.notifyItemChanged(nonNullFavorites.getInterestingFavorites().size());
+                }
+            }
+        }
+
+        public void remove(int position, RecyclerView.Adapter adapter) {
+            Favorites nonNullFavorites = getNonNullFavorites();
+            nonNullFavorites.remove(position);
+            if (nonNullFavorites.isEmpty()) {
+                adapter.notifyDataSetChanged();
+            } else {
+                adapter.notifyItemRemoved(position);
+            }
+        }
+
+    }
+
+    private static class Favorites {
+
+        private int total;
+
+        private int currentPage;
+
+        private int currentReadCountIncludingUnneeded;
+
+        @NonNull
+        private final List<Video> interestingFavorites;
+
+        public Favorites(@NonNull List<Video> interestingFavorites) {
+            this.interestingFavorites = interestingFavorites;
+        }
+
+        // TODO 由于不明原因，有些收藏可能读取不到，会导致此方法出问题
+        public boolean allRead() {
+            if (BuildConfig.DEBUG) {
+                // This if block will be auto deleted when release
+                if (currentReadCountIncludingUnneeded > total) { //NOPMD
+                    final String message = "currentReadCountIncludingUnneeded > total: " +
+                            "currentReadCountIncludingUnneeded=" + currentReadCountIncludingUnneeded
+                            + ", total=" + total;
+                    throw new AssertionError(message);
+                }
+            }
+            return currentReadCountIncludingUnneeded >= total;
+        }
+
+        public boolean isEmpty() {
+            if (total == 0) {
+                return true;
+            } else {
+                if (BuildConfig.DEBUG) {
+                    // This if block will be auto deleted when release
+                    if (total < 0) { //NOPMD
+                        throw new AssertionError("total < 0");
+                    }
+                }
+                //TODO ------------------------- test this trick -----------------------
+                return allRead() && getInterestingFavorites().isEmpty();
+            }
+        }
+
+        @NonNull
+        public List<Video> getInterestingFavorites() {
+            return Collections.unmodifiableList(interestingFavorites);
+        }
+
+        public int getCurrentPage() {
+            return currentPage;
+        }
+
+        public void setCurrentPage(int currentPage) {
+            this.currentPage = currentPage;
+        }
+
+        /**
+         * 危险：不安全地影响状态
+         */
+        public void setCurrentReadCountIncludingUnneeded(int currentReadCountIncludingUnneeded) {
+            this.currentReadCountIncludingUnneeded = currentReadCountIncludingUnneeded;
+        }
+
+        /**
+         * 危险：不安全地影响状态
+         */
+        public void setTotal(int total) {
+            this.total = total;
+        }
+
+        //TODO check illegal argument
+        //TODO check state
+        public void add(Favorites added) {
+            //TODO check total != added.total?
+            total = added.total;
+
+            //TODO check currentPage + 1 != added.currentPage?
+            //TODO 处理 多请求并发条件下的 乱序问题
+            currentPage = added.currentPage;
+
+            //TODO 重复response？
+            currentReadCountIncludingUnneeded += added.currentReadCountIncludingUnneeded;
+            interestingFavorites.addAll(added.getInterestingFavorites());
+        }
+
+        //TODO check illegal argument
+        //TODO check state
+        public void remove(int index) {
+            total--;
+            currentReadCountIncludingUnneeded--;
+            interestingFavorites.remove(index);
+        }
+
+    }
+
+    static class ViewHolder {
+
+        RecyclerView favorites;
+
+        TextView mainHint;
+
+        private ViewHolder(View root) {
+            favorites = (RecyclerView) root.findViewById(R.id.favorites);
+            mainHint = (TextView) root.findViewById(R.id.main_hint);
+        }
+
     }
 
 }

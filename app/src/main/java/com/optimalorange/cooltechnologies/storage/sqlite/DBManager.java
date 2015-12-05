@@ -1,6 +1,6 @@
 package com.optimalorange.cooltechnologies.storage.sqlite;
 
-import com.optimalorange.cooltechnologies.entity.FavoriteBean;
+import com.optimalorange.cooltechnologies.ui.entity.Video;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -9,7 +9,8 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Created by WANGZHENGZE on 2014/12/24.
@@ -29,15 +30,17 @@ public class DBManager {
     private DataBaseHelper dbHelper = null;
 
     private DBManager(Context context) {
+        // getApplicationContext() is key, it keeps you from leaking the
+        // Activity or BroadcastReceiver if someone passes one in.
+        context = context.getApplicationContext();
+
         this.context = context;
     }
 
     private static class DataBaseHelper extends SQLiteOpenHelper {
 
-        Context context;
         DataBaseHelper(Context context) {
             super(context, DB_NAME, null, DB_VERSION);
-            this.context = context;
         }
 
         @Override
@@ -80,34 +83,31 @@ public class DBManager {
         return db != null && db.isOpen();
     }
 
-    public void saveHistory(FavoriteBean bean) {
+    public void saveHistory(Video bean) {
         open();
-        if (isInHistory(bean.videoId)) {
-            deleteHistory(bean.videoId);
+        final ContentValues contentValues = convertToContentValues(bean);
+        db.beginTransaction();
+        try {
+            if (isInHistory(bean.id)) {
+                deleteHistory(bean.id);
+            }
+            db.insert("history", null, contentValues);
+
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
         }
-        ContentValues contentValues = new ContentValues();
-        contentValues.put("_videoId", bean.videoId);
-        contentValues.put("_title", bean.title);
-        contentValues.put("_duration", bean.duration);
-        contentValues.put("_imageUrl", bean.imageUrl);
-        contentValues.put("_link", bean.link);
-        db.insert("history", null, contentValues);
     }
 
-    public ArrayList<FavoriteBean> getAllHistory() {
+    public List<Video> getAllHistory() {
         open();
-        ArrayList<FavoriteBean> favoriteBeans = new ArrayList<>();
+        List<Video> result = new LinkedList<>();
         Cursor cursor = db.rawQuery("select * from history order by _id desc", null);
         while (cursor.moveToNext()) {
-            FavoriteBean favoriteBean = new FavoriteBean();
-            favoriteBean.videoId = cursor.getString(1);
-            favoriteBean.title = cursor.getString(2);
-            favoriteBean.duration = cursor.getString(3);
-            favoriteBean.imageUrl = cursor.getString(4);
-            favoriteBean.link = cursor.getString(5);
-            favoriteBeans.add(favoriteBean);
+            result.add(convertToVideo(cursor));
         }
-        return favoriteBeans;
+        cursor.close();
+        return result;
     }
 
     public boolean isInHistory(String videoId) {
@@ -121,9 +121,32 @@ public class DBManager {
         return count != 0;
     }
 
-    public void deleteHistory(String videoId) {
+    public int deleteHistory(String videoId) {
         open();
-        db.execSQL("delete from history where _videoId = ?", new String[]{videoId});
+        return db.delete("history", "_videoId = ?", new String[]{videoId});
+    }
+
+    private static ContentValues convertToContentValues(Video video) {
+        final ContentValues contentValues = new ContentValues();
+        contentValues.put("_videoId", video.id);
+        contentValues.put("_title", video.title);
+        contentValues.put("_duration", video.duration);
+        contentValues.put("_imageUrl", video.thumbnail);
+        contentValues.put("_link", video.link);
+        return contentValues;
+    }
+
+    /**
+     * convert current row of {@link Cursor} to {@link Video}
+     */
+    private static Video convertToVideo(Cursor cursor) {
+        final Video result = new Video();
+        result.id = cursor.getString(1);
+        result.title = cursor.getString(2);
+        result.duration = cursor.getString(3);
+        result.thumbnail = cursor.getString(4);
+        result.link = cursor.getString(5);
+        return result;
     }
 
 }

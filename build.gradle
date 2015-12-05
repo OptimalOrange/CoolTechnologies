@@ -1,31 +1,32 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
-buildscript {
-    repositories {
-        mavenCentral()
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:1.1.0'
-        classpath 'com.jakewharton.sdkmanager:gradle-plugin:0.12.0'
-
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
-    }
-}
-
 allprojects {
     group = PROJECTS_GROUP
     version = new Version(VERSION_NAME)
     status = version.status
 
     repositories {
-        maven { url 'http://dl.bintray.com/optimalorange/maven' }
-        mavenCentral()
         jcenter()
+        mavenCentral()
+        maven { url "https://jitpack.io" }
+        maven { url 'http://dl.bintray.com/optimalorange/maven' }
     }
 }
 
+// see http://tools.android.com/tech-docs/new-build-system/tips#TOC-Improving-Build-Server-performance.
+project.ext.preDexLibs = !project.hasProperty('disablePreDex')
+
+subprojects {
+    project.plugins.whenPluginAdded { plugin ->
+        def isAndroidProject = [
+        "com.android.build.gradle.AppPlugin",
+        "com.android.build.gradle.LibraryPlugin"
+        ].any { it == plugin.class.name }
+        if (isAndroidProject) {
+            project.android.dexOptions.preDexLibraries = rootProject.ext.preDexLibs
+        }
+    }
+}
 
 
 import java.text.SimpleDateFormat

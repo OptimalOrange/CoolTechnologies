@@ -1,7 +1,12 @@
 炫科技
 ================
 
-[![Build Status](https://travis-ci.org/OptimalOrange/CoolTechnologies.svg?branch=release)](https://travis-ci.org/OptimalOrange/CoolTechnologies)
+Status
+-------------
+
+release | master
+------- | -------
+[![Build Status](https://travis-ci.org/OptimalOrange/CoolTechnologies.svg?branch=release)](https://travis-ci.org/OptimalOrange/CoolTechnologies) | [![Build Status](https://travis-ci.org/OptimalOrange/CoolTechnologies.svg?branch=master)](https://travis-ci.org/OptimalOrange/CoolTechnologies)
 
 功能
 -------------

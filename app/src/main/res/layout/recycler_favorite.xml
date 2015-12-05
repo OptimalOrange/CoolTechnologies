@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:orientation="horizontal"
+              android:paddingTop="0dp"
+              android:paddingBottom="0dp"
+              android:paddingLeft="0dp"
+              android:paddingRight="0dp"
+              android:layout_width="match_parent"
+              android:layout_height="72dp"
+        >
+
+    <android.support.percent.PercentFrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            >
+        <!-- 这里固定宽高比为16:9=1.7777…。
+             另外目前（2015年11月29日）优酷图片为200*112px，比例为1.785714…，所以这里向上取整了。 -->
+        <!-- TODO 避免硬编码 -->
+        <!-- layout_heightPercent="100%"相当于layout_height="match_parent"，
+             但由于目前（recyclerview-v7:23.1.1）layout_height="match_parent"
+             与layout_aspectRatio兼容性不佳。这里使用layout_heightPercent="100%"。 -->
+        <ImageView
+                android:id="@+id/thumbnail"
+                app:layout_heightPercent="100%"
+                app:layout_aspectRatio="178%"
+                android:src="@drawable/ic_image_view_placeholder"
+                android:adjustViewBounds="true"
+                android:contentDescription="@android:string/no"
+                />
+    </android.support.percent.PercentFrameLayout>
+
+    <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="8dp"
+            android:gravity="center_vertical"
+            android:orientation="vertical"
+            >
+
+        <TextView
+                android:id="@+id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:textColor="@color/text_black"
+                android:textSize="@dimen/text_size_body_dense"
+                android:lines="2"
+                android:ellipsize="end"
+                />
+
+        <TextView
+                android:id="@+id/duration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:textColor="@color/text_secondary_black"
+                android:textSize="@dimen/text_size_caption_dense"
+                />
+
+    </RelativeLayout>
+
+</LinearLayout>

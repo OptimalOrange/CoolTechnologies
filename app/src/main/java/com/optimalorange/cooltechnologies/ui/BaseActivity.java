@@ -3,17 +3,20 @@ package com.optimalorange.cooltechnologies.ui;
 import com.optimalorange.cooltechnologies.R;
 import com.umeng.analytics.MobclickAgent;
 
-import android.app.Activity;
 import android.content.Intent;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
 /**
- * 本应用所有{@link Activity}的父类。
+ * 本应用所有{@link android.app.Activity Activity}的父类。
  */
-public abstract class BaseActivity extends Activity {
+public abstract class BaseActivity extends AppCompatActivity {
 
     private boolean mShowSettingsMenuItem = true;
+
+    private Toolbar mActionBarToolbar;
 
     @Override
     protected void onResume() {
@@ -52,6 +55,24 @@ public abstract class BaseActivity extends Activity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    // copy from https://github.com/google/iosched/blob/b3c3ae2a5b41e28c07383644d78e5c076288322f/android/src/main/java/com/google/samples/apps/iosched/ui/BaseActivity.java
+    @Override
+    public void setContentView(int layoutResID) {
+        super.setContentView(layoutResID);
+        getActionBarToolbar();
+    }
+
+    // copy from https://github.com/google/iosched/blob/b3c3ae2a5b41e28c07383644d78e5c076288322f/android/src/main/java/com/google/samples/apps/iosched/ui/BaseActivity.java
+    protected Toolbar getActionBarToolbar() {
+        if (mActionBarToolbar == null) {
+            mActionBarToolbar = (Toolbar) findViewById(R.id.toolbar_actionbar);
+            if (mActionBarToolbar != null) {
+                setSupportActionBar(mActionBarToolbar);
+            }
+        }
+        return mActionBarToolbar;
     }
 
     /**

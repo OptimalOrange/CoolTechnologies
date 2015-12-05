@@ -10,12 +10,18 @@ import com.android.volley.Response;
  */
 public abstract class SimpleRequest<T> extends Request<T> {
 
-    private final Response.Listener<T> mListener;
+    private Response.Listener<T> mListener;
 
     public SimpleRequest(int method, String url, Response.Listener<T> listener,
             Response.ErrorListener errorListener) {
         super(method, url, errorListener);
         mListener = listener;
+    }
+
+    @Override
+    protected void onFinish() {
+        super.onFinish();
+        mListener = null;
     }
 
     @Override
