@@ -33,6 +33,7 @@
                         android:id="@+id/app_bar_image"
                         app:layout_widthPercent="100%"
                         app:layout_aspectRatio="178%"
+                        android:scaleType="fitXY"
                         />
             </android.support.percent.PercentFrameLayout>
 
