@@ -19,9 +19,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.DialogFragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -83,18 +88,7 @@ public class ShowVideoDetailActivity extends LoginableBaseActivity {
             final ImageLoader.ImageListener imageListener = ImageLoader.getImageListener(
                     mViews.thumbnail, 0, 0
             );
-            final ImageLoader.ImageListener imageListenerWrapper = new ImageLoader.ImageListener() {
-                @Override
-                public void onResponse(ImageLoader.ImageContainer response, boolean isImmediate) {
-                    imageListener.onResponse(response, isImmediate);
-                    mViews.thumbnail.setBackgroundResource(R.color.black);
-                }
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    imageListener.onErrorResponse(error);
-                }
-            };
-            mVolleySingleton.getImageLoader().get(video.thumbnail, imageListenerWrapper);
+            mVolleySingleton.getImageLoader().get(video.thumbnail, imageListener);
         }
     }
 
@@ -103,10 +97,23 @@ public class ShowVideoDetailActivity extends LoginableBaseActivity {
             throw new IllegalStateException("cannot play video before load it.");
         }
 
-        // 保存播放历史
-        DBManager.getInstance(this).saveHistory(mVideo);
-        // 跳转到 SimpleWebViewActivity
-        SimpleWebViewActivity.start(this, mVideo.link);
+        switch (NetworkError.checkNetwork(this)) {
+            case NO_ERROR:
+                // 保存播放历史
+                DBManager.getInstance(this).saveHistory(mVideo);
+                // 跳转到 SimpleWebViewActivity
+                SimpleWebViewActivity.start(this, mVideo.link);
+                break;
+            case NO_WIFI_NETWORK:
+                new NoWifiNetworkDialogFragment()
+                        .show(getSupportFragmentManager(), "no_wifi_network");
+                break;
+            case NO_NETWORK:
+                new NoNetworkDialogFragment().show(getSupportFragmentManager(), "no_network");
+                break;
+            default:
+                throw new UnsupportedOperationException("Unsupported NetworkError");
+        }
     }
 
     /**
@@ -212,9 +219,9 @@ public class ShowVideoDetailActivity extends LoginableBaseActivity {
                 if (defaultSharedPreferences.hasLoggedIn()) {
                     String token = defaultSharedPreferences.retrieveString("access_token", "");
                     if (mHasBookmarked) {
-                        mVolleySingleton.addToRequestQueue(buildDestroyFavoriteRequest(token));
+                        sendDestroyFavoriteRequest(token);
                     } else {
-                        mVolleySingleton.addToRequestQueue(buildCreateFavoriteRequest(token));
+                        sendCreateFavoriteRequest(token);
                     }
                 } else {
                     System.err.println("Shouldn't be there.@onOptionsItemSelected.action_bookmark");
@@ -236,11 +243,38 @@ public class ShowVideoDetailActivity extends LoginableBaseActivity {
                 .build();
     }
 
+    private boolean checkVideo() {
+        if (mVideo != null) {
+            return true;
+        } else {
+            Snackbar
+                    .make(
+                            findViewById(R.id.video_detail_root_view),
+                            R.string.did_not_load_video,
+                            Snackbar.LENGTH_LONG
+                    )
+                    .show();
+            return false;
+        }
+    }
+
+    public void sendCreateFavoriteRequest(String token) {
+        if (checkVideo()) {
+            mVolleySingleton.addToRequestQueue(buildCreateFavoriteRequest(token, mVideo));
+        }
+    }
+
+    public void sendDestroyFavoriteRequest(String token) {
+        if (checkVideo()) {
+            mVolleySingleton.addToRequestQueue(buildDestroyFavoriteRequest(token, mVideo));
+        }
+    }
+
     /** 创建添加收藏的请求 */
-    private CreateFavoriteRequest buildCreateFavoriteRequest(String token) {
+    private CreateFavoriteRequest buildCreateFavoriteRequest(String token, Video video) {
         return new CreateFavoriteRequest.Builder()
                 .setClient_id(mYoukuClientId)
-                .setVideo_id(mVideo.id)
+                .setVideo_id(video.id)
                 .setAccess_token(token)
                 .setResponseListener(new OnResponseListener(this, RequestType.CREATE_FAVORITE))
                 .setErrorListener(new OnErrorResponseListener(this, RequestType.CREATE_FAVORITE))
@@ -248,10 +282,10 @@ public class ShowVideoDetailActivity extends LoginableBaseActivity {
     }
 
     /** 创建取消收藏的请求 */
-    private DestroyFavoriteRequest buildDestroyFavoriteRequest(String token) {
+    private DestroyFavoriteRequest buildDestroyFavoriteRequest(String token, Video video) {
         return new DestroyFavoriteRequest.Builder()
                 .setClient_id(mYoukuClientId)
-                .setVideo_id(mVideo.id)
+                .setVideo_id(video.id)
                 .setAccess_token(token)
                 .setResponseListener(new OnResponseListener(this, RequestType.DESTROY_FAVORITE))
                 .setErrorListener(new OnErrorResponseListener(this, RequestType.DESTROY_FAVORITE))
@@ -371,6 +405,83 @@ public class ShowVideoDetailActivity extends LoginableBaseActivity {
                 default:
                     throw new IllegalArgumentException("Unknown RequestType:" + mRequestType);
             }
+        }
+    }
+
+    private enum NetworkError {
+        NO_ERROR,
+        NO_NETWORK,
+        NO_WIFI_NETWORK;
+
+        public static NetworkError checkNetwork(Context context) {
+            NetworkChecker networkChecker = NetworkChecker.newInstance(context);
+            if (DefaultSharedPreferencesSingleton.getInstance(context).onlyPlayVideoWhenUseWlan()) {
+                if (networkChecker.isConnected()) {
+                    return networkChecker.isWifiConnected() ? NO_ERROR : NO_WIFI_NETWORK;
+                } else {
+                    return NO_NETWORK;
+                }
+            } else {
+                return networkChecker.isConnected() ? NO_ERROR : NO_NETWORK;
+            }
+        }
+    }
+
+    public static class NoNetworkDialogFragment extends DialogFragment {
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            // Use the Builder class for convenient dialog construction
+            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+            builder
+                    .setTitle(R.string.no_network_title)
+                    .setMessage(R.string.no_network_message)
+                    .setPositiveButton(
+                            R.string.action_settings, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    NetworkChecker.openWirelessSettings(getContext());
+                                }
+                            })
+                    .setNegativeButton(
+                            android.R.string.cancel, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    // do nothing when click cancel
+                                }
+                            });
+            // Create the AlertDialog object and return it
+            return builder.create();
+        }
+    }
+
+    public static class NoWifiNetworkDialogFragment extends DialogFragment {
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            // Use the Builder class for convenient dialog construction
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder
+                    .setTitle(R.string.no_wifi_network_title)
+                    .setItems(R.array.no_wifi_network_buttons,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    switch (which) {
+                                        case 0:
+                                            NetworkChecker.openWirelessSettings(getContext());
+                                            break;
+                                        case 1:
+                                            SettingsActivity.start(getContext());
+                                            break;
+                                        case 2:
+                                            // do nothing when click cancel
+                                            break;
+                                        default:
+                                            throw new UnsupportedOperationException("unsupported");
+                                    }
+                                }
+                            });
+            // Create the AlertDialog object and return it
+            return builder.create();
         }
     }
 

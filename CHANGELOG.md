@@ -4,6 +4,16 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.1] - 2015-12-05
+### Changed
+- 微调界面
+
+### Fixed
+- 修复有时遇到空主页，不显示内容的问题
+- 修复“仅在WLAN下，播放视频”设置失效的问题
+- 避免视频详情页加载缩略图时，先闪过全黑图的问题
+- 修复一些会导致应用崩溃的问题
+
 ## [1.1.0] - 2015-12-03
 ### Changed
 - 主页中向上滑动时，隐藏工具栏
@@ -25,6 +35,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - 显示播放记录
 - 搜索视频
 
-[Unreleased]: https://github.com/OptimalOrange/CoolTechnologies/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/OptimalOrange/CoolTechnologies/compare/v1.1.1...HEAD
+[1.1.1]: https://github.com/OptimalOrange/CoolTechnologies/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/OptimalOrange/CoolTechnologies/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/OptimalOrange/CoolTechnologies/compare/8fada1475dc7a2ff179e3809650233fc2820c0fc...v1.0.0
