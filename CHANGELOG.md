@@ -3,6 +3,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [1.1.1] - 2015-12-05
 ### Changed
 - 微调界面
 
@@ -33,6 +35,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - 显示播放记录
 - 搜索视频
 
-[Unreleased]: https://github.com/OptimalOrange/CoolTechnologies/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/OptimalOrange/CoolTechnologies/compare/v1.1.1...HEAD
+[1.1.1]: https://github.com/OptimalOrange/CoolTechnologies/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/OptimalOrange/CoolTechnologies/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/OptimalOrange/CoolTechnologies/compare/8fada1475dc7a2ff179e3809650233fc2820c0fc...v1.0.0
