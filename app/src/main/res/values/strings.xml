@@ -42,6 +42,18 @@
     <string name="favorite_new_loading">正在加载中，请稍后……</string>
     <string name="history_no_history">还没有历史记录哦~~</string>
 
+    <!-- ShowVideoDetailActivity -->
+    <string name="no_network_title">无可用网络</string>
+    <string name="no_network_message">现在修改系统网络设置？</string>
+    <string name="no_wifi_network_title">无WLAN网络</string>
+    <string name="no_wifi_network_button1">修改系统网络设置</string>
+    <string name="no_wifi_network_button2">修改此应用的设置</string>
+    <string-array name="no_wifi_network_buttons">
+        <item>@string/no_wifi_network_button1</item>
+        <item>@string/no_wifi_network_button2</item>
+        <item>@android:string/cancel</item>
+    </string-array>
+
     <!-- SearchActivity -->
     <string name="search">搜索</string>
 

@@ -3,6 +3,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Fixed
+- 修复“仅在WLAN下，播放视频”设置失效的问题
 
 ## [1.1.0] - 2015-12-03
 ### Changed
