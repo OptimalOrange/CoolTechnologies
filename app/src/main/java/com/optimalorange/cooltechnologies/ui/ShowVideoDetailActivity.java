@@ -102,7 +102,7 @@ public class ShowVideoDetailActivity extends LoginableBaseActivity {
                 // 保存播放历史
                 DBManager.getInstance(this).saveHistory(mVideo);
                 // 跳转到 SimpleWebViewActivity
-                SimpleWebViewActivity.start(this, mVideo.link);
+                SimpleWebViewActivity.start(this, mVideo.id);
                 break;
             case NO_WIFI_NETWORK:
                 new NoWifiNetworkDialogFragment()
