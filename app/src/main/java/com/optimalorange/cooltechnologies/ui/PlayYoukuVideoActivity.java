@@ -13,14 +13,14 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-public class SimpleWebViewActivity extends Activity {
+public class PlayYoukuVideoActivity extends Activity {
 
     /**
      * 应当显示的页面的url<br/>
      * Type: {@link String}
      */
     public static final String EXTRA_KEY_VIDEO_ID =
-            SimpleWebViewActivity.class.getName() + ".extra.KEY_VIDEO_ID";
+            PlayYoukuVideoActivity.class.getName() + ".extra.KEY_VIDEO_ID";
 
     /** 用于重置{@link WebView}的空网页 */
     private static final String URL_BLANK = "about:blank";
@@ -34,7 +34,7 @@ public class SimpleWebViewActivity extends Activity {
     private WebView mWebView;
 
     public static Intent buildIntent(Context context, String videoId) {
-        final Intent result = new Intent(context, SimpleWebViewActivity.class);
+        final Intent result = new Intent(context, PlayYoukuVideoActivity.class);
         result.putExtra(EXTRA_KEY_VIDEO_ID, videoId);
         return result;
     }
@@ -46,7 +46,7 @@ public class SimpleWebViewActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_simple_web_view);
+        setContentView(R.layout.activity_play_youku_video);
 
         final String videoId = getIntent().getStringExtra(EXTRA_KEY_VIDEO_ID);
         if (videoId == null) {
