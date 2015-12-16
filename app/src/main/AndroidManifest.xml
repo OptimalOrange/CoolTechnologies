@@ -61,7 +61,7 @@
         </activity>
 
         <activity
-                android:name=".ui.PlayYoukuVideoActivity"
+                android:name=".ui.SimpleWebViewActivity"
                 android:theme="@style/FullscreenTheme"
                 android:configChanges="orientation|keyboardHidden|screenSize"
                 android:screenOrientation="sensorLandscape"/>
