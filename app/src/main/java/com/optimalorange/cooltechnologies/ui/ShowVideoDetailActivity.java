@@ -101,8 +101,8 @@ public class ShowVideoDetailActivity extends LoginableBaseActivity {
             case NO_ERROR:
                 // 保存播放历史
                 DBManager.getInstance(this).saveHistory(mVideo);
-                // 跳转到 PlayYoukuVideoActivity
-                PlayYoukuVideoActivity.start(this, mVideo.id);
+                // 跳转到 SimpleWebViewActivity
+                SimpleWebViewActivity.start(this, mVideo.link);
                 break;
             case NO_WIFI_NETWORK:
                 new NoWifiNetworkDialogFragment()
